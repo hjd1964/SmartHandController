@@ -1,270 +1,52 @@
+// -----------------------------------------------------------------------------------
+// UserInterface, handle display and keypad
 
 #include "UserInterface.h"
-#include "../catalogs/Catalog.h"
 extern NVS nv;
+#include "../catalogs/Catalog.h"
+#include "bitmaps/Bitmaps.h"
 
 extern bool connected;
 
-#define MY_BORDER_SIZE 1
-#define icon_width 16
-#define icon_height 16
-
-#define onstep_logo_width 128
-#define onstep_logo_height 68
-
-static unsigned char align1_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x50, 0x02, 0x18, 0x04, 0x10, 0x08, 0x10, 0x10, 0x10, 0x20, 0x00, 0x00, 0x00, 0x00 };
-
-static unsigned char align2_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x48, 0x02, 0x14, 0x04, 0x10, 0x08, 0x08, 0x10, 0x04, 0x20, 0x1c, 0x00, 0x00, 0x00 };
-
-static unsigned char align3_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x10, 0x08, 0x18, 0x10, 0x10, 0x20, 0x1c, 0x00, 0x00, 0x00 };
-
-static unsigned char align4_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x14, 0x04, 0x14, 0x08, 0x1c, 0x10, 0x10, 0x20, 0x10, 0x00, 0x00, 0x00 };
-
-static unsigned char align5_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x04, 0x08, 0x1c, 0x10, 0x10, 0x20, 0x1c, 0x00, 0x00, 0x00 };
-
-static unsigned char align6_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x04, 0x08, 0x1c, 0x10, 0x14, 0x20, 0x1c, 0x00, 0x00, 0x00 };
-
-static unsigned char align7_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x10, 0x08, 0x08, 0x10, 0x08, 0x20, 0x04, 0x00, 0x00, 0x00 };
-
-static unsigned char align8_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x14, 0x08, 0x1c, 0x10, 0x14, 0x20, 0x1c, 0x00, 0x00, 0x00 };
-
-static unsigned char align9_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x14, 0x08, 0x1c, 0x10, 0x10, 0x20, 0x10, 0x00, 0x00, 0x00 };
-
-static unsigned char home_bits[] U8X8_PROGMEM = {
-  0x00, 0x02, 0x00, 0x07, 0x80, 0x0f, 0xc0, 0x1f, 0x80, 0x3f, 0x00, 0x7f, 0x00, 0x7e, 0x00, 0x7f, 0x80, 0xfb, 0xc0, 0xc1, 0xe0, 0x01, 0xbc, 0x49, 0x9e, 0x49, 0x9e, 0x79, 0x8c, 0x49, 0x80, 0x49 };
-
-static unsigned char parked_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0xfe, 0x7f, 0x02, 0x40, 0x02, 0x40, 0xe2, 0x43, 0x62, 0x46, 0x62, 0x46, 0x62, 0x46, 0xe2, 0x43, 0x62, 0x40, 0x62, 0x40, 0x62, 0x40, 0x62, 0x40, 0x02, 0x40, 0xfe, 0x7f, 0x00, 0x00 };
-
-static unsigned char parking_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x01, 0x80, 0x01, 0x80, 0xf9, 0x80, 0x99, 0x81, 0x99, 0x81, 0x99, 0x81, 0xf9, 0x80, 0x19, 0x80, 0x99, 0x84, 0x99, 0x8d, 0x99, 0x9f, 0x81, 0x8d, 0x81, 0x84, 0x01, 0x80, 0xff, 0xff };
-
-static unsigned char parkingFailed_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x01, 0x80, 0x01, 0x80, 0xf9, 0x90, 0x99, 0x91, 0x99, 0x91, 0x99, 0x91, 0xf9, 0x90, 0x19, 0x90, 0xd9, 0x93, 0x59, 0x90, 0xd9, 0x91, 0x41, 0x80, 0x41, 0x90, 0x01, 0x80, 0xff, 0xff };
-
-static unsigned char guiding_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x80, 0x01, 0x80, 0x01, 0xc0, 0x03, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x8e, 0x71, 0x8e, 0x71, 0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0xc0, 0x03, 0x80, 0x01, 0x80, 0x01, 0x00, 0x00 };
-
-static unsigned char no_tracking_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x38, 0x1c, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x38, 0x1c, 0x00, 0x00 };
-
-//static unsigned char tracking_bits[] U8X8_PROGMEM = {
-//  0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0e, 0x00, 0x1e, 0x00, 0x3e, 0x00, 0x7e, 0x00, 0xfe, 0x38, 0xfe, 0x44, 0x7e, 0x44, 0x3e, 0x20, 0x1e, 0x10, 0x0e, 0x10, 0x06, 0x00, 0x02, 0x10, 0x00, 0x00 };
-
-static unsigned char tracking_S_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0e, 0x00, 0x1e, 0x00, 0x3e, 0x00, 0x7e, 0x00, 0xfe, 0x38, 0x7e, 0x04, 0x3e, 0x04, 0x1e, 0x18, 0x0e, 0x20, 0x06, 0x20, 0x02, 0x1c, 0x00, 0x00 };
-
-static unsigned char tracking_sid_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x08, 0xFE, 0x08, 0x7E, 0x7F, 0x3E, 0x3E, 0x1E, 0x1C, 0x0E, 0x3E, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
-
-static unsigned char tracking_sid_r_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x80, 0x03, 0x82, 0x04, 0x86, 0x03, 0x8e, 0x04, 0x9e, 0x04, 0x3e, 0x00, 0x7e, 0x08, 0xfe, 0x08, 0x7e, 0x7f, 0x3e, 0x3e, 0x1e, 0x1c, 0x0e, 0x3e, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
-
-static unsigned char tracking_sid_rd_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x80, 0x33, 0x82, 0x54, 0x86, 0x53, 0x8e, 0x54, 0x9e, 0x34, 0x3e, 0x00, 0x7e, 0x08, 0xfe, 0x08, 0x7e, 0x7f, 0x3e, 0x3e, 0x1e, 0x1c, 0x0e, 0x3e, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
- 
-static unsigned char tracking_sid_f_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x80, 0x03, 0x82, 0x00, 0x86, 0x03, 0x8e, 0x00, 0x9e, 0x00, 0x3e, 0x00, 0x7e, 0x08, 0xfe, 0x08, 0x7e, 0x7f, 0x3e, 0x3e, 0x1e, 0x1c, 0x0e, 0x3e, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
- 
-static unsigned char tracking_sid_fd_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x80, 0x33, 0x82, 0x50, 0x86, 0x53, 0x8e, 0x50, 0x9e, 0x30, 0x3e, 0x00, 0x7e, 0x08, 0xfe, 0x08, 0x7e, 0x7f, 0x3e, 0x3e, 0x1e, 0x1c, 0x0e, 0x3e, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
-
-static unsigned char tracking_sol_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x00, 0xFE, 0x1C, 0x7E, 0x22, 0x3E, 0x41, 0x1E, 0x49, 0x0E, 0x41, 0x06, 0x22, 0x02, 0x1C, 0x00, 0x00 };
-
-static unsigned char tracking_lun_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x38, 0xFE, 0x1C, 0x7E, 0x06, 0x3E, 0x06, 0x1E, 0x06, 0x0E, 0x06, 0x06, 0x1C, 0x02, 0x38, 0x00, 0x00 };  
-
-static unsigned char sleewing_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x02, 0x01, 0x06, 0x03, 0x0e, 0x07, 0x1e, 0x0f, 0x3e, 0x1f, 0x7e, 0x3f, 0xfe, 0x7f, 0x7e, 0x3f, 0x3e, 0x1f, 0x1e, 0x0f, 0x0e, 0x07, 0x06, 0x03, 0x02, 0x01, 0x00, 0x00 };
-  
-static unsigned char pec_play_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x80, 0x07, 0x80, 0x08, 0x80, 0x08, 0x80, 0x08, 0x80, 0x08, 0x80, 0x07, 0x80, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x00, 0xb8, 0x40, 0x44, 0xa2, 0x83, 0x9d, 0x00, 0x00, 0x00, 0x00 };
-
-static unsigned char pec_record_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x80, 0x07, 0x80, 0x08, 0x80, 0x08, 0x80, 0x08, 0x80, 0x08, 0x80, 0x07, 0x80, 0x00, 0x90, 0x04, 0xa0, 0x02, 0xc0, 0x01, 0xb8, 0x40, 0x44, 0xa2, 0x83, 0x9d, 0x00, 0x00, 0x00, 0x00 };
-
-static unsigned char pec_wait_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x80, 0x07, 0x80, 0x08, 0x80, 0x08, 0x80, 0x08, 0x98, 0x68, 0x98, 0x67, 0x80, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x00, 0xb8, 0x40, 0x44, 0xa2, 0x83, 0x9d, 0x00, 0x00, 0x00, 0x00 };
-
-static unsigned char W_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0xe0, 0x03, 0x10, 0x04, 0x08, 0x08, 0x24, 0x12, 0x22, 0x22, 0x22, 0x22, 0xa2, 0x22, 0xa2, 0x22, 0x42, 0x21, 0x44, 0x11, 0x08, 0x08, 0x10, 0x04, 0xe0, 0x03, 0x00, 0x00 };
-
-static unsigned char E_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0xe0, 0x03, 0x10, 0x04, 0x08, 0x08, 0xe4, 0x13, 0x22, 0x20, 0x22, 0x20, 0xe2, 0x21, 0x22, 0x20, 0x22, 0x20, 0xe4, 0x13, 0x08, 0x08, 0x10, 0x04, 0xe0, 0x03, 0x00, 0x00 };
-
-static unsigned char ErrMf_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x36, 0xb0, 0xaa, 0xb3, 0xa2, 0xb0, 0xa2, 0x81, 0xa2, 0xb0, 0xa2, 0xb0, 0x00, 0x80 };
-
-static unsigned char ErrAlt_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x1e, 0xb0, 0x06, 0xb0, 0x4a, 0xb0, 0x90, 0xb4, 0x20, 0x85, 0x00, 0xb6, 0x00, 0xb7, 0x00, 0x80 };
-
-static unsigned char ErrLs_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x00, 0xb2, 0x40, 0xb2, 0x80, 0xb2, 0xfe, 0xb3, 0x80, 0x82, 0x40, 0xb2, 0x00, 0xb2, 0x00, 0x80 };
-
-static unsigned char ErrDe_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x1e, 0xb0, 0x22, 0xb0, 0xa2, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0x9e, 0xb3, 0x00, 0x80 };
-
-static unsigned char ErrAz_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x08, 0xb0, 0x14, 0xb0, 0xa2, 0xb3, 0x22, 0xb2, 0x3e, 0x81, 0xa2, 0xb0, 0xa2, 0xb3, 0x00, 0x80 };
-
-static unsigned char ErrUp_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x22, 0xb0, 0xa2, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0x9c, 0xb0, 0x00, 0x80 };
-
-static unsigned char ErrMe_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x36, 0xb0, 0xaa, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0xa2, 0xb3, 0x00, 0x80 };
-
-static unsigned char ErrOth_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0xe0, 0xb0, 0x10, 0xb1, 0x00, 0xb1, 0x80, 0xb0, 0x40, 0x80, 0x00, 0xb0, 0x40, 0xb0, 0x00, 0x80 };
-
-static const unsigned char onstep_logo_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x80, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0xC4, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFE, 0x7F, 0x00, 
-  0x00, 0x00, 0x00, 0xF8, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0xFE, 0xFF, 0x07, 0x00, 0x00, 0x00, 0xFE, 0x3F, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0x0F, 0x00, 0x00, 0x00, 0xFF, 
-  0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x7F, 0xF3, 0x0F, 
-  0x00, 0x00, 0x80, 0x1F, 0xFC, 0xC0, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0xE0, 0x1F, 0xC3, 0x0F, 0x00, 0x00, 0xC0, 0x07, 0xF0, 0xC1, 0x03, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0xE0, 0x07, 0x83, 0x1F, 0x00, 0x00, 0xC0, 0x03, 
-  0xE0, 0xC1, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x07, 0x03, 0x7F, 
-  0x00, 0x00, 0xC0, 0x03, 0xE0, 0xC1, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0xE0, 0x03, 0x03, 0x7E, 0x1C, 0x3F, 0xC0, 0x03, 0xC0, 0xF1, 0x1F, 0xF0, 
-  0x0F, 0xF0, 0xFC, 0x01, 0xF0, 0x03, 0x03, 0x3E, 0xFC, 0xFF, 0xC0, 0x03, 
-  0x00, 0xF0, 0x1F, 0xFC, 0x3F, 0xF0, 0xFF, 0x03, 0xF8, 0x01, 0x03, 0x3E, 
-  0xFC, 0xFF, 0xC1, 0x0F, 0x00, 0xF0, 0x1F, 0xFE, 0x7F, 0xF0, 0xFF, 0x07, 
-  0xF8, 0x01, 0x03, 0x3C, 0xFC, 0xE0, 0x81, 0xFF, 0x00, 0xC0, 0x03, 0x1E, 
-  0x78, 0xF0, 0x83, 0x0F, 0xF0, 0x01, 0x03, 0x7C, 0x7C, 0xE0, 0x01, 0xFF, 
-  0x07, 0xC0, 0x03, 0x0F, 0xF0, 0xF0, 0x01, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-  0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x01, 0x03, 0x7C, 0x3C, 0xC0, 0x03, 0x00, 
-  0xFF, 0xC1, 0x83, 0x07, 0xF0, 0xF1, 0x00, 0x1E, 0xF8, 0x01, 0x03, 0x3C, 
-  0x3C, 0xC0, 0x01, 0x00, 0xF8, 0xC1, 0x83, 0xFF, 0xFF, 0xF1, 0x00, 0x1E, 
-  0xF8, 0x01, 0x03, 0x3E, 0x3C, 0xC0, 0x03, 0x00, 0xE0, 0xC3, 0x83, 0xFF, 
-  0xFF, 0xF1, 0x00, 0x1E, 0xF0, 0x03, 0x03, 0x3E, 0x3C, 0xC0, 0xE3, 0x00, 
-  0xC0, 0xC3, 0x83, 0xFF, 0xFF, 0xF0, 0x00, 0x1E, 0xE0, 0x03, 0x03, 0x7E, 
-  0x3C, 0xC0, 0xE3, 0x01, 0xC0, 0xC3, 0x83, 0x07, 0x00, 0xF0, 0x00, 0x1E, 
-  0xC0, 0x07, 0x03, 0x7F, 0x3C, 0xC0, 0xE3, 0x01, 0xC0, 0xC3, 0x83, 0x07, 
-  0x00, 0xF0, 0x00, 0x1E, 0xE0, 0x07, 0x83, 0x1F, 0x3C, 0xC0, 0xC3, 0x03, 
-  0xC0, 0xC3, 0x83, 0x0F, 0xE0, 0xF0, 0x00, 0x0E, 0xE0, 0x0F, 0xC3, 0x0F, 
-  0x3C, 0xC0, 0xC3, 0x07, 0xE0, 0xC1, 0x03, 0x0F, 0xF0, 0xF0, 0x00, 0x0F, 
-  0xC0, 0x3F, 0xF3, 0x07, 0x3C, 0xC0, 0x83, 0x1F, 0xF8, 0x81, 0x07, 0x1F, 
-  0xF8, 0xF0, 0x81, 0x0F, 0x00, 0xFE, 0xFF, 0x0F, 0x3C, 0xC0, 0x83, 0xFF, 
-  0xFF, 0x80, 0x3F, 0xFE, 0x7F, 0xF0, 0xFF, 0x07, 0x00, 0xFE, 0xFF, 0x07, 
-  0x3C, 0xC0, 0x03, 0xFE, 0x7F, 0x80, 0x3F, 0xFC, 0x3F, 0xF0, 0xFF, 0x03, 
-  0x00, 0xFE, 0x7F, 0x00, 0x3C, 0xC0, 0x01, 0xFC, 0x1F, 0x00, 0x3F, 0xF0, 
-  0x1F, 0xF0, 0xFE, 0x01, 0x00, 0xC4, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x80, 0x23, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 
-  0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 
-  0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 
-  0x76, 0x18, 0xF0, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x80, 0x12, 0x11, 0x50, 0x01, 0x00, 0x83, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0xBB, 0x6B, 0x20, 0xE6, 
-  0x8D, 0xDA, 0x97, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 
-  0x2B, 0x59, 0x20, 0x55, 0x4B, 0x89, 0x5C, 0x02, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0xC0, 0x26, 0x49, 0xA0, 0x3B, 0xC9, 0x91, 0x24, 0x02, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x92, 0x24, 0x90, 0x88, 
-  0x24, 0x55, 0x22, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 
-  0xB2, 0x65, 0xB8, 0xBB, 0xBC, 0xCF, 0xE2, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
-
-void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
-{
+void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3) {
   v3 = v % 60;
   v2 = (v / 60) % 60;
   v1 = v / 3600;
 }
 
 /*
-void getdms(const long& v, short& v1, uint8_t& v2, uint8_t& v3)
-{
+void getdms(const long& v, short& v1, uint8_t& v2, uint8_t& v3) {
   v3 = abs(v) % 60;
   v2 = (abs(v) / 60) % 60;
   v1 = v / 3600;
 }
 */
 
-void getDegrees(const long& v, short& v1, uint8_t& v2, uint8_t& v3)
-{
+void getDegrees(const long& v, short& v1, uint8_t& v2, uint8_t& v3) {
   v3 = abs(v) % 60;
   v2 = (abs(v) / 60) % 60;
   v1 = v / 3600;
 }
 
-void longRa2Ra(long Ra, int& h, int& m, int& s)
-{
+void longRa2Ra(long Ra, int& h, int& m, int& s) {
   h = Ra / 30;
   m = (Ra - h * 30) / 60;
   s = (Ra / 30) % 60;
 }
 
-void longDec2Dec(long Dec, int& deg, int& min)
-{
+void longDec2Dec(long Dec, int& deg, int& min) {
   deg = Dec / 60;
   min = Dec % 60;
 }
 
-void UI::setup(const char version[], const int pin[7],const bool active[7], const int SerialBaud, const OLED model)
-{
-  // initialize NV as needed
+void UI::setup(const char version[], const int pin[7],const bool active[7], const int SerialBaud, const OLED model) {
+  // initialize and read defaults from NV as needed
   initNV();
-  // read the saved values
   readNV();
-   
+
   if (strlen(version) <= 19) strcpy(_version,version);
-  
-  telInfo.lastState = 0;
+
+  status.lastState = 0;
   #if KEYPAD_JOYSTICK_ANALOG == JS1
     pinMode(B_PIN1,INPUT_PULLUP);
     pinMode(B_PIN2,INPUT_PULLUP);
@@ -293,16 +75,16 @@ void UI::setup(const char version[], const int pin[7],const bool active[7], cons
   
   //choose a 128x64 display supported by U8G2lib (if not listed below there are many many others in u8g2 library example Sketches)
   delay(500);
-  if (model == OLED_SH1106) display = new U8G2_EXT_SH1106_128X64_NONAME_1_HW_I2C(U8G2_R0);
-  else if (model == OLED_SSD1306) display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0);
-  else if (model == OLED_SSD1309) display = new U8G2_EXT_SSD1309_128X64_NONAME_F_HW_I2C(U8G2_R0);
+  if (model == OLED_SH1106) display = new U8G2_EXT_SH1106_128X64_NONAME_1_HW_I2C(U8G2_R0); else
+  if (model == OLED_SSD1306) display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0); else
+  if (model == OLED_SSD1309) display = new U8G2_EXT_SSD1309_128X64_NONAME_F_HW_I2C(U8G2_R0);
   
   display->begin();
   display->setContrast(maxContrast);
   display->setFont(LF_STANDARD);
 
   // establish comms and clear the channel
-  Ser.begin(SerialBaud);
+  SERIAL_ONSTEP.begin(SerialBaud);
 
   delay(500);
   
@@ -312,9 +94,9 @@ void UI::setup(const char version[], const int pin[7],const bool active[7], cons
 
   for (int i = 0; i < 3; i++)
   {
-    Ser.print(":#");
+    SERIAL_ONSTEP.print(":#");
     delay(400);
-    Ser.flush();
+    SERIAL_ONSTEP.flush();
     delay(100);
   }
 
@@ -352,24 +134,18 @@ again:
     DisplayMessage(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
   }
 
-  VLF("HCM: SHC Connection established");
+  VLF(Abv "Connection established");
 }
 
-void UI::tickButtons()
-{
+void UI::tickButtons() {
   buttonPad.tickButtons();
-#if ST4_INTERFACE == ON
-  auxST4.tickButtons();
-#endif
+  #if ST4_INTERFACE == ON
+    auxST4.tickButtons();
+  #endif
 }
 
 void UI::update()
 {
-  // keep "EEPROM" subsystem awake
-#ifndef DISABLE_EEPROM_COMMIT_ON
-  nv.poll();
-#endif
-  
   tickButtons();
   unsigned long top = millis();
 
@@ -382,41 +158,41 @@ void UI::update()
   if (display_dim_time && top - time_last_action > display_dim_time && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
   // show align state
-  if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3 || 
-      telInfo.align == Telescope::ALI_SELECT_STAR_4 || telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6 ||
-      telInfo.align == Telescope::ALI_SELECT_STAR_7 || telInfo.align == Telescope::ALI_SELECT_STAR_8 || telInfo.align == Telescope::ALI_SELECT_STAR_9) {
-    char message[10]=L_STAR "# ?";
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) strcpy(message,L_STAR " #1");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_2) strcpy(message,L_STAR " #2");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_3) strcpy(message,L_STAR " #3");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_4) strcpy(message,L_STAR " #4");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_5) strcpy(message,L_STAR " #5");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_6) strcpy(message,L_STAR " #6");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_7) strcpy(message,L_STAR " #7");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_8) strcpy(message,L_STAR " #8");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_9) strcpy(message,L_STAR " #9");
+  if (status.align == Status::ALI_SELECT_STAR_1 || status.align == Status::ALI_SELECT_STAR_2 || status.align == Status::ALI_SELECT_STAR_3 ||
+      status.align == Status::ALI_SELECT_STAR_4 || status.align == Status::ALI_SELECT_STAR_5 || status.align == Status::ALI_SELECT_STAR_6 ||
+      status.align == Status::ALI_SELECT_STAR_7 || status.align == Status::ALI_SELECT_STAR_8 || status.align == Status::ALI_SELECT_STAR_9) {
+    char message[10] = L_STAR "# ?";
+    if (status.align == Status::ALI_SELECT_STAR_1) strcpy(message, L_STAR " #1");
+    if (status.align == Status::ALI_SELECT_STAR_2) strcpy(message, L_STAR " #2");
+    if (status.align == Status::ALI_SELECT_STAR_3) strcpy(message, L_STAR " #3");
+    if (status.align == Status::ALI_SELECT_STAR_4) strcpy(message, L_STAR " #4");
+    if (status.align == Status::ALI_SELECT_STAR_5) strcpy(message, L_STAR " #5");
+    if (status.align == Status::ALI_SELECT_STAR_6) strcpy(message, L_STAR " #6");
+    if (status.align == Status::ALI_SELECT_STAR_7) strcpy(message, L_STAR " #7");
+    if (status.align == Status::ALI_SELECT_STAR_8) strcpy(message, L_STAR " #8");
+    if (status.align == Status::ALI_SELECT_STAR_9) strcpy(message, L_STAR " #9");
     DisplayLongMessage(L_ALIGN_MSG1, L_ALIGN_MSG2, "", message, -1);
 
     // bring up the list of stars so user can goto the alignment star
-    if (!SelectStarAlign()) { DisplayMessage(L_ALIGNMENT, L_ABORTED, -1); telInfo.align = Telescope::ALI_OFF; return; }
+    if (!SelectStarAlign()) { DisplayMessage(L_ALIGNMENT, L_ABORTED, -1); status.align = Status::ALI_OFF; return; }
     
     // mark this as the next alignment star 
-    telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
+    status.align = static_cast<Status::AlignState>(status.align + 1);
   } else
 
   // otherwise update the main display
   if (top - lastpageupdate > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
 
   // let the user know if the comms are down
-  if (telInfo.connected == false) DisplayMessage(L_DISCONNECT_MSG1, L_DISCONNECT_MSG2, -1);
+  if (status.connected == false) DisplayMessage(L_DISCONNECT_MSG1, L_DISCONNECT_MSG2, -1);
 
   // -------------------------------------------------------------------------------------------------------------------
   // handle gotos and guiding
-  if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING)) {
+  if (status.connected && (status.getTrackingState() == Status::TRK_SLEWING || status.getParkState() == Status::PRK_PARKING)) {
     // gotos
     if (buttonPad.nsewPressed()) {
-      Ser.print(":Q#"); Ser.flush();
-      if (telInfo.align != Telescope::ALI_OFF) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 1); // try another align star?
+      SERIAL_ONSTEP.print(":Q#"); SERIAL_ONSTEP.flush();
+      if (status.align != Status::ALI_OFF) status.align = static_cast<Status::AlignState>(status.align - 1); // try another align star?
       time_last_action = millis();
       display->sleepOff();
       buttonPad.clearAllPressed();
@@ -426,25 +202,25 @@ void UI::update()
   } else {
     // guiding
     buttonCommand = false;
-#if ST4_INTERFACE == ON
-    if (!moveEast  && (buttonPad.e.isDown() || auxST4.e.isDown())) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
-    if (moveEast   && (buttonPad.e.isUp()   && auxST4.e.isUp()))   { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); auxST4.e.clearPress(); }
-    if (!moveWest  && (buttonPad.w.isDown() || auxST4.w.isDown())) { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
-    if (moveWest   && (buttonPad.w.isUp()   && auxST4.w.isUp()))   { moveWest = false;  Ser.write(ccQw); buttonCommand=true; buttonPad.w.clearPress(); auxST4.w.clearPress(); }
-    if (!moveNorth && (buttonPad.n.isDown() || auxST4.n.isDown())) { moveNorth = true;  Ser.write(ccMn); buttonCommand=true; } else
-    if (moveNorth  && (buttonPad.n.isUp()   && auxST4.n.isUp()))   { moveNorth = false; Ser.write(ccQn); buttonCommand=true; buttonPad.n.clearPress(); auxST4.n.clearPress(); }
-    if (!moveSouth && (buttonPad.s.isDown() || auxST4.s.isDown())) { moveSouth = true;  Ser.write(ccMs); buttonCommand=true; } else
-    if (moveSouth  && (buttonPad.s.isUp()   && auxST4.s.isUp()))   { moveSouth = false; Ser.write(ccQs); buttonCommand=true; buttonPad.s.clearPress(); auxST4.s.clearPress(); }
-#else
-    if (!moveEast  && (buttonPad.e.isDown())) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
-    if (moveEast   && (buttonPad.e.isUp()  )) { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); }
-    if (!moveWest  && (buttonPad.w.isDown())) { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
-    if (moveWest   && (buttonPad.w.isUp()  )) { moveWest = false;  Ser.write(ccQw); buttonCommand=true; buttonPad.w.clearPress(); }
-    if (!moveNorth && (buttonPad.n.isDown())) { moveNorth = true;  Ser.write(ccMn); buttonCommand=true; } else
-    if (moveNorth  && (buttonPad.n.isUp()  )) { moveNorth = false; Ser.write(ccQn); buttonCommand=true; buttonPad.n.clearPress(); }
-    if (!moveSouth && (buttonPad.s.isDown())) { moveSouth = true;  Ser.write(ccMs); buttonCommand=true; } else
-    if (moveSouth  && (buttonPad.s.isUp()  )) { moveSouth = false; Ser.write(ccQs); buttonCommand=true; buttonPad.s.clearPress(); }
-#endif
+    #if ST4_INTERFACE == ON
+      if (!moveEast  && (buttonPad.e.isDown() || auxST4.e.isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
+      if (moveEast   && (buttonPad.e.isUp()   && auxST4.e.isUp()))   { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; buttonPad.e.clearPress(); auxST4.e.clearPress(); }
+      if (!moveWest  && (buttonPad.w.isDown() || auxST4.w.isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
+      if (moveWest   && (buttonPad.w.isUp()   && auxST4.w.isUp()))   { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; buttonPad.w.clearPress(); auxST4.w.clearPress(); }
+      if (!moveNorth && (buttonPad.n.isDown() || auxST4.n.isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
+      if (moveNorth  && (buttonPad.n.isUp()   && auxST4.n.isUp()))   { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; buttonPad.n.clearPress(); auxST4.n.clearPress(); }
+      if (!moveSouth && (buttonPad.s.isDown() || auxST4.s.isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
+      if (moveSouth  && (buttonPad.s.isUp()   && auxST4.s.isUp()))   { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; buttonPad.s.clearPress(); auxST4.s.clearPress(); }
+    #else
+      if (!moveEast  && (buttonPad.e.isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
+      if (moveEast   && (buttonPad.e.isUp()  )) { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; buttonPad.e.clearPress(); }
+      if (!moveWest  && (buttonPad.w.isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
+      if (moveWest   && (buttonPad.w.isUp()  )) { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; buttonPad.w.clearPress(); }
+      if (!moveNorth && (buttonPad.n.isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
+      if (moveNorth  && (buttonPad.n.isUp()  )) { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; buttonPad.n.clearPress(); }
+      if (!moveSouth && (buttonPad.s.isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
+      if (moveSouth  && (buttonPad.s.isUp()  )) { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; buttonPad.s.clearPress(); }
+    #endif
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
@@ -454,66 +230,66 @@ void UI::update()
   static FocusState focusState = FS_STOPPED;
   enum RotState {RS_STOPPED, RS_CW_FAST, RS_CW_SLOW, RS_CCW_SLOW, RS_CCW_FAST};
   static RotState rotState = RS_STOPPED;
-  buttonCommand=false;
-  if (telInfo.align != Telescope::ALI_OFF) featureKeyMode = 1;
+  buttonCommand = false;
+  if (status.align != Status::ALI_OFF) featureKeyMode = 1;
   switch (featureKeyMode) {
     case 1:   // guide rate
-      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,L_FKEY_GUIDE_DN); buttonCommand=true; } else
-      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,L_FKEY_GUIDE_UP); buttonCommand=true; }
+      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage, L_FKEY_GUIDE_DN); buttonCommand = true; } else
+      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage, L_FKEY_GUIDE_UP); buttonCommand = true; }
       if (buttonCommand) {
-        if (activeGuideRate<4)  activeGuideRate=4;
-        if (activeGuideRate>10) activeGuideRate=10;
-        char cmd[5]= ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
+        if (activeGuideRate < 4)  activeGuideRate = 4;
+        if (activeGuideRate > 10) activeGuideRate = 10;
+        char cmd[5] = ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
         DisplayMessageLX200(SetLX200(cmd));
       }
     break;
     case 2:   // pulse guide rate
-      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,L_FKEY_PGUIDE_DN); buttonCommand=true; } else
-      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,L_FKEY_PGUIDE_UP); buttonCommand=true; }
+      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage, L_FKEY_PGUIDE_DN); buttonCommand = true; } else
+      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage, L_FKEY_PGUIDE_UP); buttonCommand = true; }
       if (buttonCommand) {
-        if (activeGuideRate<1) activeGuideRate=1;
-        if (activeGuideRate>3) activeGuideRate=3;
-        char cmd[5]= ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
+        if (activeGuideRate < 1) activeGuideRate = 1;
+        if (activeGuideRate > 3) activeGuideRate = 3;
+        char cmd[5] =  ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
         DisplayMessageLX200(SetLX200(cmd));
       }
     break;
     case 3:   // util. light
-#if UTILITY_LIGHT != OFF
-      if (buttonPad.F.wasPressed()) { current_selection_utility_light--; strcpy(briefMessage,L_FKEY_LAMP_DN); buttonCommand=true; } else
-      if (buttonPad.f.wasPressed()) { current_selection_utility_light++; strcpy(briefMessage,L_FKEY_LAMP_UP); buttonCommand=true; }
-      if (buttonCommand) {
-        if (current_selection_utility_light<1) current_selection_utility_light=1;
-        if (current_selection_utility_light>6) current_selection_utility_light=6;
-        int i; switch(current_selection_utility_light) { case 1: i=0; break; case 2: i=15; break; case 3: i=31; break; case 4: i=63; break; case 5: i=127; break; case 6: i=255; break; default: i=127; break; }
-#ifdef ESP32
-        ledcWrite(0, i);
-#else
-        analogWrite(UTILITY_LIGHT_PIN, i);
-#endif
-      }
-#endif
+      #if UTILITY_LIGHT != OFF
+        if (buttonPad.F.wasPressed()) { current_selection_utility_light--; strcpy(briefMessage, L_FKEY_LAMP_DN); buttonCommand = true; } else
+        if (buttonPad.f.wasPressed()) { current_selection_utility_light++; strcpy(briefMessage, L_FKEY_LAMP_UP); buttonCommand = true; }
+        if (buttonCommand) {
+          if (current_selection_utility_light < 1) current_selection_utility_light = 1;
+          if (current_selection_utility_light > 6) current_selection_utility_light = 6;
+          int i; switch(current_selection_utility_light) { case 1: i = 0; break; case 2: i = 15; break; case 3: i = 31; break; case 4: i = 63; break; case 5: i = 127; break; case 6: i = 255; break; default: i = 127; break; }
+          #ifdef ESP32
+            ledcWrite(0, i);
+          #else
+            analogWrite(UTILITY_LIGHT_PIN, i);
+          #endif
+        }
+      #endif
     break;
     case 4:  // reticule
-      if (buttonPad.F.wasPressed()) { Ser.print(":B-#"); strcpy(briefMessage,L_FKEY_RETI_DN); } else
-      if (buttonPad.f.wasPressed()) { Ser.print(":B+#"); strcpy(briefMessage,L_FKEY_RETI_UP); }
+      if (buttonPad.F.wasPressed()) { SERIAL_ONSTEP.print(":B-#"); strcpy(briefMessage, L_FKEY_RETI_DN); } else
+      if (buttonPad.f.wasPressed()) { SERIAL_ONSTEP.print(":B+#"); strcpy(briefMessage, L_FKEY_RETI_UP); }
     break;
     case 5: case 6:  // focuser1/2
-           if (focusState == FS_STOPPED && buttonPad.F.isDown()) { focusState=FS_OUT_SLOW; Ser.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand=true; }
-      else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && buttonPad.F.isUp()) { focusState=FS_STOPPED; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (focusState == FS_STOPPED && buttonPad.f.isDown()) { focusState=FS_IN_SLOW;  Ser.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand=true; }
-      else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && buttonPad.f.isUp()) { focusState=FS_STOPPED; Ser.print(":FQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
-#ifndef FOCUSER_ACCELERATE_DISABLE_ON
-      else if ((focusState == FS_OUT_SLOW && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { focusState=FS_OUT_FAST; Ser.print(":FF#:F+#"); strcpy(briefMessage,L_FKEY_FOCF_DN); }
-      else if ((focusState == FS_IN_SLOW  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { focusState=FS_IN_FAST;  Ser.print(":FF#:F-#"); strcpy(briefMessage,L_FKEY_FOCF_UP); }
-#endif
+      if (focusState == FS_STOPPED && buttonPad.F.isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand = true; }
+      else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && buttonPad.F.isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; buttonPad.F.clearPress(); }
+      else if (focusState == FS_STOPPED && buttonPad.f.isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand = true; }
+      else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && buttonPad.f.isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; buttonPad.f.clearPress(); }
+      #ifndef FOCUSER_ACCELERATE_DISABLE_ON
+        else if (focusState == FS_OUT_SLOW && buttonPad.F.isDown() && buttonPad.F.timeDown() > 5000) { focusState=FS_OUT_FAST; SERIAL_ONSTEP.print(":FF#:F+#"); strcpy(briefMessage, L_FKEY_FOCF_DN); }
+        else if (focusState == FS_IN_SLOW  && buttonPad.f.isDown() && buttonPad.f.timeDown() > 5000) { focusState=FS_IN_FAST;  SERIAL_ONSTEP.print(":FF#:F-#"); strcpy(briefMessage, L_FKEY_FOCF_UP); }
+      #endif
     break;
     case 7:  // rotator
-           if (rotState == RS_STOPPED && buttonPad.F.isDown()) { rotState = RS_CCW_SLOW; Ser.print(":r2#:rc#:r<#"); strcpy(briefMessage,L_FKEY_ROT_DN); buttonCommand=true; }
-      else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && buttonPad.F.isUp()) { rotState = RS_STOPPED; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (rotState == RS_STOPPED && buttonPad.f.isDown()) { rotState = RS_CW_SLOW;  Ser.print(":r2#:rc#:r>#"); strcpy(briefMessage,L_FKEY_ROT_UP); buttonCommand=true; }
-      else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && buttonPad.f.isUp()) { rotState = RS_STOPPED; Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
-      else if ((rotState == RS_CCW_SLOW && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { rotState = RS_CCW_FAST; Ser.print(":r4#:rc#:r<#"); strcpy(briefMessage,L_FKEY_ROTF_DN); }
-      else if ((rotState == RS_CW_SLOW  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { rotState = RS_CW_FAST;  Ser.print(":r4#:rc#:r>#"); strcpy(briefMessage,L_FKEY_ROTF_UP); }
+      if (rotState == RS_STOPPED && buttonPad.F.isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROT_DN); buttonCommand = true; }
+      else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && buttonPad.F.isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; buttonPad.F.clearPress(); }
+      else if (rotState == RS_STOPPED && buttonPad.f.isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROT_UP); buttonCommand = true; }
+      else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && buttonPad.f.isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; buttonPad.f.clearPress(); }
+      else if (rotState == RS_CCW_SLOW && buttonPad.F.isDown() && buttonPad.F.timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROTF_DN); }
+      else if (rotState == RS_CW_SLOW  && buttonPad.f.isDown() && buttonPad.f.timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROTF_UP); }
     break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
@@ -522,39 +298,39 @@ void UI::update()
   // handle shift button features
   if (buttonPad.shift.isDown()) {
     // a long press brings up the main menu
-    if ((buttonPad.shift.timeDown()>1000) && telInfo.align == Telescope::ALI_OFF) { menuMain(); time_last_action = millis(); } // bring up the menus
+    if (buttonPad.shift.timeDown() > 1000 && status.align == Status::ALI_OFF) { menuMain(); time_last_action = millis(); } // bring up the menus
   } else {
     // wait long enough that a double press can happen before picking up other press events
-    if (buttonPad.shift.timeUp()>250) {
+    if (buttonPad.shift.timeUp() > 250) {
       if (buttonPad.shift.wasDoublePressed()) { 
-        if (telInfo.align == Telescope::ALI_OFF) {
+        if (status.align == Status::ALI_OFF) {
           // display feature key menu OR...
           menuFeatureKey();
         } else {
           // ...if aligning, go back and select a different star
-          if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3 ||
-             telInfo.align == Telescope::ALI_RECENTER_4 || telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6 ||
-             telInfo.align == Telescope::ALI_RECENTER_7 || telInfo.align == Telescope::ALI_RECENTER_8 || telInfo.align == Telescope::ALI_RECENTER_9)) {
-            telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 2);
+          if (status.align == Status::ALI_RECENTER_1 || status.align == Status::ALI_RECENTER_2 || status.align == Status::ALI_RECENTER_3 ||
+             status.align == Status::ALI_RECENTER_4 || status.align == Status::ALI_RECENTER_5 || status.align == Status::ALI_RECENTER_6 ||
+             status.align == Status::ALI_RECENTER_7 || status.align == Status::ALI_RECENTER_8 || status.align == Status::ALI_RECENTER_9) {
+            status.align = static_cast<Status::AlignState>(status.align - 2);
           }
         }
         time_last_action = millis();
       } else
       if (buttonPad.shift.wasPressed()) {
-        if (telInfo.align == Telescope::ALI_OFF) {
+        if (status.align == Status::ALI_OFF) {
           // cycles through disp of Eq, Hor, Time, Ambient OR...
           page++;
-  #if DISPLAY_AMBIENT_CONDITIONS == ON
-          if (page > 3) page = 0;
-  #else
-          if (page > 2) page = 0;
-  #endif
+          #if DISPLAY_AMBIENT_CONDITIONS == ON
+            if (page > 3) page = 0;
+          #else
+            if (page > 2) page = 0;
+          #endif
         } else {
           // ...if aligning, accept the align star
-          if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3 ||
-             telInfo.align == Telescope::ALI_RECENTER_4 || telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6 ||
-             telInfo.align == Telescope::ALI_RECENTER_7 || telInfo.align == Telescope::ALI_RECENTER_8 || telInfo.align == Telescope::ALI_RECENTER_9)) {
-            if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage(L_ALIGNMENT, L_SUCCESS "!", 2000); else DisplayMessage(L_ADD_STAR, L_SUCCESS "!", 2000); } else DisplayMessage(L_ADD_STAR, L_FAILED "!", -1);
+          if ((status.align == Status::ALI_RECENTER_1 || status.align == Status::ALI_RECENTER_2 || status.align == Status::ALI_RECENTER_3 ||
+             status.align == Status::ALI_RECENTER_4 || status.align == Status::ALI_RECENTER_5 || status.align == Status::ALI_RECENTER_6 ||
+             status.align == Status::ALI_RECENTER_7 || status.align == Status::ALI_RECENTER_8 || status.align == Status::ALI_RECENTER_9)) {
+            if (status.addStar()) { if (status.align == Status::ALI_OFF) DisplayMessage(L_ALIGNMENT, L_SUCCESS "!", 2000); else DisplayMessage(L_ADD_STAR, L_SUCCESS "!", 2000); } else DisplayMessage(L_ADD_STAR, L_FAILED "!", -1);
           }
         }
         time_last_action = millis();
@@ -563,156 +339,158 @@ void UI::update()
   }
 }
 
-void UI::updateMainDisplay( u8g2_uint_t page)
-{
+void UI::updateMainDisplay( u8g2_uint_t page) {
   u8g2_t *u8g2 = display->getU8g2();
   display->setFont(LF_LARGE);
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   // get the status
-  telInfo.connected = true;
-  telInfo.updateSeq++;
-  telInfo.updateTel();
-  if (telInfo.connected == false) return;
+  status.connected = true;
+  status.updateSeq++;
+  status.updateTel();
+  if (status.connected == false) return;
 
   // detect align mode
-  if (telInfo.hasTelStatus && telInfo.align != Telescope::ALI_OFF)
-  {
-    telInfo.updateTel(true); // really make sure we have the status
-    Telescope::TrackState curT = telInfo.getTrackingState();
-    if (curT != Telescope::TRK_SLEWING && 
-       (telInfo.align == Telescope::ALI_SLEW_STAR_1 || telInfo.align == Telescope::ALI_SLEW_STAR_2 || telInfo.align == Telescope::ALI_SLEW_STAR_3 || 
-        telInfo.align == Telescope::ALI_SLEW_STAR_4 || telInfo.align == Telescope::ALI_SLEW_STAR_5 || telInfo.align == Telescope::ALI_SLEW_STAR_6 ||
-        telInfo.align == Telescope::ALI_SLEW_STAR_7 || telInfo.align == Telescope::ALI_SLEW_STAR_8 || telInfo.align == Telescope::ALI_SLEW_STAR_9)
-       ) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
+  if (status.hasTelStatus && status.align != Status::ALI_OFF) {
+    status.updateTel(true); // really make sure we have the status
+    Status::TrackState curT = status.getTrackingState();
+    if (curT != Status::TRK_SLEWING && 
+       (status.align == Status::ALI_SLEW_STAR_1 || status.align == Status::ALI_SLEW_STAR_2 || status.align == Status::ALI_SLEW_STAR_3 || 
+        status.align == Status::ALI_SLEW_STAR_4 || status.align == Status::ALI_SLEW_STAR_5 || status.align == Status::ALI_SLEW_STAR_6 ||
+        status.align == Status::ALI_SLEW_STAR_7 || status.align == Status::ALI_SLEW_STAR_8 || status.align == Status::ALI_SLEW_STAR_9)
+       ) status.align = static_cast<Status::AlignState > (status.align + 1);
     page = 4;
   }
 
   // update status info.
-  if (page == 0)
-    telInfo.updateRaDec();
-  else
-    if (page == 1)
-      telInfo.updateAzAlt();
-    else
-      if (page == 2)
-        telInfo.updateTime();
+  if (page == 0) status.updateRaDec();
+  else if (page == 1) status.updateAzAlt();
+  else if (page == 2) status.updateTime();
 
   // prep. brief message, simply place the message in the briefMessage string and it'll show for one second
-  static char lastMessage[40]="";
-  static unsigned long startTime=0;
-  if (strlen(briefMessage) != 0) { startTime=millis(); strcpy(lastMessage,briefMessage); strcpy(briefMessage,""); }
+  static char lastMessage[40] = "";
+  static unsigned long startTime = 0;
+  if (strlen(briefMessage) != 0) { startTime=millis(); strcpy(lastMessage, briefMessage); strcpy(briefMessage, ""); }
   if (strlen(lastMessage) != 0) {
     if ((long)(millis()-startTime) > 1000) strcpy(lastMessage,"");
   }
  
   // the graphics loop
   u8g2_FirstPage(u8g2);
-  do
-  {
+  do {
     u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2);
 
     // OnStep status
-    if (telInfo.hasTelStatus) { 
+    if (status.hasTelStatus) { 
 
       // update guide rate (if available)
-      if (telInfo.getGuideRate()>=0) {
+      if (status.getGuideRate()>=0) {
         char string_Speed[][8] = {"¼x","½x","1x","2x","4x","8x","20x","48x","½Mx","Max"};
         char string_PSpeed[][6] = {" ¼x"," ½x"," 1x"};
-        int gr=telInfo.getGuideRate(); activeGuideRate=gr+1;
-        int pgr=telInfo.getPulseGuideRate();
-        if ((pgr!=gr) && (pgr>=0) && (pgr<3)) strcat(string_Speed[gr],string_PSpeed[pgr]); 
-        if ((gr>=0) && (gr<=9)) {
+        int gr = status.getGuideRate();
+        activeGuideRate = gr + 1;
+        int pgr = status.getPulseGuideRate();
+        if (pgr != gr && pgr >= 0 && pgr < 3) strcat(string_Speed[gr], string_PSpeed[pgr]); 
+        if (gr >= 0 && gr <= 9) {
           display->setFont(LF_STANDARD);
           u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[gr]);
           display->setFont(LF_LARGE);
         }
       }
 
-      Telescope::ParkState curP = telInfo.getParkState();
-      Telescope::TrackState curT = telInfo.getTrackingState();
-      Telescope::TrackRate curTR = telInfo.getTrackingRate();
+      Status::ParkState curP = status.getParkState();
+      Status::TrackState curT = status.getTrackingState();
+      Status::TrackRate curTR = status.getTrackingRate();
     
-      if (curP == Telescope::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
-      if (curP == Telescope::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
-      if (telInfo.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
+      if (curP == Status::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
+      if (curP == Status::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
+      if (status.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
       {
-        if (curT == Telescope::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
-        if (curT == Telescope::TRK_ON)      
-        {
-          if (curTR == Telescope::TR_SIDEREAL) {
-            Telescope::RateCompensation rc = telInfo.getRateCompensation();
-            if (Telescope::RC_NONE      == rc) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_bits);    x -= icon_width + 1; } else
-            if (Telescope::RC_REFR_RA   == rc) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_r_bits);  x -= icon_width + 1; } else
-            if (Telescope::RC_REFR_BOTH == rc) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_rd_bits); x -= icon_width + 1; } else
-            if (Telescope::RC_FULL_RA   == rc) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_f_bits);  x -= icon_width + 1; } else
-            if (Telescope::RC_FULL_BOTH == rc) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_fd_bits); x -= icon_width + 1; }
+        if (curT == Status::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
+        if (curT == Status::TRK_ON) {
+          if (curTR == Status::TR_SIDEREAL) {
+            switch (status.getRateCompensation()) {
+              case Status::RC_NONE:      display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_bits);    x -= icon_width + 1; break;
+              case Status::RC_REFR_RA:   display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_r_bits);  x -= icon_width + 1; break;
+              case Status::RC_REFR_BOTH: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_rd_bits); x -= icon_width + 1; break;
+              case Status::RC_FULL_RA:   display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_f_bits);  x -= icon_width + 1; break;
+              case Status::RC_FULL_BOTH: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_fd_bits); x -= icon_width + 1; break;
+              default: break;
+            }
           } else
-          if (curTR == Telescope::TR_LUNAR)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_lun_bits); x -= icon_width + 1; } else
-          if (curTR == Telescope::TR_SOLAR)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; } else
-                                             { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }
-         } else
-        if (curT == Telescope::TRK_OFF) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, no_tracking_bits); x -= icon_width + 1; }
+          if (curTR == Status::TR_LUNAR) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_lun_bits); x -= icon_width + 1; } else
+          if (curTR == Status::TR_SOLAR) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; } else
+                                         { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }
+        } else
+        if (curT == Status::TRK_OFF) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, no_tracking_bits); x -= icon_width + 1; }
 
-        if (curP == Telescope::PRK_FAILED) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parkingFailed_bits); x -= icon_width + 1; }
+        if (curP == Status::PRK_FAILED) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parkingFailed_bits); x -= icon_width + 1; }
 
-        Telescope::PierState CurP = telInfo.getPierState();
-        if (CurP == Telescope::PIER_E) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, E_bits); x -= icon_width + 1; } else 
-        if (CurP == Telescope::PIER_W) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, W_bits); x -= icon_width + 1; }
+        Status::PierState CurP = status.getPierState();
+        if (CurP == Status::PIER_E) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, E_bits); x -= icon_width + 1; } else 
+        if (CurP == Status::PIER_W) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, W_bits); x -= icon_width + 1; }
 
-        if (telInfo.align != Telescope::ALI_OFF) {
-          if (telInfo.aliMode == Telescope::ALIM_ONE)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align1_bits); x -= icon_width + 1; } else 
-          if (telInfo.aliMode == Telescope::ALIM_TWO)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align2_bits); x -= icon_width + 1; } else
-          if (telInfo.aliMode == Telescope::ALIM_THREE) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align3_bits); x -= icon_width + 1; } else
-          if (telInfo.aliMode == Telescope::ALIM_FOUR)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align4_bits); x -= icon_width + 1; } else
-          if (telInfo.aliMode == Telescope::ALIM_FIVE)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align5_bits); x -= icon_width + 1; } else
-          if (telInfo.aliMode == Telescope::ALIM_SIX)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align6_bits); x -= icon_width + 1; } else
-          if (telInfo.aliMode == Telescope::ALIM_SEVEN) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align7_bits); x -= icon_width + 1; } else
-          if (telInfo.aliMode == Telescope::ALIM_EIGHT) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align8_bits); x -= icon_width + 1; } else
-          if (telInfo.aliMode == Telescope::ALIM_NINE ) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align9_bits); x -= icon_width + 1; }
+        if (status.align != Status::ALI_OFF) {
+          switch (status.aliMode) {
+            case Status::ALIM_ONE:   display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align1_bits); x -= icon_width + 1; break;
+            case Status::ALIM_TWO:   display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align2_bits); x -= icon_width + 1; break;
+            case Status::ALIM_THREE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align3_bits); x -= icon_width + 1; break;
+            case Status::ALIM_FOUR:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align4_bits); x -= icon_width + 1; break;
+            case Status::ALIM_FIVE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align5_bits); x -= icon_width + 1; break;
+            case Status::ALIM_SIX:   display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align6_bits); x -= icon_width + 1; break;
+            case Status::ALIM_SEVEN: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align7_bits); x -= icon_width + 1; break;
+            case Status::ALIM_EIGHT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align8_bits); x -= icon_width + 1; break;
+            case Status::ALIM_NINE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align9_bits); x -= icon_width + 1; break;
+            default: break;
+          }
         }
 
-        if (telInfo.isPecPlaying())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_play_bits);   x -= icon_width + 1; } else
-        if (telInfo.isPecRecording()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_record_bits); x -= icon_width + 1; } else
-        if (telInfo.isPecWaiting())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_wait_bits);   x -= icon_width + 1; }
+        if (status.isPecPlaying())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_play_bits);   x -= icon_width + 1; } else
+        if (status.isPecRecording()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_record_bits); x -= icon_width + 1; } else
+        if (status.isPecWaiting())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_wait_bits);   x -= icon_width + 1; }
 
-        if (telInfo.isGuiding()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, guiding_bits); x -= icon_width + 1; }
+        if (status.isGuiding()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, guiding_bits); x -= icon_width + 1; }
       }
 
-      if (!telInfo.isGuiding()) {
-        switch (telInfo.getError()) {
-          case Telescope::ERR_NONE:        break;                                                                                                 // no error
-          case Telescope::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits); x -= icon_width + 1; break; // motor fault
-          case Telescope::ERR_ALT_MIN:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above below horizon
-          case Telescope::ERR_LIMIT_SENSE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrLs_bits); x -= icon_width + 1; break; // physical limit switch triggered
-          case Telescope::ERR_DEC:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits); x -= icon_width + 1; break; // past the rarely used Dec limit
-          case Telescope::ERR_AZM:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAz_bits); x -= icon_width + 1; break; // for AltAz mounts, past limit in Az
-          case Telescope::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits); x -= icon_width + 1; break; // for Eq mounts, past limit in HA
-          case Telescope::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits); x -= icon_width + 1; break; // for Eq mounts, past meridian limit
-          case Telescope::ERR_ALT_MAX:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above overhead
-          default:                         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrOth_bits);x -= icon_width + 1; break; // other error
+      if (!status.isGuiding()) {
+        switch (status.getError()) {
+          case Status::ERR_NONE: break;                                                                                                        // no error
+          case Status::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits); x -= icon_width + 1; break; // motor fault
+          case Status::ERR_ALT_MIN:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above below horizon
+          case Status::ERR_LIMIT_SENSE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrLs_bits); x -= icon_width + 1; break; // physical limit switch triggered
+          case Status::ERR_DEC:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits); x -= icon_width + 1; break; // past the rarely used Dec limit
+          case Status::ERR_AZM:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAz_bits); x -= icon_width + 1; break; // for AltAz mounts, past limit in Az
+          case Status::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits); x -= icon_width + 1; break; // for Eq mounts, past limit in HA
+          case Status::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits); x -= icon_width + 1; break; // for Eq mounts, past meridian limit
+          case Status::ERR_ALT_MAX:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above overhead
+          default:                      display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrOth_bits);x -= icon_width + 1; break; // other error
         }
       }
     }
 
     // show brief message
     if (strlen(lastMessage) != 0) {
-      x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;  u8g2_uint_t x1 = u8g2_GetStrWidth(u8g2,lastMessage);
-      u8g2_DrawUTF8(u8g2, (x/2)-(x1/2), y+8, lastMessage);
+      x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;  u8g2_uint_t x1 = u8g2_GetStrWidth(u8g2, lastMessage);
+      u8g2_DrawUTF8(u8g2, (x/2) - (x1/2), y + 8, lastMessage);
     } else
 
     // show equatorial coordinates
     if (page == 0) {
-      if (telInfo.hasInfoRa && telInfo.hasInfoDec) {
-        char rs[20]; strcpy(rs,telInfo.TempRa); int l=strlen(rs); if (l>1) rs[l-1]=0;
-        u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"00000000");
+      if (status.hasInfoRa && status.hasInfoDec) {
+        char rs[20]; strcpy(rs, status.TempRa);
+        int l = strlen(rs);
+        if (l > 1) rs[l - 1] = 0;
+        u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2) - u8g2_GetUTF8Width(u8g2, "00000000");
         u8g2_uint_t y = 36;
 
         u8g2_DrawUTF8(u8g2, 0, y, L_RA);
         display->DrawFwNumeric(x, y, rs);
 
-        char ds[20]; strcpy(ds,telInfo.TempDec); l=strlen(ds); if (l>1) ds[l-1]=0; if (l>8) { ds[3]='\xb0'; ds[6]='\''; }
-        x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
+        char ds[20]; strcpy(ds, status.TempDec);
+        l = strlen(ds);
+        if (l > 1) ds[l - 1] = 0;
+        if (l > 8) { ds[3] = '\xb0'; ds[6] = '\''; }
+        x = u8g2_GetDisplayWidth(u8g2) - u8g2_GetUTF8Width(u8g2, "000000000");
         y += line_height + 4;
         u8g2_DrawUTF8(u8g2, 0, y, L_DEC); 
         display->DrawFwNumeric(x, y, ds);
@@ -721,35 +499,44 @@ void UI::updateMainDisplay( u8g2_uint_t page)
 
     // show horizon coordinates
     if (page == 1) {
-      if (telInfo.hasInfoAz && telInfo.hasInfoAlt)
+      if (status.hasInfoAz && status.hasInfoAlt)
       {
-        char zs[20]; strcpy(zs,telInfo.TempAz); int l=strlen(zs); if (l>1) zs[l-1]=0; if (l>8) { zs[3]='\xb0'; zs[6]='\''; }
-        x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
-        u8g2_uint_t y = 36; 
+        char zs[20]; strcpy(zs, status.TempAz);
+        int l = strlen(zs);
+        if (l > 1) zs[l - 1] = 0;
+        if (l > 8) { zs[3] = '\xb0'; zs[6] = '\''; }
+        x = u8g2_GetDisplayWidth(u8g2) - u8g2_GetUTF8Width(u8g2, "000000000");
+        u8g2_uint_t y = 36;
         u8g2_DrawUTF8(u8g2, 0, y, L_AZ);
-        display->DrawFwNumeric(x,y,zs);
+        display->DrawFwNumeric(x, y, zs);
 
-        char as[20]; strcpy(as,telInfo.TempAlt); l=strlen(as); if (l>1) as[l-1]=0; if (l>8) { as[3]='\xb0'; as[6]='\''; }
-        y += line_height + 4; 
+        char as[20]; strcpy(as, status.TempAlt);
+        l = strlen(as);
+        if (l > 1) as[l - 1] = 0;
+        if (l > 8) { as[3] = '\xb0'; as[6] = '\''; }
+        y += line_height + 4;
         u8g2_DrawUTF8(u8g2, 0, y, L_ALT);
-        display->DrawFwNumeric(x,y,as);
+        display->DrawFwNumeric(x, y, as);
       }
     } else
     
     // show time
     if (page == 2) {
-      if (telInfo.hasInfoUTC && telInfo.hasInfoSidereal)
-      {
-        char us[20]; strcpy(us,telInfo.TempUniversalTime); int l=strlen(us); if (l>1) us[l-1]=0;
-        x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"00000000");
+      if (status.hasInfoUTC && status.hasInfoSidereal) {
+        char us[20]; strcpy(us, status.TempUniversalTime);
+        int l = strlen(us);
+        if (l > 1) us[l - 1] = 0;
+        x = u8g2_GetDisplayWidth(u8g2) - u8g2_GetUTF8Width(u8g2, "00000000");
         u8g2_uint_t y = 36;
         display->setFont(LF_STANDARD); u8g2_DrawUTF8(u8g2, 0, y, "UT"); display->setFont(LF_LARGE);
-        display->DrawFwNumeric(x,y,us);
+        display->DrawFwNumeric(x, y, us);
 
-        char ss[20]; strcpy(ss,telInfo.TempSidereal); l=strlen(ss); if (l>1) ss[l-1]=0;
+        char ss[20]; strcpy(ss,status.TempSidereal);
+        l = strlen(ss);
+        if (l > 1) ss[l - 1] = 0;
         y += line_height + 4;
         u8g2_DrawUTF8(u8g2, 0, y, "LST");
-        display->DrawFwNumeric(x,y,ss);
+        display->DrawFwNumeric(x, y, ss);
       }
     } else
 
@@ -758,26 +545,26 @@ void UI::updateMainDisplay( u8g2_uint_t page)
       // H46% DP13.7C
       display->setFont(LF_STANDARD);
 
-      double T,P,H,DP;
-      if (telInfo.getT(T) && telInfo.getP(P) && telInfo.getH(H) && telInfo.getDP(DP)) {
-        char temp[20],line[20];
+      double T, P, H, DP;
+      if (status.getT(T) && status.getP(P) && status.getH(H) && status.getDP(DP)) {
+        char temp[20], line[20];
         u8g2_uint_t y = 36;
         u8g2_uint_t dx = u8g2_GetDisplayWidth(u8g2);
 
-        dtostrf(T,3,1,temp);
-        sprintf(line,"T%s\xb0%s",temp,"C");
-        display->DrawFwNumeric(0,y,line);
+        dtostrf(T, 3, 1, temp);
+        sprintf(line, "T%s\xb0%s", temp, "C");
+        display->DrawFwNumeric(0, y, line);
 
-        sprintf(line,"P%dmb",(int)round(P));
-        display->DrawFwNumeric(dx-display->GetFwNumericWidth(line),y,line);
+        sprintf(line, "P%dmb",(int)round(P));
+        display->DrawFwNumeric(dx - display->GetFwNumericWidth(line), y, line);
 
         y += line_height + 4;
-        sprintf(line,"H%d%%",(int)round(H));
-        display->DrawFwNumeric(0,y,line);
+        sprintf(line, "H%d%%", (int)round(H));
+        display->DrawFwNumeric(0, y, line);
 
-        dtostrf(DP,3,1,temp);
-        sprintf(line,"DP%s\xb0%s",temp,"C");
-        display->DrawFwNumeric(dx-display->GetFwNumericWidth(line),y,line);
+        dtostrf(DP, 3, 1, temp);
+        sprintf(line, "DP%s\xb0%s", temp, "C");
+        display->DrawFwNumeric(dx-display->GetFwNumericWidth(line), y, line);
       }
       
       display->setFont(LF_LARGE);
@@ -788,8 +575,8 @@ void UI::updateMainDisplay( u8g2_uint_t page)
       u8g2_uint_t y = 36;
 
       char txt[20];
-      if ((telInfo.align - 1) % 3 == 1) sprintf(txt, L_SLEWING_TO_STAR " %u", (telInfo.align - 1) / 3 + 1); else
-      if ((telInfo.align - 1) % 3 == 2) sprintf(txt, L_RECENTER_STAR " %u", (telInfo.align - 1) / 3 + 1);
+      if ((status.align - 1) % 3 == 1) sprintf(txt, L_SLEWING_TO_STAR " %u", (status.align - 1) / 3 + 1); else
+      if ((status.align - 1) % 3 == 2) sprintf(txt, L_RECENTER_STAR " %u", (status.align - 1) / 3 + 1);
       u8g2_DrawUTF8(u8g2, 0, y, txt);
 
       y += line_height + 4;
@@ -804,8 +591,7 @@ void UI::updateMainDisplay( u8g2_uint_t page)
   lastpageupdate = millis();
 }
 
-void UI::drawIntro()
-{
+void UI::drawIntro() {
   display->firstPage();
   do {
     display->drawXBMP(0, 0, onstep_logo_width, onstep_logo_height, onstep_logo_bits);
@@ -814,9 +600,8 @@ void UI::drawIntro()
 }
 
 // misc.
-bool UI::SelectStarAlign()
-{
-  cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0());
+bool UI::SelectStarAlign() {
+  cat_mgr.setLat(status.getLat()); cat_mgr.setLstT0(status.getLstT0());
   cat_mgr.select(0);
 
   cat_mgr.filtersClear();
@@ -832,8 +617,7 @@ bool UI::SelectStarAlign()
   return false;
 }
 
-void UI::DisplayMessage(const char* txt1, const char* txt2, int duration)
-{
+void UI::DisplayMessage(const char* txt1, const char* txt2, int duration) {
   uint8_t x;
   uint8_t y = 40;
   display->firstPage();
@@ -851,54 +635,44 @@ void UI::DisplayMessage(const char* txt1, const char* txt2, int duration)
   if (duration >= 0) delay(duration); else { buttonPad.waitForPress(); buttonPad.clearAllPressed(); }
 }
 
-void UI::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration)
-{
+void UI::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration) {
   display->setFont(LF_STANDARD);
   uint8_t h = 15;
   uint8_t x = 0;
   uint8_t y = h;
   display->firstPage();
   do {
-
     y = h;
     x = (display->getDisplayWidth() - display->getStrWidth(txt1)) / 2;
     display->drawStr(x, y, txt1);
     y += h;
-    if (txt2 != NULL)
-    {
+    if (txt2 != NULL) {
       x = 0;
       display->drawStr(x, y, txt2);
-    }
-    else
-    {
+    } else {
       y -= 7;
     }
     y += 15;
-    if (txt3 != NULL)
-    {
+    if (txt3 != NULL) {
       x = 0;
       display->drawStr(x, y, txt3);
     }
 
     y += 15;
-    if (txt4 != NULL)
-    {
+    if (txt4 != NULL) {
       x = 0;
       display->drawStr(x, y, txt4);
     }
   } while (display->nextPage());
   if (duration >= 0) delay(duration); else { buttonPad.waitForPress(); buttonPad.clearAllPressed(); }
-
   display->setFont(LF_LARGE);
 }
-  
-bool UI::DisplayMessageLX200(LX200RETURN val, bool silentOk)
-{
+
+bool UI::DisplayMessageLX200(LX200RETURN val, bool silentOk) {
   char text1[20] = "";
   char text2[20] = "";
   int time = -1;
-  if (val < LX200OK)
-  {
+  if (val < LX200OK) {
          if (val == LX200NOTOK)                    { sprintf(text1, L_LX200_NOTOK_1); sprintf(text2, L_LX200_NOTOK_2);  }
     else if (val == LX200SETVALUEFAILED)           { sprintf(text1, L_LX200_SETVF_1); sprintf(text2, L_LX200_SETVF_2);  }
     else if (val == LX200GETVALUEFAILED)           { sprintf(text1, L_LX200_GETVF_1); sprintf(text2, L_LX200_GETVF_2);  }
@@ -915,9 +689,7 @@ bool UI::DisplayMessageLX200(LX200RETURN val, bool silentOk)
     else if (val == LX200_GOTO_ERR_UNSPECIFIED)    { sprintf(text1, L_LX200_UNSPF_1); sprintf(text2, L_LX200_UNSPF_2);  }
     else { sprintf(text1, L_LX200_ERROR); sprintf(text2, "-1"); }
     DisplayMessage(text1, text2, -1);
-  }
-  else if (!silentOk)
-  {
+  } else if (!silentOk) {
     time = 1000;
          if (val == LX200OK)            { sprintf(text1, L_LX200_ISAOK_1); sprintf(text2, L_LX200_ISAOK_2);  }
     else if (val == LX200VALUESET)      { sprintf(text1, L_LX200_SETOK_1); sprintf(text2, L_LX200_SETOK_2);  }

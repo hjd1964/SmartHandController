@@ -1,8 +1,10 @@
+// -----------------------------------------------------------------------------------
+// Status, from OnStep
 #pragma once
 
 #include <Arduino.h>
 
-class Telescope
+class Status
 {
 public:
   enum Errors {
@@ -36,7 +38,7 @@ public:
   unsigned short  alignSelectedStar = 1;
   int             alignMaxNumStars = -1;
 
-  Errors lastError = Telescope::ERR_NONE;
+  Errors lastError = Status::ERR_NONE;
 
   char TempRa[20];
   char TempDec[20];

@@ -1,9 +1,11 @@
+// -----------------------------------------------------------------------------------
+// UserInterface, handle display and keypad
 #pragma once
 
 #include "../Common.h"
 #include "../buttons/Pad.h"
 #include "../u8g2ext/u8g2_ext.h"
-#include "../status/Telescope.h"
+#include "../status/Status.h"
 #include "../commands/LX200.h"
 
 #define SH1106 0
@@ -24,6 +26,13 @@
 #define ccQw 19
 #define ccQn 20
 #define ccQs 21
+
+#define MY_BORDER_SIZE 1
+#define icon_width 16
+#define icon_height 16
+
+#define onstep_logo_width 128
+#define onstep_logo_height 68
 
 enum MENU_RESULT { MR_OK, MR_CANCEL, MR_QUIT };
 
@@ -47,7 +56,7 @@ private:
   Pad buttonPad;
   U8G2_EXT *display = NULL;
 
-  Telescope telInfo;
+  Status status;
   char _version[20] = "Version ?";
   char briefMessage[40] = "";
 

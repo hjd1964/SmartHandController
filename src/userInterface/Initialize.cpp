@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// Functions for variables on startup
+// Initialize, get settings from NV on startup
 
 #include "UserInterface.h"
 extern NVS nv;
@@ -21,9 +21,7 @@ void UI::initNV() {
 }
 
 void UI::readNV() {
-  #ifndef DISABLE_EEPROM_COMMIT_ON
-    maxContrast = nv.readL(EE_dispMaxContrast);
-    display_dim_time = nv.readL(EE_dispDimTimeout);
-    display_blank_time = nv.readL(EE_dispBlankTimeout);
-  #endif
+  maxContrast = nv.readL(EE_dispMaxContrast);
+  display_dim_time = nv.readL(EE_dispDimTimeout);
+  display_blank_time = nv.readL(EE_dispBlankTimeout);
 }

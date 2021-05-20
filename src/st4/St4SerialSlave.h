@@ -55,15 +55,15 @@ class Sst4 : public Stream
     inline size_t write(int n) { return write((uint8_t)n); }
     using Print::write;
 
-    volatile char _xmit_buffer[256] = "";
-    volatile byte _xmit_head        = 0;
-    volatile byte _xmit_tail        = 0;
-    volatile char _recv_buffer[256] = "";
-    volatile byte _recv_tail        = 0;
-    volatile unsigned long lastMs   = 0;
+    volatile char xmit_buffer[256] = "";
+    volatile uint8_t xmit_head     = 0;
+    volatile uint8_t xmit_tail     = 0;
+    volatile char recv_buffer[256] = "";
+    volatile uint8_t recv_tail     = 0;
+    volatile unsigned long lastMs  = 0;
 
   private:
-    byte _recv_head = 0;
+    uint8_t recv_head = 0;
     long time_out = 500;
 };
 

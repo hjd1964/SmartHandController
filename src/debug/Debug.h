@@ -4,8 +4,11 @@
 
 #include <Arduino.h>
 #include "../Constants.h"
+#include "../locales/Locales.h"
 #include "../../Config.h"
 #include "../HAL/HAL.h"
+#include "../pinmaps/Models.h"
+#include "../st4/St4SerialSlave.h"
 
 extern bool connected;
 

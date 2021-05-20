@@ -11,7 +11,7 @@ class Ast4
   public:
     void setup();
     void tickButtons();
-    button n,s,e,w;
+    button n, s, e, w;
   private:
     int debounceMs = 20;
 };

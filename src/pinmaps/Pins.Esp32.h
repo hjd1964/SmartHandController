@@ -5,9 +5,6 @@
 #if defined(ESP32)
   #define PINMAP_STR "ESP32"
 
-  // workaround for ESP32 crashing on EEPROM commit
-  #define DISABLE_EEPROM_COMMIT_ON
-
   #if KEYPAD_JOYSTICK_ANALOG == JS1
     #define B_PIN0 25   // Shift
     #define B_PIN1 33   // N

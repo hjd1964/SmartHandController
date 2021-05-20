@@ -1,8 +1,10 @@
+// -----------------------------------------------------------------------------------
+// Catalog
 
 #include <math.h>
 #include "Catalog.h"
 #include "CatalogTypes.h"
-#include "../../CatalogConfig.h"
+#include "../../Config.catalogs.h"
 
 // Bayer designation, the Greek letter for each star within a constellation
 const char* Txt_Bayer[25] = {

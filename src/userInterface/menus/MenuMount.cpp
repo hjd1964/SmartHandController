@@ -1,39 +1,36 @@
-// Mount menu
+// -----------------------------------------------------------------------------------
+// MenuMount, for UserInterface
 #include "..\UserInterface.h"
 
-void UI::menuMount()
-{
+void UI::menuMount() {
   current_selection_L2 = 1;
-  while (current_selection_L2 != 0)
-  {
+  while (current_selection_L2 != 0) {
     const char *string_list_Mount = L_MOUNT_SPEED "\n" L_MOUNT_BL "\n" L_MOUNT_LIMITS "\n" L_MOUNT_PIER;
     current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, L_MOUNT_CONFIG, current_selection_L2, string_list_Mount);
-    switch (current_selection_L2)
-    {
-    case 1: menuGotoSpeed(); break;
-    case 2: menuBacklash(); break;
-    case 3: menuLimits(); break;
-    case 4: menuPier(); break;
+    switch (current_selection_L2) {
+      case 1: menuGotoSpeed(); break;
+      case 2: menuBacklash(); break;
+      case 3: menuLimits(); break;
+      case 4: menuPier(); break;
     }
   }
 }
 
-void UI::menuGotoSpeed()
-{
+void UI::menuGotoSpeed() {
   char string_list_LimitsL2[80];
   strcpy(string_list_LimitsL2,L_MOUNT_FASTEST "\n" L_MOUNT_FASTER "\n" L_MOUNT_DEFAULT_SPEED "\n" L_MOUNT_SLOWER "\n" L_MOUNT_SLOWEST);
 
-  char mr[20]=""; boolean ok = GetLX200Trim(":GX93#",mr) == LX200VALUEGET;
+  char mr[20] = ""; boolean ok = GetLX200Trim(":GX93#",mr) == LX200VALUEGET;
   if (ok) {
-    double rateDefault=atof(mr);
+    double rateDefault = atof(mr);
     ok = GetLX200Trim(":GX92#",mr) == LX200VALUEGET;
     if (ok) {
-      double rateCurrent=atof(mr);
-      double r=rateDefault/rateCurrent;
-      if (r>1.75) current_selection_L3 = 1; else
-      if (r>1.25) current_selection_L3 = 2; else
-      if (r>0.875) current_selection_L3 = 3; else
-      if (r>0.625) current_selection_L3 = 4; else current_selection_L3 = 5;
+      double rateCurrent = atof(mr);
+      double r = rateDefault/rateCurrent;
+      if (r > 1.75) current_selection_L3 = 1; else
+      if (r > 1.25) current_selection_L3 = 2; else
+      if (r > 0.875) current_selection_L3 = 3; else
+      if (r > 0.625) current_selection_L3 = 4; else current_selection_L3 = 5;
     } else current_selection_L3 = 1;
   } else current_selection_L3 = 1;
 
@@ -55,16 +52,14 @@ void UI::menuBacklash()
 {
   char string_list_LimitsL2[80];
   uint8_t bl;
-  strcpy(string_list_LimitsL2,"Axis1 RA/Az\n""Axis2 Dec/Alt");
+  strcpy(string_list_LimitsL2, "Axis1 RA/Az\n""Axis2 Dec/Alt");
   current_selection_L3 = 1;
-  while (current_selection_L3 != 0)
-  {
+  while (current_selection_L3 != 0) {
     current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, L_MOUNT_BL, current_selection_L3, string_list_LimitsL2);
-    switch (current_selection_L3)
-    {
-    case 1: bl=1; menuSetBacklash(bl); break;
-    case 2: bl=2; menuSetBacklash(bl); break;
-    default: break;
+    switch (current_selection_L3) {
+      case 1: bl = 1; menuSetBacklash(bl); break;
+      case 2: bl = 2; menuSetBacklash(bl); break;
+      default: break;
     }
   }
 }
@@ -75,121 +70,104 @@ bool UI::menuSetBacklash(uint8_t &axis)
   if (!DisplayMessageLX200(readBacklashLX200(axis, backlash))) return false;
   char text[20];
   sprintf(text, L_MOUNT_BL " Axis%u", axis);
-  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &backlash, 0, 3600, 4, 0, " " L_ARCSEC))
-  {
-    return DisplayMessageLX200(writeBacklashLX200(axis, backlash),false);
+  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &backlash, 0, 3600, 4, 0, " " L_ARCSEC)) {
+    return DisplayMessageLX200(writeBacklashLX200(axis, backlash), false);
   }
   return true;
 }
 
-void UI::menuLimits()
-{
+void UI::menuLimits() {
   char string_list_LimitsL2[80];
  
-  if (telInfo.isMountGEM()) {
+  if (status.isMountGEM()) {
     strcpy(string_list_LimitsL2,L_MOUNT_LIMIT_H "\n" L_MOUNT_LIMIT_O "\n" L_MOUNT_LIMIT_ME "\n" L_MOUNT_LIMIT_MW);
   } else {
     strcpy(string_list_LimitsL2,L_MOUNT_LIMIT_H "\n" L_MOUNT_LIMIT_O);
   }
   
   current_selection_L3 = 1;
-  while (current_selection_L3 != 0)
-  {
+  while (current_selection_L3 != 0) {
     current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, L_MOUNT_LIMITS, current_selection_L3, string_list_LimitsL2);
-    switch (current_selection_L3)
-    {
-    case 1:
-      menuHorizon();
+    switch (current_selection_L3) {
+      case 1:
+        menuHorizon();
       break;
-    case 2:
-      menuOverhead();
+      case 2:
+        menuOverhead();
       break;
-    case 3:
-      menuMeridianE();
+      case 3:
+        menuMeridianE();
       break;
-    case 4:
-      menuMeridianW();
+      case 4:
+        menuMeridianW();
       break;
     }
   }
 }
 
-void UI::menuHorizon()
-{
+void UI::menuHorizon() {
   char out[20];
-  if (DisplayMessageLX200(GetLX200(":Gh#", out)))
-  {
+  if (DisplayMessageLX200(GetLX200(":Gh#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, L_MOUNT_LIMIT_HORIZON, "", &angle, -10, 20, 2, 0, " degree"))
-    {
+    if (display->UserInterfaceInputValueFloat(&buttonPad, L_MOUNT_LIMIT_HORIZON, "", &angle, -10, 20, 2, 0, " degree")) {
       sprintf(out, ":Sh%+03d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out),false);
+      DisplayMessageLX200(SetLX200(out), false);
     }
   }
 }
 
-void UI::menuOverhead()
-{
+void UI::menuOverhead() {
   char out[20];
-  if (DisplayMessageLX200(GetLX200(":Go#", out)))
-  {
+  if (DisplayMessageLX200(GetLX200(":Go#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, L_MOUNT_LIMIT_OVERHEAD, "", &angle, 60, 91, 2, 0, " " L_DEGREE))
-    {
+    if (display->UserInterfaceInputValueFloat(&buttonPad, L_MOUNT_LIMIT_OVERHEAD, "", &angle, 60, 91, 2, 0, " " L_DEGREE)) {
       sprintf(out, ":So%02d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out),false);
+      DisplayMessageLX200(SetLX200(out), false);
     }
   }
 }
 
-void UI::menuMeridianE()
-{
+void UI::menuMeridianE() {
   char out[20] = "";
-  if (DisplayMessageLX200(GetLX200(":GXE9#", out)))
-  {
+  if (DisplayMessageLX200(GetLX200(":GXE9#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
     angle = round((angle * 15.0) / 60.0);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, L_MOUNT_LIMIT_MERIDIAN_EAST, "", &angle, -180, 180, 3, 0, " " L_DEGREE))
-    {
+    if (display->UserInterfaceInputValueFloat(&buttonPad, L_MOUNT_LIMIT_MERIDIAN_EAST, "", &angle, -180, 180, 3, 0, " " L_DEGREE)) {
       angle = round((angle * 60.0) / 15.0);
       sprintf(out, ":SXE9,%+02d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out),false);
+      DisplayMessageLX200(SetLX200(out), false);
     }
   }
 }
 
-void UI::menuMeridianW()
-{
+void UI::menuMeridianW() {
   char out[20] = "";
-  if (DisplayMessageLX200(GetLX200(":GXEA#", out)))
-  {
+  if (DisplayMessageLX200(GetLX200(":GXEA#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
     angle = round((angle * 15.0) / 60.0);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, L_MOUNT_LIMIT_MERIDIAN_WEST, "", &angle, -180, 180, 3, 0, " " L_DEGREE))
-    {
+    if (display->UserInterfaceInputValueFloat(&buttonPad, L_MOUNT_LIMIT_MERIDIAN_WEST, "", &angle, -180, 180, 3, 0, " " L_DEGREE)) {
       angle = round((angle * 60.0) / 15.0);
       sprintf(out, ":SXEA,%+02d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out),false);
+      DisplayMessageLX200(SetLX200(out), false);
     }
   }
 }
 
-void UI::menuPier()
-{
+void UI::menuPier() {
   // get preferred pier side user setting
   bool ok = false;
   char ppsState[20]=""; ok = GetLX200(":GX96#",ppsState) == LX200VALUEGET;
   if (ok) {
     uint8_t choice = 1;
-    if (ppsState[0]=='B') choice=1; else
-    if (ppsState[0]=='E') choice=2; else
-    if (ppsState[0]=='W') choice=3;
+    if (ppsState[0] == 'B') choice = 1; else
+    if (ppsState[0] == 'E') choice = 2; else
+    if (ppsState[0] == 'W') choice = 3;
     
     choice = display->UserInterfaceSelectionList(&buttonPad, L_MOUNT_PPS, choice, L_PPS_BEST "\n" L_PPS_EAST "\n" L_PPS_WEST);
     if (choice) {
-      if (choice == 1) ok = DisplayMessageLX200(SetLX200(":SX96,B#"),false); else
-      if (choice == 2) ok = DisplayMessageLX200(SetLX200(":SX96,E#"),false); else
-      if (choice == 3) ok = DisplayMessageLX200(SetLX200(":SX96,W#"),false);
+      if (choice == 1) ok = DisplayMessageLX200(SetLX200(":SX96,B#"), false); else
+      if (choice == 2) ok = DisplayMessageLX200(SetLX200(":SX96,E#"), false); else
+      if (choice == 3) ok = DisplayMessageLX200(SetLX200(":SX96,W#"), false);
     }
   }
 }

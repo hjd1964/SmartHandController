@@ -1,3 +1,5 @@
+// -----------------------------------------------------------------------------------
+// CatalogTypes, data types for catalogs
 #pragma once
 
 // maximum number of catalogs supported

@@ -10,7 +10,7 @@
 #define HAL_WIRE_CLOCK 100000
 
 // Default serial port where OnStep is attached ------------------------------------------------------
-#define SERIAL_ONSTEP Serial
+#define SERIAL_ONSTEP SERIAL_INTERFACE
 
 // Non-volatile storage ------------------------------------------------------------------------------
 #ifdef NV_DEFAULT

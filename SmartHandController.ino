@@ -51,23 +51,22 @@ void systemServices() {
   nv.poll();
 }
 
-void setup(void)
-{
+void setup(void) {
   HAL_INIT();
 
   // System services
   // add task for system services, runs at 10ms intervals so commiting 1KB of NV takes about 10 seconds
-  VF("HCM: Setup, starting system services task (rate 10ms priority 7)... ");
+  VF(Abv ": Setup, starting system services task (rate 10ms priority 7)... ");
   if (tasks.add(10, 0, true, 7, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
   userInterface.setup(Version, pin, active, SERIAL_BAUD_DEFAULT, static_cast<UI::OLED>(DISPLAY_OLED));
   
   // say hello
-  VF("HCM: SHC Addon "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
-  VF("HCM: MCU = "); VLF(MCU_STR);
+  VF(Abv "Smart Hand Controller "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
+  VF(Abv "MCU = "); VLF(MCU_STR);
 }
 
-void loop()
-{
+void loop() {
   userInterface.update();
+  tasks.yield();
 }

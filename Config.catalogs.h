@@ -49,7 +49,7 @@
   #include "src/catalogs/data/ic_select_c.h"     // The Index Catalog (supplement) of 473 DSO's, limited to Magnitude 16 AND with surface brightness >= 22.5m/arc-sec^2
 #endif
 
-// Note: There should be a matching line below for every catalog #included above (catalogs appear in the menus in the order the appear below):
+// Note: There should be a matching line below for every catalog #included above (catalogs appear in the menus in the order they appear below):
 catalog_t catalog[] = {
 // Note: Alignment always uses the first catalog!
 // Note: Sub Menu items should be grouped together in this list!

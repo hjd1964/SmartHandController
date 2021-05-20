@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------------------------------------------------
-// Handle push buttons
+// Push button
 #pragma once
 
 #include "../Common.h"
@@ -15,11 +15,11 @@ class button {
     }
     // must be repeatedly called to check status of button
     void poll() {
-      int lastState = _state;
+      int lastState = state;
 
       if (analogThreshold == 0) {
         // an analog threshold of exactly zero means this is a digital input
-        state = digitalRead(_pin);
+        state = digitalRead(pin);
       } else if (analogThreshold < 0) {
         // an analog threshold of < zero means this is an analog input and we are checking the negative value 
         state = analogRead(pin) + analogThreshold; // ranges from about 0 to -500
@@ -36,8 +36,8 @@ class button {
       if (stableMs > debounceMs) {
         if (lastStableState == UP && state == DOWN) { 
           static unsigned long lastPressTime = 0;
-          if (wasPressed && (long)(millis()-lastPressTime) < 500) wasDoublePressed = true; 
-          wasPressed = true; 
+          if (pressed && (long)(millis()-lastPressTime) < 500) doublePressed = true; 
+          pressed = true; 
           lastPressTime = millis();
         }
         lastStableState = state;
@@ -46,19 +46,19 @@ class button {
     // is the button down
     bool isDown() { if (stableMs > debounceMs && state == DOWN) return true; else return false; }
     // was the button down since last checked
-    bool wasPressed(boolean peek = false) { if (wasPressed) { if (!peek) wasPressed = false; return true; } else return false; }
+    bool wasPressed(boolean peek = false) { if (pressed) { if (!peek) pressed = false; return true; } else return false; }
     // was the button down since last checked
-    bool wasDoublePressed(boolean peek = false) { if (wasDoublePressed) { if (!peek) { wasDoublePressed = false; wasPressed = false; } return true; } else return false; }
+    bool wasDoublePressed(boolean peek = false) { if (doublePressed) { if (!peek) { doublePressed = false; pressed = false; } return true; } else return false; }
     // was the button down since last checked
     bool wasClicked(boolean peek = false) { if (isUp()) return wasPressed(peek); else return false; }
     // clear pressed state
-    void clearPress() {wasPressed = false; }
+    void clearPress() { pressed = false; }
     // is the button up
     bool isUp() { if (stableMs > debounceMs && state == UP) return true; else return false; }
     // number of ms down
     long timeDown() { if (stableMs > debounceMs && state == DOWN) return stableMs; else return 0; }
     // number of ms up
-    long timeUp() { if (stableMs > debounceMs ) && state == UP) return stableMs; else return 0; }
+    long timeUp() { if (stableMs > debounceMs && state == UP) return stableMs; else return 0; }
     // check to see if this button has the SHC tone
     boolean hasTone() { if (fabs(avgPulseDuration - 40.0) < 5.0) return true; else return false; }
     double toneFreq() { return avgPulseDuration; }
@@ -70,8 +70,8 @@ class button {
     unsigned long debounceMs = 0;
     unsigned long stableStartMs = 0;
     unsigned long stableMs = 0;
-    bool wasPressed = false;
-    bool wasDoublePressed = false;
+    bool pressed = false;
+    bool doublePressed = false;
     double avgPulseDuration = 2000.0;
     int UP = HIGH;
     int DOWN = LOW;

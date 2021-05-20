@@ -11,7 +11,7 @@
 
 // Default serial port where OnStep is attached ------------------------------------------------------
 #include <Arduino.h>
-#define SERIAL_ONSTEP Serial
+#define SERIAL_ONSTEP SERIAL_INTERFACE
 
 // Non-volatile storage ------------------------------------------------------------------------------
 #ifdef NV_DEFAULT

@@ -2,7 +2,13 @@
 // Loads pinmap model for current configuration
 #pragma once
 
-#include "../Common.h"
+#include <Arduino.h>
+
+#include "../Constants.h"
+#include "../locales/Locales.h"
+#include "../../Config.h"
+#include "../HAL/HAL.h"
+#include "../locales/Locale.h"
 
 // Default pin state; true for active LOW, false if active HIGH
 #define B_PIN_UP_0 true
