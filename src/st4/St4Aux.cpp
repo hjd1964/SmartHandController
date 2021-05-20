@@ -2,7 +2,6 @@
 // ST4 aux port
 
 #include "../st4/St4Aux.h"
-#include "../buttons/PushButton.h"
 
 #if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
 

@@ -3,6 +3,7 @@
 
 #include "UserInterface.h"
 extern NVS nv;
+#include "../st4/St4Aux.h"
 #include "../catalogs/Catalog.h"
 #include "bitmaps/Bitmaps.h"
 

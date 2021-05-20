@@ -6,6 +6,8 @@
 
 #if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
 
+#include "../buttons/PushButton.h"
+
 class Ast4 {
   public:
     void setup();
