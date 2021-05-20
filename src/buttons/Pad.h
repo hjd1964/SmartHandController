@@ -4,8 +4,7 @@
 
 #include "PushButton.h"
 
-class Pad
-{
+class Pad {
 public:
   void setup(const int pin[7], const bool active[7], int nullNS, int nullEW);
 
@@ -15,7 +14,7 @@ public:
   void waitForPress();
   void clearAllPressed();
 
-  button shift,n,s,e,w,F,f;
+  button shift, n, s, e, w, F, f;
 
 private:
   int debounceMs = 30;

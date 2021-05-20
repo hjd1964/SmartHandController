@@ -6,8 +6,7 @@
 
 #if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
 
-class Ast4
-{
+class Ast4 {
   public:
     void setup();
     void tickButtons();

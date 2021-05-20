@@ -2,8 +2,7 @@
 // Button pad
 #include "Pad.h"
 
-void Pad::setup(const int pin[7], const bool active[7], int nullNS, int nullEW)
-{
+void Pad::setup(const int pin[7], const bool active[7], int nullNS, int nullEW) {
   shift.init(pin[0], debounceMs, true, 0, active[0]);
   n.init(pin[1], debounceMs, true, nullNS, active[1]);
   s.init(pin[2], debounceMs, true, -nullNS, active[2]);
@@ -13,8 +12,7 @@ void Pad::setup(const int pin[7], const bool active[7], int nullNS, int nullEW)
   f.init(pin[6], debounceMs, true, 0, active[6]);
 }
 
-void Pad::tickButtons()
-{
+void Pad::tickButtons() {
   shift.poll();
   n.poll();
   s.poll();
@@ -24,15 +22,13 @@ void Pad::tickButtons()
   f.poll();
 }
 
-bool Pad::anyPressed()
-{
+bool Pad::anyPressed() {
   if (shift.isDown() || n.isDown() || s.isDown() || e.isDown() || w.isDown() || f.isDown() || F.isDown()) return true;
   if (shift.wasPressed(true) || n.wasPressed(true) || s.wasPressed(true) || e.wasPressed(true) || w.wasPressed(true) || f.wasPressed(true) || F.wasPressed(true)) return true;
   return false;
 }
 
-bool Pad::nsewPressed()
-{
+bool Pad::nsewPressed() {
   if (n.isDown() || s.isDown() || e.isDown() || w.isDown()) return true;
   if (n.wasPressed(true) || s.wasPressed(true) || e.wasPressed(true) || w.wasPressed(true)) return true;
   return false;
