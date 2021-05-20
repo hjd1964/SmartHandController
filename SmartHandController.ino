@@ -28,11 +28,9 @@
 */
 
 #define Product               "SHC"
-#define FirmwareDate          __DATE__
-#define FirmwareTime          __TIME__
-#define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "9"
-#define FirmwareVersionPatch  "l"
+#define FirmwareVersionMajor  "2"
+#define FirmwareVersionMinor  "0"
+#define FirmwareVersionPatch  "a"
 
 #include "src/Common.h"
 NVS nv;
