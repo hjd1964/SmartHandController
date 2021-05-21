@@ -93,8 +93,7 @@ void UI::setup(const char version[], const int pin[7],const bool active[7], cons
   drawIntro();
   tickButtons();
 
-  for (int i = 0; i < 3; i++)
-  {
+  for (int i = 0; i < 3; i++) {
     SERIAL_ONSTEP.print(":#");
     delay(400);
     SERIAL_ONSTEP.flush();
@@ -103,39 +102,52 @@ void UI::setup(const char version[], const int pin[7],const bool active[7], cons
 
   DisplayMessage(L_ESTABLISHING, L_CONNECTION, 1000);
 
+  // OnStep establish connection
+  char s[20] = "";
+  int thisTry = 0;
+again1:
+  delay(2000);
+
+  VLF(Abv "Attempting to connect");
+  LX200RETURN r = GetLX200(":GVP#", s);
+  if (r != LX200VALUEGET || (!strstr(s, "On-Step") && !strstr(s, "OnStepX"))) if (++thisTry <= 8) goto again1;
+  VLF(Abv "Connection established");
+
+again2:
+  delay(2000);
+
   // OnStep coordinate mode for getting and setting RA/Dec
   // 0 = OBSERVED_PLACE (same as not supported)
   // 1 = TOPOCENTRIC (does refraction)
   // 2 = ASTROMETRIC_J2000 (does refraction and precession/nutation)
-  char s[20] = "";
-
-  int thisTry = 0;
-again:
-  delay(4000);
-  if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
+  thisTry = 0;
+  if (GetLX200(":GXEE#", s) == LX200VALUEGET && s[0] >= '0' && s[0] <= '3' && s[1] == 0) {
     if (s[0] == '0') {
+      VLF(Abv "Coordinates Observed Place");
       telescopeCoordinates = OBSERVED_PLACE; 
       DisplayMessage(L_CONNECTION, L_OK "!", 1000);
       connected = true;
     } else 
     if (s[0] == '1') {
+      VLF(Abv "Coordinates Topocentric");
       telescopeCoordinates = TOPOCENTRIC; 
       DisplayMessage(L_CONNECTION, L_OK "!", 1000);
       connected = true;
     } else 
     if (s[0] == '2') {
+      VLF(Abv "Coordinates J2000");
       telescopeCoordinates = ASTROMETRIC_J2000;
       DisplayMessage(L_CONNECTION, L_OK "!", 1000);
       connected = true;
     }
   } else {
-    if (++thisTry <= 4) goto again;
+    if (++thisTry <= 3) goto again2;
+    VLF(Abv "Warning, get coords failed");
+    VLF(Abv "fallback to Observed Place");
     telescopeCoordinates = OBSERVED_PLACE;
     DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
     DisplayMessage(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
   }
-
-  VLF(Abv "Connection established");
 }
 
 void UI::tickButtons() {

@@ -55,7 +55,7 @@ bool processCommand(char* command, char* response, unsigned long timeOutMs) {
     if (command[1] == 'A') {
       if (strchr("W123456789+", command[2])) { shortResponse = true; SERIAL_ONSTEP.setTimeout(1000); }
     }
-    if ((command[1]=='F') || (command[1]=='f')) {
+    if ((command[1] == 'F') || (command[1] == 'f')) {
       if (strchr("+-QZHhFS1234",command[2])) noResponse=true;
       if (strchr("Apc",command[2]) || (strchr("B",command[2])&&command[3]!='#') || (strchr("C",command[2])&&command[3]!='#') || (strchr("D",command[2])&&command[3]!='#')) shortResponse=true;
     }
@@ -157,7 +157,7 @@ LX200RETURN GetLX200(const char* command, char* output) {
 LX200RETURN GetLX200Trim(char* command, char* output) {
   memset(output, 0, sizeof(*output));
   if (processCommand(command, output, TIMEOUT_CMD)) {
-    if ((strlen(output)>0) && (output[strlen(output)-1]=='#')) output[strlen(output)-1]=0;
+    if ((strlen(output) > 0) && (output[strlen(output) - 1] == '#')) output[strlen(output) - 1] = 0;
     return LX200VALUEGET;
   } else
     return LX200GETVALUEFAILED;
@@ -203,8 +203,7 @@ LX200RETURN SetTimeLX200(long &value) {
 
 LX200RETURN GetSiteLX200(int& value) {
   char out[20];
-  if (GetLX200(":W?#", out) == LX200VALUEGET)
-  {
+  if (GetLX200(":W?#", out) == LX200VALUEGET) {
     value = (int)strtol(&out[0], NULL, 10) + 1;
     return LX200VALUEGET;
   }
@@ -224,9 +223,9 @@ LX200RETURN Move2TargetLX200() {
   processCommand((char *)":MS#", out, TIMEOUT_CMD);
   LX200RETURN response;
 
-  int result = (out[0]-'0');
-  if (result==0) { response = LX200_GOTO_GOINGTO; } else
-  if ((result>0) && (result<=9)) { response = (LX200RETURN)(result+(int)LX200_GOTO_ERR_BELOW_HORIZON-1); } else 
+  int result = (out[0] - '0');
+  if (result == 0) { response = LX200_GOTO_GOINGTO; } else
+  if (result > 0 && result <= 9) { response = (LX200RETURN)(result + (int)LX200_GOTO_ERR_BELOW_HORIZON - 1); } else 
   response = LX200_GOTO_ERR_UNSPECIFIED;
   
   return response;

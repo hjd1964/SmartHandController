@@ -93,37 +93,35 @@ void UI::menuDisplay() {
 
 void UI::menuContrast() {
   const char *string_list_Display = L_SET_DISP_MIN "\n" L_SET_DISP_LOW "\n" L_SET_DISP_HIGH "\n" L_SET_DISP_MAX;
-  current_selection_L3 = 1;
-
+  current_selection_L3 = nv.readL(EE_dispMaxContrast);
+  
   current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, L_SET_DISP_CONTRAST, current_selection_L3, string_list_Display);
   if (current_selection_L3 > 0) {
-    maxContrast = (uint)63 * (current_selection_L3 - 1);
+    maxContrast = (current_selection_L3) * 63;
     display->setContrast(maxContrast);
-    nv.write(EE_dispMaxContrast, (int32_t)maxContrast);
+    nv.write(EE_dispMaxContrast, (int32_t)current_selection_L3);
   }
 }
 
 void UI::menuDimTimeout() {
   const char *string_list_Display = L_DISABLE "\n""30 " L_SEC_ABV "\n""60 " L_SEC_ABV;
-  current_selection_L3 = 2;
+  current_selection_L3 = nv.readL(EE_dispDimTimeout);
 
-  if (current_selection_L3 > 0)
-  {
+  if (current_selection_L3 > 0) {
     current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, L_SET_DISP_DIM_TO, current_selection_L3, string_list_Display);
     display_dim_time = (current_selection_L3 - 1) * 30000;
-    nv.write(EE_dispDimTimeout, (int32_t)display_dim_time);
+    nv.write(EE_dispDimTimeout, (int32_t)current_selection_L3);
   }
 }
 
 void UI::menuBlankTimeout() {
   const char *string_list_Display = L_DISABLE "\n""1 " L_MIN_ABV "\n""2 " L_MIN_ABV "\n""3 " L_MIN_ABV "\n""4 " L_MIN_ABV "\n""5 " L_MIN_ABV;
-  current_selection_L3 = 3;
+  current_selection_L3 = nv.readL(EE_dispBlankTimeout);
 
-  if (current_selection_L3 > 0)
-  {
+  if (current_selection_L3 > 0) {
     current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, L_SET_DISP_BLANK_TO, current_selection_L3, string_list_Display);
     display_blank_time = (current_selection_L3 - 1) * 60 * 1000;
-    nv.write(EE_dispBlankTimeout, (int32_t)display_blank_time);
+    nv.write(EE_dispBlankTimeout, (int32_t)current_selection_L3);
   }
 }
 

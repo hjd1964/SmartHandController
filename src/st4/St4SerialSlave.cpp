@@ -41,7 +41,7 @@ void Sst4::begin(long baudRate = 9600) {
   pinMode(ST4RAe, OUTPUT);
   pinMode(ST4RAw, OUTPUT);
 
-  attachInterrupt(digitalPinToInterrupt(ST4DEs),dataClock,CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ST4DEs), dataClock, CHANGE);
 
   #ifdef __TEENSYDUINO__
     Timer1.begin(shcTone, INTERVAL);

@@ -35,8 +35,7 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 void dataClock();
 void shcTone();
 
-class Sst4 : public Stream
-{
+class Sst4 : public Stream {
   public:
     void begin(long baudRate);
     void end();
