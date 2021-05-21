@@ -163,7 +163,7 @@ volatile uint8_t data_out = 0;
 
 Sst4 SerialST4;
 
-void dataClock() {
+IRAM_ATTR void dataClock() {
   static volatile unsigned long t = 0;
   static volatile int i = 9;
   static volatile bool frame_error = false;
@@ -221,7 +221,7 @@ void dataClock() {
 
 // this routine keeps a 12.5Hz "tone" on the RAe pin (always) but also on the
 // RAw pin when the data comms clock from OnStep isn't running
-void shcTone() {
+IRAM_ATTR void shcTone() {
   static volatile bool tone_state = false;
 
   if (tone_state) { 
