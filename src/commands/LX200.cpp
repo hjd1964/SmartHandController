@@ -56,7 +56,7 @@ bool processCommand(char* command, char* response, unsigned long timeOutMs) {
       if (strchr("W123456789+", command[2])) { shortResponse = true; SERIAL_ONSTEP.setTimeout(1000); }
     }
     if ((command[1] == 'F') || (command[1] == 'f')) {
-      if (strchr("+-QZHhFS1234",command[2])) noResponse=true;
+      if (strchr("+-QZHhFS1234", command[2])) noResponse = true;
       if (strchr("Apc",command[2]) || (strchr("B",command[2])&&command[3]!='#') || (strchr("C",command[2])&&command[3]!='#') || (strchr("D",command[2])&&command[3]!='#')) shortResponse=true;
     }
     if (command[1] == 'M') {
@@ -91,8 +91,8 @@ bool processCommand(char* command, char* response, unsigned long timeOutMs) {
       if (strchr("edrn", command[2])) shortResponse = true;
     }
     if (command[1] == 'U') noResponse = true;
-    if ((command[1] == 'W') && (command[2] != '?')) { noResponse = true; }
-    if ((command[1] == '$') && (command[2] == 'Q') && (command[3] == 'Z')) {
+    if (command[1] == 'W' && command[2] != '?') { noResponse = true; }
+    if (command[1] == '$' && command[2] == 'Q' && command[3] == 'Z') {
       if (strchr("+-Z/!", command[4])) noResponse = true;
     }
     if (command[1] == 'G') {

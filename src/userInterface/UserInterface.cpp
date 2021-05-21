@@ -110,7 +110,7 @@ again1:
 
   VLF(Abv "Attempting to connect");
   LX200RETURN r = GetLX200(":GVP#", s);
-  if (r != LX200VALUEGET || (!strstr(s, "On-Step") && !strstr(s, "OnStepX"))) if (++thisTry <= 8) goto again1;
+  if (r != LX200VALUEGET || (!strstr(s, "On-Step") && !strstr(s, "OnStepX"))) { if (++thisTry <= 8) goto again1; }
   VLF(Abv "Connection established");
 
 again2:
