@@ -36,8 +36,7 @@
 
 enum MENU_RESULT { MR_OK, MR_CANCEL, MR_QUIT };
 
-class UI
-{
+class UI {
 public:
   enum OLED { OLED_SH1106, OLED_SSD1306, OLED_SSD1309 };
   int telescopeCoordinates=1;
@@ -64,8 +63,9 @@ private:
   bool sleepDisplay = false;
   bool lowContrast = false;
   uint8_t maxContrast = 255;
-  unsigned long display_blank_time = DISPLAY_BLANK_TIMEOUT * 1000;
-  unsigned long display_dim_time = DISPLAY_DIM_TIMEOUT * 1000;
+  int Contrast[4] = {1, 66, 192, 255};
+  unsigned long display_blank_time;
+  unsigned long display_dim_time;
   bool buttonCommand = false;
   bool moveNorth = false;
   bool moveSouth = false;

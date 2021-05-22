@@ -32,8 +32,6 @@
 #define DISPLAY_AMBIENT_CONDITIONS    OFF //    OFF, ON to show ambient conditions in the display rotation                    Option
 #define DISPLAY_WRAP_MENUS            OFF //    OFF, ON allows menus to wrap so moving past bottom returns to top, etc.       Option
 #define DISPLAY_24HR_TIME              ON //     ON, OFF to use 12 hour format for entering time.                             Option
-#define DISPLAY_DIM_TIMEOUT            30 //     30, n. Where n=0..600 seconds, 0 disables timeout.                           Adjust
-#define DISPLAY_BLANK_TIMEOUT         120 //    120, n. Where n=0..600 seconds, 0 disables timeout.                           Adjust
 
 // KEYPAD --------------------------------------------------------------------------------------------------------------------------
 #define KEYPAD_JOYSTICK_ANALOG        OFF //    OFF, JS1 for Jerry's analog joystick                                          Option
@@ -44,7 +42,7 @@
                                           //             Note: Available only when SERIAL_INTERFACE SerialST4 is used
 
 // CATALOGS ------------------------------------------------------------------------------------------------------------------------
-// Advanced users can also customize which celestial object catalogs are included or even add new catalogs using CatalogConfig.h
+// Advanced users can also customize which celestial object catalogs are included or even add new catalogs using Config.catalogs.h
 
 // THAT'S IT FOR USER CONFIGURATION!
 
