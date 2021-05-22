@@ -41,6 +41,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../locales/Locales.h"
 #include "../../Config.h"
 #include "../locales/Locale.h"
+#include "../tasks/OnTask.h"
+extern Tasks tasks;
 
 /*
 Draw a string at x,y
@@ -240,6 +242,7 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *ti
 
   for (;;)
   {
+    tasks.yield();
     u8g2_FirstPage(u8g2);
     do
     {
