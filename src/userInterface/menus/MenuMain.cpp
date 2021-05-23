@@ -8,7 +8,7 @@ void UI::menuFeatureKey() {
 
   char string_feature_Modes[120] = L_FKEY_GUIDE_RATE "\n" L_FKEY_PULSE_GUIDE_RATE;
 
-  int i=2,j=-1,k=-1,l=-1,m=-1,n=-1;
+  int i = 2, j = -1, k = -1, l = -1, m = -1, n = -1;
   #if UTILITY_LIGHT != OFF
     { i++; j=i; strcat(string_feature_Modes,"\n" L_FKEY_UTILITY_LIGHT); }
   #endif

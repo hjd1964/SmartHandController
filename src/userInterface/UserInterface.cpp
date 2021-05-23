@@ -52,11 +52,11 @@ void UI::setup(const char version[], const int pin[7],const bool active[7], cons
     pinMode(B_PIN1,INPUT_PULLUP);
     pinMode(B_PIN2,INPUT_PULLUP);
     delay(100);
-    int v1=analogRead(B_PIN1);
-    int v2=analogRead(B_PIN3);
-    buttonPad.setup( pin, active, v1, v2);
+    int v1 = analogRead(B_PIN1);
+    int v2 = analogRead(B_PIN3);
+    buttonPad.setup(pin, active, v1, v2);
   #else
-    buttonPad.setup( pin, active, 0, 0);
+    buttonPad.setup(pin, active, 0, 0);
   #endif
 
   #if ST4_INTERFACE == ON
