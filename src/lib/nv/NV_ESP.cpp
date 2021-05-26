@@ -5,9 +5,7 @@
 
 #if defined(ESP8266) || defined(ESP32)
 
-  #include "EEPROM.h"
   #include "../../tasks/OnTask.h"
-  extern Tasks tasks;
 
   bool NonVolatileStorageESP::init(uint16_t size, bool cacheEnable, uint16_t wait, bool checkEnable, TwoWire* wire, uint8_t address) {
     if (size > 4096 || wait == false) return false;
@@ -23,8 +21,6 @@
     if (dirty && ((long)(millis() - commitReadyTimeMs) >= 0)) {
       #if defined(ESP32)
         if (disableInterrupts) timerAlarmsDisable();
-      #else
-        (void)(disableInterrupts);
       #endif
       EEPROM.commit();
       #if defined(ESP32)
@@ -32,6 +28,10 @@
       #endif
       dirty = false;
     }
+    #if !defined(ESP32)
+      // stop compiler warnings
+      (void)(disableInterrupts);
+    #endif
   }
 
   bool NonVolatileStorageESP::committed() {

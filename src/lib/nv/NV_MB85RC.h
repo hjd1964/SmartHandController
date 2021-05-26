@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <Arduino.h>
 #include "NV.h"
 
 class NonVolatileStorageMB85RC : public NonVolatileStorage {
