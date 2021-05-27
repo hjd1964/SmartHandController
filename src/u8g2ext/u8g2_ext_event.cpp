@@ -20,10 +20,7 @@ uint8_t ext_GetMenuEvent(Pad* extPad)
     unsigned long t = extPad->n.timeDown();
     if (t > 1000) {
       if (t > 6000) t = 6000;
-      t = t - 1000;
-      t = 5000 - t;
-      t = t / 20;
-      t = t + 10;
+      t = (5000 - (t - 1000))/20 + 10;
       tasks.yield(t);
     }
 
@@ -35,10 +32,7 @@ uint8_t ext_GetMenuEvent(Pad* extPad)
     unsigned long t = extPad->s.timeDown();
     if (t > 1000) {
       if (t > 6000) t = 6000;
-      t = t - 1000;
-      t = 5000 - t;
-      t = t / 20;
-      t = t + 10;
+      t = (5000 - (t - 1000))/20 + 10;
       tasks.yield(t);
     }
 
