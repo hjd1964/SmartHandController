@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------
 // MenuAlignment, for UserInterface
-#include "..\UserInterface.h"
+#include "../UserInterface.h"
 
 void UI::menuAlignment()
 {
