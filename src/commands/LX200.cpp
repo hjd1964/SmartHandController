@@ -2,6 +2,11 @@
 // LX200 command processing
 
 #include <stdint.h>
+
+#ifdef ESP32
+#define PROGMEM
+#endif
+
 #include <Ephemeris.h> // https://github.com/MarScaper/ephemeris
 #include "../catalogs/Catalog.h"
 #include "../userInterface/UserInterface.h"
