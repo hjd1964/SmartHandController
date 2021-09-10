@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // LX200 command processing
 
+#include <stdint.h>
 #include <Ephemeris.h> // https://github.com/MarScaper/ephemeris
 #include "../catalogs/Catalog.h"
 #include "../userInterface/UserInterface.h"
