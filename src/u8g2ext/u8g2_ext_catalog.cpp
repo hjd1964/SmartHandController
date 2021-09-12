@@ -356,8 +356,8 @@ static uint8_t ext_draw_user_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
-  char line1[16];
-  char line2[16];
+  char line1[128];
+  char line2[128];
 
   // user object catalog
   GetLX200(":LI#",line1);
