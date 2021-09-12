@@ -7,8 +7,12 @@
 
 #if !defined(ARDUINO_ARCH_SAMD)
 
-  #include "EEPROM.h"
   #include "NV.h"
+  
+  // don't bring in the EEPROM library here if this is an Mega2560, etc.
+  #ifndef __AVR__
+    #include "EEPROM.h"
+  #endif
 
   #if defined(E2END)
 
