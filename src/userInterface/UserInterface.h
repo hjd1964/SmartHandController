@@ -140,8 +140,7 @@ private:
   void menuContrast();
   void menuDimTimeout();
   void menuBlankTimeout();
-  void menuFocuser1();
-  void menuFocuser2();
+  void menuFocuser(uint8_t foc);
   bool menuSetFocTCCoef(uint8_t &foc);
   bool menuSetFocBacklash(uint8_t &foc);
   bool menuSetFocTCDeadband(uint8_t &foc);

@@ -286,7 +286,15 @@ void UI::update()
       if (buttonPad.F.wasPressed()) { SERIAL_ONSTEP.print(":B-#"); strcpy(briefMessage, L_FKEY_RETI_DN); } else
       if (buttonPad.f.wasPressed()) { SERIAL_ONSTEP.print(":B+#"); strcpy(briefMessage, L_FKEY_RETI_UP); }
     break;
-    case 5: case 6:  // focuser1/2
+    case 5:  // rotator
+      if (rotState == RS_STOPPED && buttonPad.F.isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROT_DN); buttonCommand = true; }
+      else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && buttonPad.F.isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; buttonPad.F.clearPress(); }
+      else if (rotState == RS_STOPPED && buttonPad.f.isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROT_UP); buttonCommand = true; }
+      else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && buttonPad.f.isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; buttonPad.f.clearPress(); }
+      else if (rotState == RS_CCW_SLOW && buttonPad.F.isDown() && buttonPad.F.timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROTF_DN); }
+      else if (rotState == RS_CW_SLOW  && buttonPad.f.isDown() && buttonPad.f.timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROTF_UP); }
+    break;
+    case 6: case 7: case 8: case 9: case 10: case 11:  // focusers
       if (focusState == FS_STOPPED && buttonPad.F.isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand = true; }
       else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && buttonPad.F.isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; buttonPad.F.clearPress(); }
       else if (focusState == FS_STOPPED && buttonPad.f.isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand = true; }
@@ -295,14 +303,6 @@ void UI::update()
         else if (focusState == FS_OUT_SLOW && buttonPad.F.isDown() && buttonPad.F.timeDown() > 5000) { focusState=FS_OUT_FAST; SERIAL_ONSTEP.print(":FF#:F+#"); strcpy(briefMessage, L_FKEY_FOCF_DN); }
         else if (focusState == FS_IN_SLOW  && buttonPad.f.isDown() && buttonPad.f.timeDown() > 5000) { focusState=FS_IN_FAST;  SERIAL_ONSTEP.print(":FF#:F-#"); strcpy(briefMessage, L_FKEY_FOCF_UP); }
       #endif
-    break;
-    case 7:  // rotator
-      if (rotState == RS_STOPPED && buttonPad.F.isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROT_DN); buttonCommand = true; }
-      else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && buttonPad.F.isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; buttonPad.F.clearPress(); }
-      else if (rotState == RS_STOPPED && buttonPad.f.isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROT_UP); buttonCommand = true; }
-      else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && buttonPad.f.isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; buttonPad.f.clearPress(); }
-      else if (rotState == RS_CCW_SLOW && buttonPad.F.isDown() && buttonPad.F.timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROTF_DN); }
-      else if (rotState == RS_CW_SLOW  && buttonPad.f.isDown() && buttonPad.f.timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROTF_UP); }
     break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
@@ -397,7 +397,7 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
     if (status.hasTelStatus) { 
 
       // update guide rate (if available)
-      if (status.getGuideRate()>=0) {
+      if (status.getGuideRate() >= 0) {
         char string_Speed[][8] = {"¼x","½x","1x","2x","4x","8x","20x","48x","½Mx","Max"};
         char string_PSpeed[][6] = {" ¼x"," ½x"," 1x"};
         int gr = status.getGuideRate();

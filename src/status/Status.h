@@ -4,8 +4,7 @@
 
 #include <Arduino.h>
 
-class Status
-{
+class Status {
 public:
   enum Errors {
     ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC,
@@ -91,8 +90,9 @@ public:
   int getGuideRate();
   int getPulseGuideRate();
   Errors getError();
-  bool hasFocuser1();
-  bool hasFocuser2();
+  int getOnStepVersion();
+  bool hasFocuser(int n);
+  int getFocuserCount();
   bool hasRotator();
   bool hasDeRotator();
   bool hasReticle();
@@ -100,4 +100,5 @@ public:
   bool addStar();
 
 private:
+  int focuserCount = 0;
 };
