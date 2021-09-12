@@ -83,9 +83,7 @@
 #define L_FKEY_PULSE_GUIDE_RATE "Pulse Guide Rate"
 #define L_FKEY_UTILITY_LIGHT "Utility Light"
 #define L_FKEY_RETICLE "Reticle"
-#define L_FKEY_FOCUSER1 "Focuser 1"
 #define L_FKEY_FOCUSER "Focuser"
-#define L_FKEY_FOCUSER2 "Focuser 2"
 #define L_FKEY_ROTATOR "Rotator"
 #define L_FKEY_FEATURE_KEYS "Feature Keys"
 

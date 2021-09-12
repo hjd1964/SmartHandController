@@ -404,14 +404,16 @@ LX200RETURN readFocTCCoefLX200(const uint8_t &foc, float &tccoef) {
 }
 
 LX200RETURN writeFocTCCoefLX200(const uint8_t &foc, const float &tccoef) {
-  char text[20];
-  if (foc == 1) SetLX200(":FA1#"); else SetLX200(":FA2#");
-  sprintf(text, ":FC%d#", (signed int)tccoef);
-  return SetLX200(text);
+  char cmd[20];
+  sprintf(cmd, ":FA%u#", foc);
+  SetLX200(cmd);
+  sprintf(cmd, ":FC%d#", (signed int)tccoef);
+  return SetLX200(cmd);
 }
 LX200RETURN readFocBacklashLX200(const uint8_t &foc, float &backlash) {
-  char out[20];
-  if (foc == 1) SetLX200(":FA1#"); else SetLX200(":FA2#");
+  char out[20], cmd[20];
+  sprintf(cmd, ":FA%u#", foc);
+  SetLX200(cmd);
   LX200RETURN ok = GetLX200(":FB#", out);
   if (ok == LX200VALUEGET) {
     backlash = (float)strtol(&out[0], NULL, 10);
@@ -420,14 +422,16 @@ LX200RETURN readFocBacklashLX200(const uint8_t &foc, float &backlash) {
 }
 
 LX200RETURN writeFocBacklashLX200(const uint8_t &foc, const float &backlash) {
-  char text[20];
-  if (foc == 1) SetLX200(":FA1#"); else SetLX200(":FA2#");
-  sprintf(text, ":FB%d#", (signed int)backlash);
-  return SetLX200(text);
+  char cmd[20];
+  sprintf(cmd, ":FA%u#", foc);
+  SetLX200(cmd);
+  sprintf(cmd, ":FB%d#", (signed int)backlash);
+  return SetLX200(cmd);
 }
 LX200RETURN readFocTCDeadbandLX200(const uint8_t &foc, float &tcdeadband) {
-  char out[20];
-  if (foc == 1) SetLX200(":FA1#"); else SetLX200(":FA2#");
+  char out[20], cmd[20];
+  sprintf(cmd, ":FA%u#", foc);
+  SetLX200(cmd);
   LX200RETURN ok = GetLX200(":FD#", out);
   if (ok == LX200VALUEGET)
   {
@@ -437,10 +441,11 @@ LX200RETURN readFocTCDeadbandLX200(const uint8_t &foc, float &tcdeadband) {
 }
 
 LX200RETURN writeFocTCDeadbandLX200(const uint8_t &foc, const float &tcdeadband) {
-  char text[20];
-  if (foc == 1) SetLX200(":FA1#"); else SetLX200(":FA2#");
-  sprintf(text, ":FD%d#", (signed int)tcdeadband);
-  return SetLX200(text);
+  char cmd[20];
+  sprintf(cmd, ":FA%u#", foc);
+  SetLX200(cmd);
+  sprintf(cmd, ":FD%d#", (signed int)tcdeadband);
+  return SetLX200(cmd);
 }
 
 // convert string in format HH:MM:SS to floating point

@@ -189,22 +189,48 @@ Status::Errors Status::getError() {
   return (Errors)(TelStatus[8] & 0b00001111);
 }
 
-bool Status::hasFocuser1() {
-  static int focuser1 = -1;
-  if (focuser1 == -1) {
-    char out[20];
-    if ((GetLX200(":FA#", out) == LX200VALUEGET)) focuser1 = (out[0] == '1'); 
+int Status::getOnStepVersion() {
+  static bool processed = false;
+  static int version = -1, major, minor;
+  static char patch = 0;
+  if (!processed) {
+    char out[20], ver[20];
+    if (GetLX200(":GVN#", out) != LX200VALUEGET || out[0] == 0 ) return -1;
+    strcpy(ver, out);
+    if (strlen(out) > 0) { patch = out[strlen(out) - 1]; out[strlen(out) - 1] = 0; }
+    char *s1 = strchr(out, '.');
+    if (s1 != NULL) { s1[0] = 0; s1++; major = atol(out); minor = atol(s1); }
+    if (major >= 0 || major <= 99 || minor >= 0 || minor <= 99 || patch >= 'a' || patch <= 'z') {
+      processed = true;
+      version = major * 100 + minor;
+    } else return -1;
   }
-  if (focuser1 > 0) return true; else return false;
+  return version;
 }
 
-bool Status::hasFocuser2() {
-  static int focuser2 = -1;
-  if (focuser2 == -1) {
+bool Status::hasFocuser(int n) {
+  static bool processed = false;
+  static bool focuser[6] = {false, false, false, false, false, false};
+  if (!processed) {
     char out[20];
-    if ((GetLX200(":fA#", out) == LX200VALUEGET)) focuser2 = (out[0] == '1'); 
+    if (getOnStepVersion() < 1000) {
+      if ((GetLX200(":FA#", out) == LX200VALUEGET)) focuser[0] = (out[0] == '1');
+      if ((GetLX200(":fA#", out) == LX200VALUEGET)) focuser[1] = (out[0] == '1');
+    } else {
+      if ((GetLX200(":F1a#", out) == LX200VALUEGET)) focuser[0] = (out[0] == '1');
+      if ((GetLX200(":F2a#", out) == LX200VALUEGET)) focuser[1] = (out[0] == '1');
+      if ((GetLX200(":F3a#", out) == LX200VALUEGET)) focuser[2] = (out[0] == '1');
+      if ((GetLX200(":F4a#", out) == LX200VALUEGET)) focuser[3] = (out[0] == '1');
+      if ((GetLX200(":F5a#", out) == LX200VALUEGET)) focuser[4] = (out[0] == '1');
+      if ((GetLX200(":F6a#", out) == LX200VALUEGET)) focuser[5] = (out[0] == '1');
+    }
+    for (int i = 0; i < 6; i++) { if (focuser[i]) focuserCount++; }
   }
-  return (focuser2 > 0);
+  return focuser[n];
+}
+
+int Status::getFocuserCount() {
+  return focuserCount;
 }
 
 static int _rotator  = -1;

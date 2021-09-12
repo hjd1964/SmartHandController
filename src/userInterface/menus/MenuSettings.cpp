@@ -8,29 +8,41 @@ void UI::menuSettings() {
   while (current_selection_L1 != 0) {
     char string_list_SettingsL1[150] = "";
 
-    int i = 1; int index[11];
+    int i = 1;
+    int index[15] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
     index[1] = i++; strcat(string_list_SettingsL1,L_SET_DATE_TIME);
     index[2] = i++; strcat(string_list_SettingsL1,"\n" L_SET_SITE);
-    if (status.hasFocuser1()) { index[3] = i++; if (status.hasFocuser2()) strcat(string_list_SettingsL1,"\n" L_SET_FOCUSER1); else strcat(string_list_SettingsL1,"\n" L_SET_FOCUSER); } else index[3] = -1;
-    if (status.hasFocuser2()) { index[4] = i++; strcat(string_list_SettingsL1,"\n" L_SET_FOCUSER2); } else index[4] = -1;
-    if (status.hasRotator())  { index[5] = i++; strcat(string_list_SettingsL1,"\n" L_SET_ROTATOR); } else index[5] = -1;
-    index[6] = i++; strcat(string_list_SettingsL1,"\n" L_SET_DISPLAY);
-    index[7] = i++; strcat(string_list_SettingsL1,"\n" L_SET_BUZ);
-    if (status.isMountGEM()) { index[8] = i++; strcat(string_list_SettingsL1,"\n" L_SET_MERIDIAN_FLIP); } else index[8] = -1;
-    index[9] = i++; strcat(string_list_SettingsL1,"\n" L_SET_CONFIG);
-    index[10] = i++; strcat(string_list_SettingsL1,"\n" L_SET_VERSION);
+    index[3] = i++; strcat(string_list_SettingsL1,"\n" L_SET_DISPLAY);
+    index[4] = i++; strcat(string_list_SettingsL1,"\n" L_SET_BUZ);
+    if (status.isMountGEM()) { index[5] = i++; strcat(string_list_SettingsL1,"\n" L_SET_MERIDIAN_FLIP); }
+    index[6] = i++; strcat(string_list_SettingsL1,"\n" L_SET_CONFIG);
+    index[7] = i++; strcat(string_list_SettingsL1,"\n" L_SET_VERSION);
+    if (status.hasRotator())  { index[8] = i++; strcat(string_list_SettingsL1,"\n" L_SET_ROTATOR); }
+    char nums[] = "0";
+    for (int n = 0; n < 6; n++) {
+      if (status.hasFocuser(n)) {
+        index[3] = i++;
+        strcat(string_list_SettingsL1,"\n" L_SET_FOCUSER);
+        nums[0] = '1' + n;
+        if (status.getFocuserCount() > 1) strcat(string_list_SettingsL1, nums);
+      }
+    }
 
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_SETTINGS, current_selection_L1, string_list_SettingsL1);
     if (current_selection_L1 == index[1]) menuLocalDateTime();
     if (current_selection_L1 == index[2]) menuSite();
-    if (current_selection_L1 == index[3]) menuFocuser1();
-    if (current_selection_L1 == index[4]) menuFocuser2();
-    if (current_selection_L1 == index[5]) menuRotator();
-    if (current_selection_L1 == index[6]) menuDisplay();
-    if (current_selection_L1 == index[7]) menuSound();
-    if (current_selection_L1 == index[8]) menuMeridianFlips();
-    if (current_selection_L1 == index[9]) menuMount();
-    if (current_selection_L1 == index[10]) menuFirmware();
+    if (current_selection_L1 == index[3]) menuDisplay();
+    if (current_selection_L1 == index[4]) menuSound();
+    if (current_selection_L1 == index[5]) menuMeridianFlips();
+    if (current_selection_L1 == index[6]) menuMount();
+    if (current_selection_L1 == index[7]) menuFirmware();
+    if (current_selection_L1 == index[8]) menuRotator();
+    if (current_selection_L1 == index[9]) menuFocuser(1);
+    if (current_selection_L1 == index[10]) menuFocuser(2);
+    if (current_selection_L1 == index[11]) menuFocuser(3);
+    if (current_selection_L1 == index[12]) menuFocuser(4);
+    if (current_selection_L1 == index[13]) menuFocuser(5);
+    if (current_selection_L1 == index[14]) menuFocuser(6);
   }
 }
 
@@ -259,24 +271,26 @@ void UI::menuFirmware() {
   }
 }
 
-void UI::menuFocuser1() {
+void UI::menuFocuser(uint8_t foc) {
   current_selection_L2 = 1;
   while (current_selection_L2 != 0) {
     const char *string_list_SiteL2 = L_FOC_RET_HOME "\n" L_FOC_AT_HOME "\n" L_FOC_BACKLASH "\n" L_FOC_TC "\n" L_FOC_TC_COEF "\n" L_FOC_TC_DEADBAND;
     
-    if (status.hasFocuser2())
-      current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, L_FOCUSER " 1", current_selection_L2, string_list_SiteL2);
-    else
-      current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, L_FOCUSER, current_selection_L2, string_list_SiteL2);
+    char title[40];
+    if (status.getFocuserCount() > 1) sprintf(title, "%s %i", L_FOCUSER, foc); else sprintf(title, "%s", L_FOCUSER);
+    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, title, current_selection_L2, string_list_SiteL2);
+
     bool isOk = false;
-    uint8_t foc = 1;
+    char cmd[40];
     switch (current_selection_L2) {
       case 1:
-        DisplayMessageLX200(SetLX200(":FA1#:Fh#"),false);
+        sprintf(cmd, ":FA%u#:Fh#", foc);
+        DisplayMessageLX200(SetLX200(cmd),false);
       break;
       case 2:
         if (display->UserInterfaceInputValueBoolean(&buttonPad, L_FOC_AT_HALF, &isOk)) {
-          if (isOk) { DisplayMessageLX200(SetLX200(":FA1#:FH#"), false); }
+          sprintf(cmd, ":FA%u#:FH#", foc);
+          if (isOk) { DisplayMessageLX200(SetLX200(cmd), false); }
         }
       break;
       case 3:
@@ -284,10 +298,11 @@ void UI::menuFocuser1() {
       break;
       case 4:
         if (display->UserInterfaceInputValueBoolean(&buttonPad, L_FOC_TC, &isOk)) {
+          sprintf(cmd, ":FA%u#", foc);
           if (isOk) {
-            if (DisplayMessageLX200(SetLX200(":FA1#"))) DisplayMessageLX200(SetLX200(":Fc1#"), false);
+            if (DisplayMessageLX200(SetLX200(cmd))) DisplayMessageLX200(SetLX200(":Fc1#"), false);
           } else {
-            if (DisplayMessageLX200(SetLX200(":FA1#"))) DisplayMessageLX200(SetLX200(":Fc0#"), false);
+            if (DisplayMessageLX200(SetLX200(cmd))) DisplayMessageLX200(SetLX200(":Fc0#"), false);
           }
         }
       break;
@@ -301,53 +316,14 @@ void UI::menuFocuser1() {
   }
 }
 
-void UI::menuFocuser2() {
-  current_selection_L2 = 1;
-  while (current_selection_L2 != 0) {
-    const char *string_list_SiteL2 = L_FOC_RET_HOME "\n" L_FOC_AT_HOME "\n" L_FOC_BACKLASH "\n" L_FOC_TC "\n" L_FOC_TC_COEF "\n" L_FOC_TC_DEADBAND;
-    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, L_FOCUSER " 2", current_selection_L2, string_list_SiteL2);
-    bool isOk=false;
-    uint8_t foc = 2;
-    switch (current_selection_L2) {
-      case 1:
-        DisplayMessageLX200(SetLX200(":FA2#:Fh#"),false);
-      break;
-      case 2:
-        if (display->UserInterfaceInputValueBoolean(&buttonPad, L_FOC_AT_HALF, &isOk)) {
-          if (isOk) { DisplayMessageLX200(SetLX200(":FA2#:FH#"),false); }
-        }
-      break;
-      case 3:
-        menuSetFocBacklash(foc);
-        break;
-      case 4:
-        if (display->UserInterfaceInputValueBoolean(&buttonPad, L_FOC_TC, &isOk)) {
-          if (isOk) {
-            if (DisplayMessageLX200(SetLX200(":FA2#"))) DisplayMessageLX200(SetLX200(":Fc1#"),false);
-          } else {
-            if (DisplayMessageLX200(SetLX200(":FA2#"))) DisplayMessageLX200(SetLX200(":Fc0#"),false);
-          }
-        }
-      break;
-      case 5:
-        menuSetFocTCCoef(foc);
-      break;
-      case 6:
-        menuSetFocTCDeadband(foc);
-      break;
-    }
-  }
-}
-
-bool UI::menuSetFocBacklash(uint8_t &foc)
-{
+bool UI::menuSetFocBacklash(uint8_t &foc) {
   float backlash;
   if (!DisplayMessageLX200(readFocBacklashLX200(foc, backlash))) return false;
   char text[20];
-  if (foc == 1 && !status.hasFocuser2())
-    sprintf(text, "Focuser " L_FOC_BACKLASH);
-  else
+  if (status.getFocuserCount() > 1)
     sprintf(text, "Foc.%u " L_FOC_BACKLASH, foc);
+  else
+    sprintf(text, "Focuser " L_FOC_BACKLASH);
   if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &backlash, 0, 999, 3, 0, " " L_FOC_BL_UNITS))
   {
     return DisplayMessageLX200(writeFocBacklashLX200(foc, backlash), false);
@@ -359,10 +335,10 @@ bool UI::menuSetFocTCCoef(uint8_t &foc) {
   float tccoef;
   if (!DisplayMessageLX200(readFocTCCoefLX200(foc, tccoef))) return false;
   char text[20];
-  if (foc == 1 && !status.hasFocuser2())
-    sprintf(text, "Focuser " L_FOC_TC_COEF);
-  else
+  if (status.getFocuserCount() > 1)
     sprintf(text, "Foc.%u " L_FOC_TC_COEF, foc);
+  else
+    sprintf(text, "Focuser " L_FOC_TC_COEF);
   if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &tccoef, -999, 999, 4, 0, " " L_MICRON_PER_C)) {
     return DisplayMessageLX200(writeFocTCCoefLX200(foc, tccoef), false);
   }
@@ -373,10 +349,10 @@ bool UI::menuSetFocTCDeadband(uint8_t &foc) {
   float deadband;
   if (!DisplayMessageLX200(readFocTCDeadbandLX200(foc, deadband))) return false;
   char text[20];
-  if (foc == 1 && !status.hasFocuser2())
-    sprintf(text, "Focuser " L_FOC_TC_DEADBAND);
-  else
+  if (status.getFocuserCount() > 1)
     sprintf(text, "Foc.%u " L_FOC_TC_DEADBAND, foc);
+  else
+    sprintf(text, "Focuser " L_FOC_TC_DEADBAND);
   if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &deadband, 1, 999, 3, 0, " " L_FOC_TC_DB_UNITS)) {
     return DisplayMessageLX200(writeFocTCDeadbandLX200(foc, deadband), false);
   }

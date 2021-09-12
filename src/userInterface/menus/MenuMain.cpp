@@ -8,26 +8,39 @@ void UI::menuFeatureKey() {
 
   char string_feature_Modes[120] = L_FKEY_GUIDE_RATE "\n" L_FKEY_PULSE_GUIDE_RATE;
 
-  int i = 2, j = -1, k = -1, l = -1, m = -1, n = -1;
+  int i = 2;
+  int j[9] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
   #if UTILITY_LIGHT != OFF
-    { i++; j=i; strcat(string_feature_Modes,"\n" L_FKEY_UTILITY_LIGHT); }
+    { i++; j[0]=i; strcat(string_feature_Modes,"\n" L_FKEY_UTILITY_LIGHT); }
   #endif
-  if (status.hasReticle())  { i++; k = i; strcat(string_feature_Modes,"\n" L_FKEY_RETICLE);  }
-  if (status.hasFocuser1()) { i++; l = i; if (status.hasFocuser2()) strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER1); else strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER); }
-  if (status.hasFocuser2()) { i++; m = i; strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER2); }
-  if (status.hasRotator())  { i++; n = i; strcat(string_feature_Modes,"\n" L_FKEY_ROTATOR);  }
+  if (status.hasReticle())  { i++; j[1] = i; strcat(string_feature_Modes,"\n" L_FKEY_RETICLE);  }
+  if (status.hasRotator())  { i++; j[2] = i; strcat(string_feature_Modes,"\n" L_FKEY_ROTATOR);  }
+  for (int n = 0; n < 6; n++) {
+    char nums[] = "0";
+    if (status.hasFocuser(n)) {
+      i++;
+      j[n + 3] = i;
+      strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER);
+      nums[0] = '1' + n;
+      if (status.getFocuserCount() > 1) { strcat(string_feature_Modes, " "); strcat(string_feature_Modes, nums); }
+    }
+  }
 
   current_selection_feature_mode = display->UserInterfaceSelectionList(&buttonPad, L_FKEY_FEATURE_KEYS, current_selection_feature_mode, string_feature_Modes);
 
   if (last_selection_feature_mode > 0) {
     if (current_selection_feature_mode == 1) featureKeyMode = 1; else // guide rate
     if (current_selection_feature_mode == 2) featureKeyMode = 2; else // pulse guide rate
-    if (current_selection_feature_mode == j) featureKeyMode = 3; else // util. light
-    if (current_selection_feature_mode == k) featureKeyMode = 4; else // reticule
-    if (current_selection_feature_mode == l) { featureKeyMode = 5; SetLX200(":FA1#"); } else // focuser 1
-    if (current_selection_feature_mode == m) { featureKeyMode = 6; SetLX200(":FA2#"); } else // focuser 2
-    if (current_selection_feature_mode == n) featureKeyMode = 7; else // rotator
-    { featureKeyMode = 1; current_selection_feature_mode = 1; }       // default to guide rate
+    if (current_selection_feature_mode == j[0]) featureKeyMode = 3; else // util. light
+    if (current_selection_feature_mode == j[1]) featureKeyMode = 4; else // reticule
+    if (current_selection_feature_mode == j[2]) featureKeyMode = 5; else // rotator
+    if (current_selection_feature_mode == j[3]) { featureKeyMode = 6; SetLX200(":FA1#"); } else // focuser 1
+    if (current_selection_feature_mode == j[4]) { featureKeyMode = 7; SetLX200(":FA2#"); } else // focuser 2
+    if (current_selection_feature_mode == j[5]) { featureKeyMode = 8; SetLX200(":FA3#"); } else // focuser 3
+    if (current_selection_feature_mode == j[6]) { featureKeyMode = 9; SetLX200(":FA4#"); } else // focuser 4
+    if (current_selection_feature_mode == j[7]) { featureKeyMode = 10; SetLX200(":FA5#"); } else // focuser 5
+    if (current_selection_feature_mode == j[8]) { featureKeyMode = 11; SetLX200(":FA6#"); } else // focuser 6
+    { featureKeyMode = 1; current_selection_feature_mode = 1; } // default to guide rate
   } else current_selection_feature_mode = last_selection_feature_mode;
 }
 

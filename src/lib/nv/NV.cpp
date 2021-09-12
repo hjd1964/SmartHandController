@@ -74,7 +74,7 @@ void NonVolatileStorage::poll(bool disableInterrupts) {
 bool NonVolatileStorage::committed() {
   uint8_t dirty = 0;
 
-  for (int16_t j = 0; j < cacheSize; j++) {
+  for (uint16_t j = 0; j < cacheSize; j++) {
     dirty = bitRead(cacheStateWrite[j/8], j%8);
     if (dirty) break;
   }
@@ -109,8 +109,15 @@ void NonVolatileStorage::writeToCache(uint16_t i, uint8_t j) {
   // no longer clean
   cacheClean = false;
 
-  if (cacheSize == 0 || readAndWriteThrough) if (!readOnlyMode) writeToStorage(i, j);
-  if (cacheSize == 0) return;
+  if (readAndWriteThrough) if (!readOnlyMode) writeToStorage(i, j);
+  if (cacheSize == 0) {
+    if (!readOnlyMode) {
+      if (!readAndWriteThrough) {
+        if (j != readFromStorage(i)) writeToStorage(i, j);
+      } else writeToStorage(i, j);
+    }
+    return;
+  }
 
   uint8_t k = readFromCache(i);
   if (j != k) {
