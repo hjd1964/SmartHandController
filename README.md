@@ -5,7 +5,7 @@ OnStep Smart Hand Controller (SHC)
 
 THERE ARE SEVERAL GITHUB BRANCHES OF THE SMART HAND CONTROLLER:
 * The **RELEASE BRANCHES** are well tested and what most should use.  Usually the newest (highest revision) RELEASE is recommended.  No new features are added and only bug fixes where necessary and safe.
-* Tne **BETA BRANCH**, if present, is a "snap-shot" of the MAIN BRANCH where we have reached a point of apparent stability.  This provides access to most new features for adventurous users.
+* The **BETA BRANCH**, if present, is a "snap-shot" of the MAIN BRANCH where we have reached a point of apparent stability.  This provides access to most new features for adventurous users.
 * The **MAIN BRANCH** is the most up to date version; where new features are added.  It is the least well tested branch and should only be user by experienced users willing to test for and report bugs.
 
 The SHC adds the functionality of a "handbox/hand controller" to an OnStep telescope controller. 
