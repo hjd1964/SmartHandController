@@ -2,7 +2,7 @@ OnStep Smart Hand Controller (SHC)
 ==================================
 
 The SHC adds the functionality of a "handbox/hand controller" to an OnStep telescope controller. 
-This firmware is desgined to run on supported hardware, and communicates with OnStep over the 
+This firmware is designed to run on supported hardware, and communicates with OnStep over the 
 ST4 guiding port. It can replace most of the functions provided by the OnStep2 Android App. 
 
 The SHC is almost entirely based on [Charles Lemaire](https://pixelstelescopes.wordpress.com/)'s excellent [TeenAstro fork](https://groups.io/g/TeenAstro/wiki/home).
