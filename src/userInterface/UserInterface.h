@@ -17,16 +17,6 @@
 #define TOPOCENTRIC 2
 #define ASTROMETRIC_J2000 3
 
-// Single byte guide commands
-#define ccMe 14
-#define ccMw 15
-#define ccMn 16
-#define ccMs 17
-#define ccQe 18
-#define ccQw 19
-#define ccQn 20
-#define ccQs 21
-
 #define MY_BORDER_SIZE 1
 #define icon_width 16
 #define icon_height 16
@@ -71,6 +61,16 @@ private:
   bool moveSouth = false;
   bool moveEast = false;
   bool moveWest = false;
+
+  // Guide commands
+  char ccMe[5];
+  char ccMw[5];
+  char ccMn[5];
+  char ccMs[5];
+  char ccQe[5];
+  char ccQw[5];
+  char ccQn[5];
+  char ccQs[5];
 
   unsigned long lastpageupdate = millis();
   unsigned long time_last_action = millis();

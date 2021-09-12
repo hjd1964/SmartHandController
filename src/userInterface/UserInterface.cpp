@@ -89,6 +89,28 @@ void UI::setup(const char version[], const int pin[7],const bool active[7], cons
 
   delay(500);
   
+  // get guide commands ready, use single byte for SerialST4 or normal LX200 otherwise
+  // SerialST4 always returns 0 "may block", Teensy and ESP32 always return > 0
+  if (SERIAL_ONSTEP.availableForWrite() == 0) {
+    strcpy(ccMe, "\x0e"); // 14
+    strcpy(ccMw, "\x0f"); // 15
+    strcpy(ccMn, "\x10"); // 16
+    strcpy(ccMs, "\x11"); // 17
+    strcpy(ccQe, "\x12"); // 18
+    strcpy(ccQw, "\x13"); // 19
+    strcpy(ccQn, "\x14"); // 20
+    strcpy(ccQs, "\x15"); // 21
+  } else {
+    strcpy(ccMe, ":Me#");
+    strcpy(ccMw, ":Mw#");
+    strcpy(ccMn, ":Mn#");
+    strcpy(ccMs, ":Ms#");
+    strcpy(ccQe, ":Qe#");
+    strcpy(ccQw, ":Qw#");
+    strcpy(ccQn, ":Qn#");
+    strcpy(ccQs, ":Qs#");
+  }
+
   // display the splash screen
   drawIntro();
   tickButtons();

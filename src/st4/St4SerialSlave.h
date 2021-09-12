@@ -48,6 +48,7 @@ class Sst4 : public Stream {
     virtual int peek(void);
     virtual void flush(void);
 
+    inline int availableForWrite(void) { return 0; }
     inline size_t write(unsigned long n) { return write((uint8_t)n); }
     inline size_t write(long n) { return write((uint8_t)n); }
     inline size_t write(unsigned int n) { return write((uint8_t)n); }
