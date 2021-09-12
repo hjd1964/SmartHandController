@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------
 // MenuMount, for UserInterface
-#include "..\UserInterface.h"
+#include "../UserInterface.h"
 
 void UI::menuMount() {
   current_selection_L2 = 1;

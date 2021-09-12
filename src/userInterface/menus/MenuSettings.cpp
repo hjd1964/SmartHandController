@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------
 // MenuSettings, for UserInterface
-#include "..\UserInterface.h"
+#include "../UserInterface.h"
 extern NVS nv;
 
 void UI::menuSettings() {
