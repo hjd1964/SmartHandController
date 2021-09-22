@@ -21,7 +21,7 @@ void UI::menuSettings() {
     char nums[] = "0";
     for (int n = 0; n < 6; n++) {
       if (status.hasFocuser(n)) {
-        index[9+n] = i++;
+        index[9 + n] = i++;
         strcat(string_list_SettingsL1,"\n" L_SET_FOCUSER);
         nums[0] = '1' + n;
         if (status.getFocuserCount() > 1) strcat(string_list_SettingsL1, nums);

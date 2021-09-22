@@ -209,10 +209,11 @@ int Status::getOnStepVersion() {
 }
 
 bool Status::hasFocuser(int n) {
+  if (n < 0 || n > 5) return false;
   static bool processed = false;
   static bool focuser[6] = {false, false, false, false, false, false};
   if (!processed) {
-    char out[20];
+    char out[40];
     if (getOnStepVersion() < 1000) {
       if ((GetLX200(":FA#", out) == LX200VALUEGET)) focuser[0] = (out[0] == '1');
       if ((GetLX200(":fA#", out) == LX200VALUEGET)) focuser[1] = (out[0] == '1');
@@ -225,6 +226,7 @@ bool Status::hasFocuser(int n) {
       if ((GetLX200(":F6a#", out) == LX200VALUEGET)) focuser[5] = (out[0] == '1');
     }
     for (int i = 0; i < 6; i++) { if (focuser[i]) focuserCount++; }
+    processed = true;
   }
   return focuser[n];
 }

@@ -56,9 +56,19 @@ bool processCommand(char* command, char* response, unsigned long timeOutMs) {
       if (strchr("W123456789+", command[2])) { shortResponse = true; SERIAL_ONSTEP.setTimeout(1000); }
     }
     if ((command[1] == 'F') || (command[1] == 'f')) {
-      if (strchr("+-QZHhFS1234", command[2])) noResponse = true;
-      if (strchr("Apc",command[2]) || (strchr("B",command[2])&&command[3]!='#') || (strchr("C",command[2])&&command[3]!='#') || (strchr("D",command[2])&&command[3]!='#')) shortResponse=true;
-    }
+      if (strchr("123456", command[2]) && command[3] != '#') {
+        // direct focuser select command?
+        if (strchr("+-QZHhF", command[3])) noResponse = true;
+        if (strchr("1234", command[3])) noResponse = true;
+        if (strchr("Aap",command[3])) shortResponse = true;
+      } else {
+        // normal command
+        if (strchr("+-QZHhF", command[2])) noResponse = true;
+        if (strchr("1234", command[2])) noResponse = true;
+        if (strchr("Aap",command[2])) shortResponse = true;
+      }
+    } else
+
     if (command[1] == 'M') {
       if (strchr("ewnsg", command[2])) noResponse = true;
       if (strchr("SAP", command[2])) shortResponse = true;
