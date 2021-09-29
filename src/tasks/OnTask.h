@@ -81,7 +81,13 @@ extern unsigned char __task_mutex[];
 #define tasks_mutex_exit(m)  bitClear(__task_mutex[(m)/8],(m)%8);
 #define tasks_mutex_busy(m)  (bitRead(__task_mutex[(m)/8],(m)%8))
 
-enum PeriodUnits {PU_NONE, PU_MILLIS, PU_MICROS, PU_SUB_MICROS};
+enum PeriodUnits: uint8_t {PU_NONE, PU_MILLIS, PU_MICROS, PU_SUB_MICROS};
+
+// Timing modes
+// TM_BALANCED (default) to maintain the specified frequency/period where a task that runs late is next run early to compensate
+// TM_MINIMUM to run the task at an interval not less than the specified frequency/period from task start to next start
+// TM_GAP to run the task at an interval not less than the specified frequency/period from task exit to next start
+enum TimingMode: uint8_t {TM_BALANCED, TM_MINIMUM, TM_GAP};
 
 class Task {
   public:
@@ -92,14 +98,15 @@ class Task {
 
     void setCallback(void (*volatile callback)());
 
+    void setTimingMode(TimingMode mode);
+
     // run task at the prescribed interval
     // note: tasks are timed in such a way as to achieve an accurate average frequency, if
     //       the task occurs late the next call is scheduled earlier to make up the difference
     bool poll();
 
-    void setPeriod(unsigned long period);
-    void setPeriodMicros(unsigned long period);
-    void setPeriodSubMicros(unsigned long period);
+    void refreshPeriod();
+    void setPeriod(unsigned long period, PeriodUnits units = PU_MILLIS);
     void setFrequency(float freq);
 
     void setDuration(unsigned long duration);
@@ -142,6 +149,7 @@ class Task {
     unsigned long          last_task_time    = 0;
     unsigned long          next_task_time    = 0;
     uint8_t                hardwareTimer     = 0;
+    TimingMode             timingMode        = TM_BALANCED;
     void (*volatile callback)() = NULL;
 
     #ifdef TASKS_PROFILER_ENABLE
@@ -197,14 +205,24 @@ class Tasks {
 
     // change task callback
     // \param handle        task handle
-    // \param callback  function to handle this tasks processing
+    // \param callback      function to handle this tasks processing
     // \return              true if successful, or false if unable to find the associated task
     bool setCallback(uint8_t handle, void (*volatile callback)());
+
+    // change task timing mode
+    // \param handle        task handle
+    // \param mode          either TM_BALANCED (default) or TM_MINIMUM
+    // \return              true if successful, or false if unable to find the associated task
+    bool setTimingMode(uint8_t handle, TimingMode mode);
 
     // remove process task. Note: do not remove a task if the task process is running
     // \param handle    task handle
     // \return          nothing
     void remove(uint8_t handle);
+
+    // refresh process period, causes setPeriodRatioSubMicros() ratio to be recognized by hardware timers
+    // handle: task handle
+    void refreshPeriod(uint8_t handle);
 
     // set process period ms. Note: the period/frequency change takes effect on the next task cycle, 
     // if the period is > the hardware timers maximum period the task is disabled
@@ -237,6 +255,14 @@ class Tasks {
     //   when setting a frequency the most appropriate setPeriod is used automatically
     //   if the period is > ~49 days (or > the hardware timers maximum period) the task is disabled
     void setFrequency(uint8_t handle, double freq);
+
+    // set the period ratio to compensate for MCU clock inaccuracy
+    // in sub-microseconds per second, this is safe to call from within an ISR
+    // software based timers are automatically updated on-the-fly
+    // hardware based timers need their period set to be updated
+    // values above 16M cause the timers to compensate by running slower
+    // values below 16M cause the timers to compensate by running faster
+    IRAM_ATTR void setPeriodRatioSubMicros(unsigned long value);
 
     // set process to run immediately on the next pass (within its priority level)
     IRAM_ATTR inline void immediate(uint8_t handle) { if (handle != 0 && allocated[handle - 1]) { task[handle - 1]->immediate = true; } }
@@ -282,6 +308,7 @@ class Tasks {
     // processes that are already running are ignored so it's ok to poll() within a process
     void yield();
     void yield(unsigned long milliseconds);
+    void yieldMicros(unsigned long microseconds);
 
   private:
     // keep track of the range of priorities so we don't waste cycles looking at empty ones
@@ -301,3 +328,5 @@ class Tasks {
     uint8_t handleSearch     = 255;
     Task    *task[TASKS_MAX];
 };
+
+extern Tasks tasks;
