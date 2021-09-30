@@ -35,7 +35,6 @@
 #include "src/Common.h"
 NVS nv;
 #include "src/tasks/OnTask.h"
-Tasks tasks;
 #include "src/userInterface/UserInterface.h"
 
 const char Version[] = "Version " FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch;
