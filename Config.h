@@ -41,6 +41,11 @@
 #define ST4_INTERFACE                 OFF //    OFF, ON, ON_PULLUP enables auxillary "pass-through" ST4 interface.            Option
                                           //             Note: Available only when SERIAL_INTERFACE SerialST4 is used
 
+// WiFi INTERFACE -------------------------------------------------------------------------------------------------------------------
+#define ONSTEP_SSID              "ONSTEP" //    "ONSTEP"
+#define ONSTEP_PASSWORD        "password" //    "password"
+#define ONSTEP_IP           "192.168.0.1" //    "192.168.0.1"
+
 // CATALOGS ------------------------------------------------------------------------------------------------------------------------
 // Advanced users can also customize which celestial object catalogs are included or even add new catalogs using Config.catalogs.h
 

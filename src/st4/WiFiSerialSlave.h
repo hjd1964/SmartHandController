@@ -10,11 +10,6 @@
 #include "../Common.h"
 #include <WiFi.h>
 
-// Configuration needs to move to SHC main or extended config file at some time
-#define ONSTEP_SSID "ONSTEP"
-#define ONSTEP_PASSWORD "password"
-#define ONSTEP_IP "192.168.0.1"
-
 class SWiFi : public Stream {
   public:
     void begin(long baudRate);
