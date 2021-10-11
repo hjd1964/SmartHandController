@@ -3,7 +3,7 @@
 
 #include "WiFiSerialSlave.h"
 
-#if defined(ESP32)
+#if defined(ESP32) && (SERIAL_INTERFACE == SerialWiFi) // only add SerialWiFi code on ESP32 and when it is really used
 void SWiFi::connect(char* ssid, char* password) {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
