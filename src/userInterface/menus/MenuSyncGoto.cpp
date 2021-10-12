@@ -36,7 +36,7 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
     strcat(string_list_gotoL1,L_SG_SOLSYS ">" "\n");
     if (sync) strcat(string_list_gotoL1,L_SG_HERE ">"); else strcat(string_list_gotoL1,L_SG_USER ">" "\n" L_SG_FILTERS "\n" L_SG_COORDS "\n" L_SG_HOME);
 
-    int selection = display->UserInterfaceSelectionList(&buttonPad, sync ? L_SG_SYNC : L_SG_GOTO, current_selection, string_list_gotoL1);
+    int selection = display->UserInterfaceSelectionList(&keyPad, sync ? L_SG_SYNC : L_SG_GOTO, current_selection, string_list_gotoL1);
     if (selection == 0) return MR_CANCEL;
     current_selection=selection;
 
@@ -51,7 +51,7 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
       case 2:
         if (sync) {
           bool isYes = true;
-          if (display->UserInterfaceInputValueBoolean(&buttonPad, L_SG_HERE "?", &isYes)) if (isYes) { DisplayMessageLX200(SetLX200(":CS#"),false); return MR_QUIT; }
+          if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HERE "?", &isYes)) if (isYes) { DisplayMessageOnStep(onStep.Set(":CS#"),false); return MR_QUIT; }
         } else {
           if (menuUser(sync) == MR_QUIT) return MR_QUIT;
         }
@@ -66,12 +66,12 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
       {
         bool GotoHome = false;
         DisplayMessage(L_SG_HOME1, L_SG_HOME2, 2000);
-        if (display->UserInterfaceInputValueBoolean(&buttonPad, L_SG_HOME3 "?", &GotoHome)) {
+        if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HOME3 "?", &GotoHome)) {
           if (GotoHome) {
             char cmd[5];
             sprintf(cmd, ":hX#");
             cmd[2] = sync ? 'F' : 'C';
-            if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? L_SG_HOME4 : L_SG_HOME5, " " L_SG_HOME6, -1);
+            if (onStep.Set(cmd) == CR_VALUE_SET) DisplayMessage(sync ? L_SG_HOME4 : L_SG_HOME5, " " L_SG_HOME6, -1);
             return MR_QUIT;
           }
         }
@@ -112,7 +112,7 @@ MENU_RESULT UI::subMenuSyncGoto(char sync, int subMenuNum) {
     }
 
     if (sync) strcpy(title,L_SG_SYNC " "); else strcpy(title,L_SG_GOTO " "); strcat(title, lastSubmenu);
-    int selection = display->UserInterfaceSelectionList(&buttonPad, title, current_selection[subMenuNum], string_list_gotoL1);
+    int selection = display->UserInterfaceSelectionList(&keyPad, title, current_selection[subMenuNum], string_list_gotoL1);
     if (selection == 0) return MR_CANCEL;
     current_selection[subMenuNum]=selection;
     
@@ -137,8 +137,8 @@ MENU_RESULT UI::menuCatalog(bool sync, int number) {
 
   if (cat_mgr.isInitialized()) {
     if (cat_mgr.setIndex(cat_mgr.getIndex())) {
-      if (display->UserInterfaceCatalog(&buttonPad, title)) {
-        if (DisplayMessageLX200(SyncGotoCatLX200(sync), false)) return MR_QUIT;
+      if (display->UserInterfaceCatalog(&keyPad, title)) {
+        if (DisplayMessageOnStep(onStep.SyncGotoCat(sync), false)) return MR_QUIT;
       }
     } else DisplayMessage(cat_mgr.catalogTitle(), L_SG_NO_OBJECT, 2000);
   } else DisplayMessage(cat_mgr.catalogTitle(), L_SG_NO_INIT "?", 2000);
@@ -150,7 +150,7 @@ MENU_RESULT UI::menuSolarSys(bool sync) {
   if (current_selection < 1) current_selection = 1;
 
   const char *string_list_SolarSyst = L_SG_SUN "\n" L_SG_MER "\n" L_SG_VEN "\n" L_SG_MAR "\n" L_SG_JUP "\n" L_SG_SAT "\n" L_SG_URA "\n" L_SG_NEP "\n" L_SG_MOON;
-  current_selection = display->UserInterfaceSelectionList(&buttonPad, sync ? L_SG_SSOL : L_SG_GSOL, current_selection, string_list_SolarSyst);
+  current_selection = display->UserInterfaceSelectionList(&keyPad, sync ? L_SG_SSOL : L_SG_GSOL, current_selection, string_list_SolarSyst);
   if (current_selection == 0) return MR_CANCEL;
 
   if (current_selection>3) current_selection++;
@@ -158,10 +158,10 @@ MENU_RESULT UI::menuSolarSys(bool sync) {
   { 
     DisplayMessage(L_SG_SOL_WARN1, L_SG_SOL_WARN2, 2000);
     bool GotoSun = false;
-    if (display->UserInterfaceInputValueBoolean(&buttonPad, L_SG_GSUN "?", &GotoSun)) { if (!GotoSun) return MR_CANCEL; } else return MR_CANCEL;
+    if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_GSUN "?", &GotoSun)) { if (!GotoSun) return MR_CANCEL; } else return MR_CANCEL;
   }
 
-  if (DisplayMessageLX200(SyncGotoPlanetLX200(sync, current_selection-1),false)) return MR_QUIT;
+  if (DisplayMessageOnStep(onStep.SyncGotoPlanet(sync, current_selection-1),false)) return MR_QUIT;
   return MR_CANCEL;
 }
 
@@ -178,9 +178,9 @@ MENU_RESULT UI::menuUser(bool sync) {
   char temp1[500];
   for (int l=0; l<=14; l++) {
     strcpy(temp, ":Lo0#"); temp[3] = l + '0';
-    SetLX200(temp);
-    SetLX200(":L$#");
-    GetLX200(":LI#",temp1);
+    onStep.Set(temp);
+    onStep.Set(":L$#");
+    onStep.Get(":LI#",temp1);
     
     int len = strlen(temp1);
     if (len > 4) temp1[len - 5] = 0;
@@ -196,16 +196,16 @@ MENU_RESULT UI::menuUser(bool sync) {
 
   int last_selection_UserCatalog = current_selection_UserCatalog;
   while (true) {
-    current_selection_UserCatalog = display->UserInterfaceSelectionList(&buttonPad, sync ? L_SG_SYNC_USER : L_SG_GOTO_USER, current_selection_UserCatalog, string_list_UserCatalogs);
+    current_selection_UserCatalog = display->UserInterfaceSelectionList(&keyPad, sync ? L_SG_SYNC_USER : L_SG_GOTO_USER, current_selection_UserCatalog, string_list_UserCatalogs);
     if (current_selection_UserCatalog == 0) { current_selection_UserCatalog = last_selection_UserCatalog; return MR_CANCEL; }
 
     // select this user catalog
     strcpy(temp,":Lo0#"); temp[3] = userCatalog[current_selection_UserCatalog - 1] + '0';
-    SetLX200(temp);
+    onStep.Set(temp);
 
     // show the catalog objects
-    if (display->UserInterfaceUserCatalog(&buttonPad, sync ? L_SG_SYNC_USER_ITEM : L_SG_GOTO_USER_ITEM)) {
-      if (DisplayMessageLX200(SetLX200(":LIG#"))) return MR_QUIT;
+    if (display->UserInterfaceUserCatalog(&keyPad, sync ? L_SG_SYNC_USER_ITEM : L_SG_GOTO_USER_ITEM)) {
+      if (DisplayMessageOnStep(onStep.Set(":LIG#"))) return MR_QUIT;
     }
   }
 }
@@ -236,7 +236,7 @@ MENU_RESULT UI::menuFilters() {
       if (current_selection_filter_dblmax > 1) strcpy(s, "\xb7"); else strcpy(s, "");
       strcat(string_list_Filters, "\n"); strcat(string_list_Filters, s); strcat(string_list_Filters, L_SG_FILT_DBL_MAX); strcat(string_list_Filters, s);
     }
-    current_selection = display->UserInterfaceSelectionList(&buttonPad, L_SG_FILT_ALLOW, current_selection, string_list_Filters);
+    current_selection = display->UserInterfaceSelectionList(&keyPad, L_SG_FILT_ALLOW, current_selection, string_list_Filters);
     if (current_selection == 0) return MR_CANCEL;
     
     switch (current_selection) {
@@ -252,7 +252,7 @@ MENU_RESULT UI::menuFilters() {
         DisplayMessage(L_SG_FILT_MSG1, L_SG_FILT_MSG2, 1000);
       break;
       case 2:
-        if (display->UserInterfaceInputValueBoolean(&buttonPad, L_SG_FILT_MSG3 "?", &current_selection_filter_above)) {
+        if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_FILT_MSG3 "?", &current_selection_filter_above)) {
           if (current_selection_filter_above) DisplayMessage(L_SG_FILTER, L_ON, 1000); else DisplayMessage(L_SG_FILTER, L_OFF, 1000);
         }
       break;
@@ -313,7 +313,7 @@ MENU_RESULT UI::menuFilterCon() {
     if (l < 88) strcat(string_list_fCon, "\n");
   }
   int last_selection_filter_con = current_selection_filter_con;
-  current_selection_filter_con = display->UserInterfaceSelectionList(&buttonPad, L_SG_FILT_BY_CON, current_selection_filter_con, string_list_fCon);
+  current_selection_filter_con = display->UserInterfaceSelectionList(&keyPad, L_SG_FILT_BY_CON, current_selection_filter_con, string_list_fCon);
   if (current_selection_filter_con == 0) { current_selection_filter_con=last_selection_filter_con; return MR_CANCEL; }
   return MR_OK;
 }
@@ -325,7 +325,7 @@ MENU_RESULT UI::menuFilterType() {
     if (l < 21) strcat(string_list_fType, "\n");
   }
   int last_selection_filter_type = current_selection_filter_type;
-  current_selection_filter_type = display->UserInterfaceSelectionList(&buttonPad, L_SG_FILT_BY_TYPE, current_selection_filter_type, string_list_fType);
+  current_selection_filter_type = display->UserInterfaceSelectionList(&keyPad, L_SG_FILT_BY_TYPE, current_selection_filter_type, string_list_fType);
   if (current_selection_filter_type == 0) { current_selection_filter_type = last_selection_filter_type; return MR_CANCEL; }
   return MR_OK;
 }
@@ -334,7 +334,7 @@ MENU_RESULT UI::menuFilterByMag() {
   const char* string_list_fMag = L_ALL "\n" "10th 1.6\"/40mm" "\n" "12th   3\"/ 80mm" "\n" "13th  4\"/100mm" "\n" "14th  7\"/180mm" "\n" "15th 12\"/300mm" "\n" "16th 17\"/430mm" "\n" "17th 22\"/560mm";
   int last_selection_filter_byMag = current_selection_filter_byMag;
 
-  current_selection_filter_byMag = display->UserInterfaceSelectionList(&buttonPad, L_SG_FILT_BY_MAG, current_selection_filter_byMag, string_list_fMag);
+  current_selection_filter_byMag = display->UserInterfaceSelectionList(&keyPad, L_SG_FILT_BY_MAG, current_selection_filter_byMag, string_list_fMag);
   if (current_selection_filter_byMag == 0) { current_selection_filter_byMag = last_selection_filter_byMag; return MR_CANCEL; }
   return MR_OK;
 }
@@ -342,7 +342,7 @@ MENU_RESULT UI::menuFilterByMag() {
 MENU_RESULT UI::menuFilterNearby() {
   const char* string_list_fNearby = L_OFF "\n" L_WITHIN "  1°" "\n" L_WITHIN "  5°" "\n" L_WITHIN " 10°" "\n" L_WITHIN " 15°";
   int last_selection_filter_nearby = current_selection_filter_nearby;
-  current_selection_filter_nearby = display->UserInterfaceSelectionList(&buttonPad, L_SG_FILT_BY_NEAR, current_selection_filter_nearby, string_list_fNearby);
+  current_selection_filter_nearby = display->UserInterfaceSelectionList(&keyPad, L_SG_FILT_BY_NEAR, current_selection_filter_nearby, string_list_fNearby);
   if (current_selection_filter_nearby == 0) { current_selection_filter_nearby = last_selection_filter_nearby; return MR_CANCEL; }
   return MR_OK;
 }
@@ -352,7 +352,7 @@ MENU_RESULT UI::menuFilterDblMinSep() {
   int last_selection_filter_dblmin = current_selection_filter_dblmin;
 
   while (true) {
-    current_selection_filter_dblmin = display->UserInterfaceSelectionList(&buttonPad, L_SG_FILT_BY_SEP_MIN, current_selection_filter_dblmin, string_list_fDblMin);
+    current_selection_filter_dblmin = display->UserInterfaceSelectionList(&keyPad, L_SG_FILT_BY_SEP_MIN, current_selection_filter_dblmin, string_list_fDblMin);
     if (current_selection_filter_dblmin == 0) { current_selection_filter_dblmin=last_selection_filter_dblmin; return MR_CANCEL; }
     
     if (current_selection_filter_dblmin <= 1) break;                               // abort or inactive
@@ -369,7 +369,7 @@ MENU_RESULT UI::menuFilterDblMaxSep() {
   int last_selection_filter_dblmax = current_selection_filter_dblmax;
 
   while (true) {
-    current_selection_filter_dblmax = display->UserInterfaceSelectionList(&buttonPad, L_SG_FILT_BY_SEP_MAX, current_selection_filter_dblmax, string_list_fDblMax);
+    current_selection_filter_dblmax = display->UserInterfaceSelectionList(&keyPad, L_SG_FILT_BY_SEP_MAX, current_selection_filter_dblmax, string_list_fDblMax);
     if (current_selection_filter_dblmax == 0) { current_selection_filter_dblmax=last_selection_filter_dblmax; return MR_CANCEL; }
     if (current_selection_filter_dblmax <= 1) break;                               // abort or inactive
     if (current_selection_filter_dblmin <= 1) break;                               // any maximum is ok
@@ -383,7 +383,7 @@ MENU_RESULT UI::menuFilterDblMaxSep() {
 MENU_RESULT UI::menuFilterVarMaxPer() {
   const char* string_list_fVarMax = L_OFF "\n" " <= 0.5 " L_DAYS "\n" "<= 1.0 " L_DAYS "\n" "<= 2.0 " L_DAYS "\n" "<= 5.0 " L_DAYS "\n" "<= 10 " L_DAYS "\n" "<= 20 " L_DAYS "\n" "<= 50 " L_DAYS "\n" "<= 100 " L_DAYS;
   int last_selection_filter_varmax = current_selection_filter_varmax;
-  current_selection_filter_varmax = display->UserInterfaceSelectionList(&buttonPad, L_SG_FILT_BY_PER_MAX, current_selection_filter_varmax, string_list_fVarMax);
+  current_selection_filter_varmax = display->UserInterfaceSelectionList(&keyPad, L_SG_FILT_BY_PER_MAX, current_selection_filter_varmax, string_list_fVarMax);
   if (current_selection_filter_varmax == 0) { current_selection_filter_dblmax=last_selection_filter_varmax; return MR_CANCEL; }
   return MR_OK;
 }
@@ -393,13 +393,13 @@ void secondsToFloat(const long& v, float& f) {
 }
 
 MENU_RESULT UI::menuRADec(bool sync) {
-  if (display->UserInterfaceInputValueRA(&buttonPad, &angleRA)) {
+  if (display->UserInterfaceInputValueRA(&keyPad, &angleRA)) {
     float fR;
     secondsToFloat(angleRA,fR);
-    if (display->UserInterfaceInputValueDec(&buttonPad, &angleDEC)) {
+    if (display->UserInterfaceInputValueDec(&keyPad, &angleDEC)) {
       float fD;
       secondsToFloat(angleDEC,fD);
-      if (DisplayMessageLX200(SyncGotoLX200(sync, fR, fD))) return MR_QUIT;
+      if (DisplayMessageOnStep(onStep.SyncGoto(sync, fR, fD))) return MR_QUIT;
     }
   }
   return MR_CANCEL;

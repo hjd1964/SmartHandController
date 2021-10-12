@@ -23,16 +23,16 @@
     #define B_PIN6 23   // f
   #endif
 
-  #define ST4RAw 2    // ST4 (OnStep) RA- West,  send data to OnStep
-  #define ST4DEs 3    // ST4 (OnStep) DE- South, clock input to ISR
-  #define ST4DEn 4    // ST4 (OnStep) DE+ North, recv data from OnStep
-  #define ST4RAe 5    // ST4 (OnStep) RA+ East,  always 25 Hz square wave on this pin
+  #define ST4_W_PIN 2    // ST4 (OnStep) RA- West,  send data to OnStep
+  #define ST4_S_PIN 3    // ST4 (OnStep) DE- South, clock input to ISR
+  #define ST4_N_PIN 4    // ST4 (OnStep) DE+ North, recv data from OnStep
+  #define ST4_E_PIN 5    // ST4 (OnStep) RA+ East,  always 25 Hz square wave on this pin
 
-  #if ST4_INTERFACE == ON
-    #define ST4AuxRAw 6 // ST4 (Aux) RA- West
-    #define ST4AuxDEs 7 // ST4 (Aux) DE- South
-    #define ST4AuxDEn 8 // ST4 (Aux) DE+ North
-    #define ST4AuxRAe 9 // ST4 (Aux) RA+ East
+  #if ST4_AUX_INTERFACE == ON
+    #define ST4_AUX_W_PIN 6 // ST4 (Aux) RA- West
+    #define ST4_AUX_S_PIN 7 // ST4 (Aux) DE- South
+    #define ST4_AUX_N_PIN 8 // ST4 (Aux) DE+ North
+    #define ST4_AUX_E_PIN 9 // ST4 (Aux) RA+ East
   #endif
 
   #define UTILITY_LIGHT_PIN  10    // Pin10 used as PWM output to drive utility lamp LED

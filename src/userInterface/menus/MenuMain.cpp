@@ -26,7 +26,7 @@ void UI::menuFeatureKey() {
     }
   }
 
-  current_selection_feature_mode = display->UserInterfaceSelectionList(&buttonPad, L_FKEY_FEATURE_KEYS, current_selection_feature_mode, string_feature_Modes);
+  current_selection_feature_mode = display->UserInterfaceSelectionList(&keyPad, L_FKEY_FEATURE_KEYS, current_selection_feature_mode, string_feature_Modes);
 
   if (last_selection_feature_mode > 0) {
     if (current_selection_feature_mode == 1) featureKeyMode = 1; else // guide rate
@@ -34,12 +34,12 @@ void UI::menuFeatureKey() {
     if (current_selection_feature_mode == j[0]) featureKeyMode = 3; else // util. light
     if (current_selection_feature_mode == j[1]) featureKeyMode = 4; else // reticule
     if (current_selection_feature_mode == j[2]) featureKeyMode = 5; else // rotator
-    if (current_selection_feature_mode == j[3]) { featureKeyMode = 6; SetLX200(":FA1#"); } else // focuser 1
-    if (current_selection_feature_mode == j[4]) { featureKeyMode = 7; SetLX200(":FA2#"); } else // focuser 2
-    if (current_selection_feature_mode == j[5]) { featureKeyMode = 8; SetLX200(":FA3#"); } else // focuser 3
-    if (current_selection_feature_mode == j[6]) { featureKeyMode = 9; SetLX200(":FA4#"); } else // focuser 4
-    if (current_selection_feature_mode == j[7]) { featureKeyMode = 10; SetLX200(":FA5#"); } else // focuser 5
-    if (current_selection_feature_mode == j[8]) { featureKeyMode = 11; SetLX200(":FA6#"); } else // focuser 6
+    if (current_selection_feature_mode == j[3]) { featureKeyMode = 6; onStep.Set(":FA1#"); } else // focuser 1
+    if (current_selection_feature_mode == j[4]) { featureKeyMode = 7; onStep.Set(":FA2#"); } else // focuser 2
+    if (current_selection_feature_mode == j[5]) { featureKeyMode = 8; onStep.Set(":FA3#"); } else // focuser 3
+    if (current_selection_feature_mode == j[6]) { featureKeyMode = 9; onStep.Set(":FA4#"); } else // focuser 4
+    if (current_selection_feature_mode == j[7]) { featureKeyMode = 10; onStep.Set(":FA5#"); } else // focuser 5
+    if (current_selection_feature_mode == j[8]) { featureKeyMode = 11; onStep.Set(":FA6#"); } else // focuser 6
     { featureKeyMode = 1; current_selection_feature_mode = 1; } // default to guide rate
   } else current_selection_feature_mode = last_selection_feature_mode;
 }
@@ -50,7 +50,7 @@ void UI::menuMain() {
   while (current_selection_L0 != 0) {
     if (status.isPecEnabled()) {
       const char *string_list_main_UnParkedL0 = L_MM_GOTO "\n" L_MM_SYNC "\n" L_MM_ALIGN "\n" L_MM_PARKING "\n" L_MM_TRACKING "\n" L_MM_PEC "\n" L_MM_SETTINGS;
-      current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, L_MM_MAIN_MENU, current_selection_L0, string_list_main_UnParkedL0);
+      current_selection_L0 = display->UserInterfaceSelectionList(&keyPad, L_MM_MAIN_MENU, current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
         case 1: if (menuSyncGoto(false) == MR_QUIT) return; break;
         case 2: if (menuSyncGoto(true) == MR_QUIT) return; break;
@@ -62,7 +62,7 @@ void UI::menuMain() {
       }
     } else {
       const char *string_list_main_UnParkedL0 = L_MM_GOTO "\n" L_MM_SYNC "\n" L_MM_ALIGN "\n" L_MM_PARKING "\n" L_MM_TRACKING "\n" L_MM_SETTINGS;
-      current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, L_MM_MAIN_MENU, current_selection_L0, string_list_main_UnParkedL0);
+      current_selection_L0 = display->UserInterfaceSelectionList(&keyPad, L_MM_MAIN_MENU, current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
         case 1: if (menuSyncGoto(false) == MR_QUIT) return; break;
         case 2: if (menuSyncGoto(true) == MR_QUIT) return; break;
@@ -84,26 +84,26 @@ void UI::menuParking() {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0) {
     const char *string_list_SettingsL1 = L_PARK "\n" L_UNPARK "\n" L_SETPARK;
-    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_PARKING, current_selection_L1, string_list_SettingsL1);
+    current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_PARKING, current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1) {
       case 1:
-        if (SetLX200(":hP#")== LX200VALUESET) {
+        if (onStep.Set(":hP#")== CR_VALUE_SET) {
           DisplayMessage(L_PARKING, L_TELESCOPE, 500); 
           current_selection_L1 = 0;
           current_selection_L0 = 0;
         } else DisplayMessage(L_PARK, L_FAILED, 1000);
       break;
       case 2:
-        if (SetLX200(":hR#")== LX200VALUESET) {
+        if (onStep.Set(":hR#")== CR_VALUE_SET) {
           DisplayMessage(L_UNPARKING, L_TELESCOPE, 500); 
           current_selection_L1 = 0;
         } else DisplayMessage(L_UNPARK, L_FAILED, 1000);
       break;
       case 3: 
         boolean SetP=false; 
-        if (display->UserInterfaceInputValueBoolean(&buttonPad, L_SETPARK "?", &SetP)) {
+        if (display->UserInterfaceInputValueBoolean(&keyPad, L_SETPARK "?", &SetP)) {
           if (SetP) {
-            if (SetLX200(":hQ#")== LX200VALUESET) {
+            if (onStep.Set(":hQ#")== CR_VALUE_SET) {
               DisplayMessage(L_SETPARK, L_OK, 500);
               current_selection_L1 = 0;
             } else DisplayMessage(L_SETPARK, L_FAILED, 1000); 
@@ -126,21 +126,21 @@ void UI::menuTracking() {
       } else {
         string_list = L_TRK_START "\n" L_TRK_SIDEREAL "\n" L_TRK_SOLAR "\n" L_TRK_LUNAR "\n" L_TRK_RESET "\n" L_TRK_FASTER "\n" L_TRK_SLOWER;
       }
-      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_TRACKING, current_selection_L1, string_list);
+      current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_TRACKING, current_selection_L1, string_list);
       switch (current_selection_L1) {
         case 1:
           if (currentstate == Status::TRK_ON) {
-            if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
+            if (onStep.Set(":Td#")== CR_VALUE_SET) { DisplayMessage(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
           } else {
-            if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
+            if (onStep.Set(":Te#")== CR_VALUE_SET) { DisplayMessage(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
           }
         break;
-        case 2: DisplayMessageLX200(SetLX200(":TQ#"), false); break;
-        case 3: DisplayMessageLX200(SetLX200(":TS#"), false); break;
-        case 4: DisplayMessageLX200(SetLX200(":TL#"), false); break;
-        case 5: DisplayMessageLX200(SetLX200(":TR#"), false); break;
-        case 6: DisplayMessageLX200(SetLX200(":T+#"), false); break;
-        case 7: DisplayMessageLX200(SetLX200(":T-#"), false); break;
+        case 2: DisplayMessageOnStep(onStep.Set(":TQ#"), false); break;
+        case 3: DisplayMessageOnStep(onStep.Set(":TS#"), false); break;
+        case 4: DisplayMessageOnStep(onStep.Set(":TL#"), false); break;
+        case 5: DisplayMessageOnStep(onStep.Set(":TR#"), false); break;
+        case 6: DisplayMessageOnStep(onStep.Set(":T+#"), false); break;
+        case 7: DisplayMessageOnStep(onStep.Set(":T-#"), false); break;
       }
     }
   } else {
@@ -152,26 +152,26 @@ void UI::menuTracking() {
       } else {
         string_list = L_TRK_START "\n" L_TRK_SIDEREAL "\n" L_TRK_SOLAR "\n" L_TRK_LUNAR "\n" L_TRK_CF "\n" L_TRK_CR "\n" L_TRK_CO "\n" L_TRK_CS "\n" L_TRK_CD "\n" L_TRK_RESET "\n" L_TRK_FASTER "\n" L_TRK_SLOWER;
       }
-      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_TRACKING, current_selection_L1, string_list);
+      current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_TRACKING, current_selection_L1, string_list);
       switch (current_selection_L1) {
         case 1:
           if (currentstate == Status::TRK_ON) {
-            if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
+            if (onStep.Set(":Td#")== CR_VALUE_SET) { DisplayMessage(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
           } else {
-            if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
+            if (onStep.Set(":Te#")== CR_VALUE_SET) { DisplayMessage(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
           }
         break;
-        case 2:  DisplayMessageLX200(SetLX200(":TQ#"), false); break;
-        case 3:  DisplayMessageLX200(SetLX200(":TS#"), false); break;
-        case 4:  DisplayMessageLX200(SetLX200(":TL#"), false); break;
-        case 5:  DisplayMessageLX200(SetLX200(":To#"), false); break;
-        case 6:  DisplayMessageLX200(SetLX200(":Tr#"), false); break;
-        case 7:  DisplayMessageLX200(SetLX200(":Tn#"), false); break;
-        case 8:  DisplayMessageLX200(SetLX200(":T1#"), false); break;
-        case 9:  DisplayMessageLX200(SetLX200(":T2#"), false); break;
-        case 10: DisplayMessageLX200(SetLX200(":TR#"), false); break;
-        case 11: DisplayMessageLX200(SetLX200(":T+#"), false); break;
-        case 12: DisplayMessageLX200(SetLX200(":T-#"), false); break;
+        case 2:  DisplayMessageOnStep(onStep.Set(":TQ#"), false); break;
+        case 3:  DisplayMessageOnStep(onStep.Set(":TS#"), false); break;
+        case 4:  DisplayMessageOnStep(onStep.Set(":TL#"), false); break;
+        case 5:  DisplayMessageOnStep(onStep.Set(":To#"), false); break;
+        case 6:  DisplayMessageOnStep(onStep.Set(":Tr#"), false); break;
+        case 7:  DisplayMessageOnStep(onStep.Set(":Tn#"), false); break;
+        case 8:  DisplayMessageOnStep(onStep.Set(":T1#"), false); break;
+        case 9:  DisplayMessageOnStep(onStep.Set(":T2#"), false); break;
+        case 10: DisplayMessageOnStep(onStep.Set(":TR#"), false); break;
+        case 11: DisplayMessageOnStep(onStep.Set(":T+#"), false); break;
+        case 12: DisplayMessageOnStep(onStep.Set(":T-#"), false); break;
       }
     }
   }
@@ -183,14 +183,14 @@ void UI::menuPEC() {
   while (current_selection_L1 != 0)
   {
     const char *string_list_SettingsL1 = L_PEC_PLAY "\n" L_PEC_STOP "\n" L_PEC_CLEAR "\n" L_PEC_RECORD "\n" L_PEC_WRITENV;
-    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_PEC, current_selection_L1, string_list_SettingsL1);
+    current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_PEC, current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {
-    case 1: DisplayMessageLX200(SetLX200(":$QZ+#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_PLAYING, 1000); break;
-    case 2: DisplayMessageLX200(SetLX200(":$QZ-#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_STOPPED, 1000); break;
-    case 3: DisplayMessageLX200(SetLX200(":$QZZ#"), false); break;
-    case 4: DisplayMessageLX200(SetLX200(":$QZ/#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_RECORDING, 1000); break;
-    case 5: DisplayMessageLX200(SetLX200(":$QZ!#"), false); break;
+    case 1: DisplayMessageOnStep(onStep.Set(":$QZ+#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_PLAYING, 1000); break;
+    case 2: DisplayMessageOnStep(onStep.Set(":$QZ-#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_STOPPED, 1000); break;
+    case 3: DisplayMessageOnStep(onStep.Set(":$QZZ#"), false); break;
+    case 4: DisplayMessageOnStep(onStep.Set(":$QZ/#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_RECORDING, 1000); break;
+    case 5: DisplayMessageOnStep(onStep.Set(":$QZ!#"), false); break;
     default: break;
     }
   }

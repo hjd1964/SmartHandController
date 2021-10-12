@@ -2,8 +2,7 @@
 // MenuAlignment, for UserInterface
 #include "../UserInterface.h"
 
-void UI::menuAlignment()
-{
+void UI::menuAlignment() {
   int maxAlignStars, thisStar, numStars;
   bool alignInProgress = false;
 
@@ -24,7 +23,7 @@ void UI::menuAlignment()
     char string_list_AlignmentL1[200];
     if (alignInProgress) {
       strcpy(string_list_AlignmentL1,L_ALGN_RESUME "\n" L_ALGN_SHOW_CORR "\n" L_ALGN_CLEAR_CORR "\n" L_ALGN_RESET_HOME);
-      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_ALIGNMENT, current_selection_L1, string_list_AlignmentL1);
+      current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_ALIGNMENT, current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
         case 1:
           status.aliMode = (Status::AlignMode)numStars;
@@ -48,7 +47,7 @@ void UI::menuAlignment()
         sprintf(s, "\nRefine PA");
         strcat(string_list_AlignmentL1, s);
       }
-      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_ALIGNMENT, current_selection_L1, string_list_AlignmentL1);
+      current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_ALIGNMENT, current_selection_L1, string_list_AlignmentL1);
       if (current_selection_L1 <= maxAlignStars) {
         starsForAlign = current_selection_L1;
       } else {
@@ -62,9 +61,9 @@ void UI::menuAlignment()
     // handle misc. resulting actions
     if (showAlign) {
       char r2[20] = ""; char r3[20] = ""; char r4[20] = ""; char r5[20] = ""; char r8[20] = "";
-      if ((GetLX200Trim(":GX02#", r2) == LX200VALUEGET) && (GetLX200Trim(":GX03#", r3) == LX200VALUEGET) && 
-          (GetLX200Trim(":GX04#", r4) == LX200VALUEGET) && (GetLX200Trim(":GX05#", r5) == LX200VALUEGET) && 
-          (GetLX200Trim(":GX08#", r8) == LX200VALUEGET)) {
+      if ((onStep.GetTrim(":GX02#", r2) == CR_VALUE_GET) && (onStep.GetTrim(":GX03#", r3) == CR_VALUE_GET) && 
+          (onStep.GetTrim(":GX04#", r4) == CR_VALUE_GET) && (onStep.GetTrim(":GX05#", r5) == CR_VALUE_GET) && 
+          (onStep.GetTrim(":GX08#", r8) == CR_VALUE_GET)) {
         char s1[20] = ""; strcat(s1, "PE:"); strcat(s1, r2); strcat(s1, ", PZ:"); strcat(s1, r3);
         char s2[20] = ""; strcat(s2, "DO (cone):"); strcat(s2, r4);
         char s3[20] = ""; strcat(s3, "PD:"); strcat(s3, r5); strcat(s3, ", TF:"); strcat(s3, r8);
@@ -72,14 +71,14 @@ void UI::menuAlignment()
       }
     } else  
     if (clearAlign) {
-      if ((SetLX200(":SX02,0#") == LX200VALUESET) && (SetLX200(":SX03,0#") == LX200VALUESET) &&
-          (SetLX200(":SX04,0#") == LX200VALUESET) && (SetLX200(":SX05,0#") == LX200VALUESET) &&
-          (SetLX200(":SX06,0#") == LX200VALUESET) && (SetLX200(":SX07,0#") == LX200VALUESET) &&
-          (SetLX200(":SX08,0#") == LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
+      if ((onStep.Set(":SX02,0#") == CR_VALUE_SET) && (onStep.Set(":SX03,0#") == CR_VALUE_SET) &&
+          (onStep.Set(":SX04,0#") == CR_VALUE_SET) && (onStep.Set(":SX05,0#") == CR_VALUE_SET) &&
+          (onStep.Set(":SX06,0#") == CR_VALUE_SET) && (onStep.Set(":SX07,0#") == CR_VALUE_SET) &&
+          (onStep.Set(":SX08,0#") == CR_VALUE_SET)) DisplayMessageOnStep(CR_VALUE_SET,false); else DisplayMessageOnStep(CR_SET_VALUE_FAILED,false);
     } else
     if (resetAlign) {
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
-      if (SetLX200(":hF#") == LX200VALUESET) DisplayMessage(L_ALGN_RESUME0, L_ALGN_RESUME1, -1);
+      if (onStep.Set(":hF#") == CR_VALUE_SET) DisplayMessage(L_ALGN_RESUME0, L_ALGN_RESUME1, -1);
     } else
     if (starsForAlign>0) {
       // check if date/time is set, if not set it
@@ -87,8 +86,8 @@ void UI::menuAlignment()
 
       // start the align
       char s[20]; sprintf(s,":A%d#",starsForAlign);
-      if (SetLX200(s) == LX200VALUESET) status.aliMode = (Status::AlignMode)starsForAlign; else DisplayMessage(L_ALIGNMENT, L_FAILED "!", -1);
-      if (SetLX200(":R7#") == LX200VALUESET) { DisplayMessage(L_ALGN_RESUME4, L_ALGN_RESUME5, 1000);  activeGuideRate=8; }
+      if (onStep.Set(s) == CR_VALUE_SET) status.aliMode = (Status::AlignMode)starsForAlign; else DisplayMessage(L_ALIGNMENT, L_FAILED "!", -1);
+      if (onStep.Set(":R7#") == CR_VALUE_SET) { DisplayMessage(L_ALGN_RESUME4, L_ALGN_RESUME5, 1000);  activeGuideRate=8; }
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
     } else
     if (refinePA) {
@@ -98,8 +97,8 @@ void UI::menuAlignment()
       DisplayMessage(L_ALGN_REFINE_MSG7, L_ALGN_REFINE_MSG8, 3500);
       DisplayMessage(L_ALGN_REFINE_MSG9, L_ALGN_REFINE_MSG10,4500);
       DisplayMessage(L_ALGN_REFINE_MSG11,L_ALGN_REFINE_MSG12,3500);
-      if (display->UserInterfaceInputValueBoolean(&buttonPad, L_ALGN_REFINE_MSG13, &refinePA)) {
-        if ((refinePA) && (SetLX200(":MP#") == LX200VALUESET)) DisplayMessage(L_ALGN_REFINE_MSG14, L_ALGN_REFINE_MSG15, -1);
+      if (display->UserInterfaceInputValueBoolean(&keyPad, L_ALGN_REFINE_MSG13, &refinePA)) {
+        if ((refinePA) && (onStep.Set(":MP#") == CR_VALUE_SET)) DisplayMessage(L_ALGN_REFINE_MSG14, L_ALGN_REFINE_MSG15, -1);
         if (refinePA) { current_selection_L0 = 0; current_selection_L1 = 0; } // Quit Menu
       }
     }
