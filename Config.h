@@ -19,10 +19,10 @@
                                           //         SSD1309 is a 2.3" I2C display (w/Reset on ESP32 Pin23 or Teensy Pin14.)
 
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
-#define SERIAL_INTERFACE        SerialST4 // Se..T4, SerialST4 for ST4 port sync comms, you can also use any other available  Infreq
+#define SERIAL_ONSTEP          SERIAL_ST4 // .._ST4, SERIAL_ST4 for ST4 port sync comms, you can also use any other available Infreq
                                           //         serial port (if pins are unused,) Serial3 for example, on the Teensy3.2
                                           //         This is the serial interface connected to OnStep.
-#define SERIAL_BAUD_DEFAULT          9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
+#define SERIAL_ONSTEP_BAUD_DEFAULT   9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
                                           //         Only used for async serial communication with OnStep.
 
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
@@ -36,10 +36,9 @@
 // KEYPAD --------------------------------------------------------------------------------------------------------------------------
 #define KEYPAD_JOYSTICK_ANALOG        OFF //    OFF, JS1 for Jerry's analog joystick                                          Option
 
-// ST4 INTERFACE -------------------------------------------------------------------------------------------------------------------
+// ST4 AUXILIARY INTERFACE ---------------------------------------------------------------------------------------------------------
 // *** It is up to you to verify the interface meets the electrical specifications of any connected device, use at your own risk ***
-#define ST4_INTERFACE                 OFF //    OFF, ON, ON_PULLUP enables auxillary "pass-through" ST4 interface.            Option
-                                          //             Note: Available only when SERIAL_INTERFACE SerialST4 is used
+#define ST4_AUX_INTERFACE             OFF //    OFF, ON, ON_PULLUP enables auxillary "pass-through" ST4 interface.            Option
 
 // CATALOGS ------------------------------------------------------------------------------------------------------------------------
 // Advanced users can also customize which celestial object catalogs are included or even add new catalogs using Config.catalogs.h

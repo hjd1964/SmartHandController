@@ -3,10 +3,10 @@
 #pragma once
 
 #include "../Common.h"
-#include "../buttons/Pad.h"
-#include "../u8g2ext/u8g2_ext.h"
-#include "../status/Status.h"
-#include "../commands/LX200.h"
+#include "../libApp/keyPad/KeyPad.h"
+#include "../libApp/u8g2ext/u8g2_ext.h"
+#include "../libApp/status/Status.h"
+#include "../libApp/cmd/Cmd.h"
 
 #define SH1106 0
 #define SSD1306 1
@@ -37,12 +37,12 @@ public:
   #endif
   void update();
   void drawIntro();
-  void setup(const char version[], const int pin[7], const bool active[7], const int SerialBaud, const OLED model);
-  void tickButtons();
+  void setup(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model);
+  void poll();
 private:
   unsigned long maxT=0;
 
-  Pad buttonPad;
+  KeyPad keyPad;
   U8G2_EXT *display = NULL;
 
   Status status;
@@ -157,7 +157,7 @@ private:
 
   void DisplayMessage(const char* txt1, const char* txt2 = NULL, int duration = 0);
   void DisplayLongMessage(const char* txt1, const char* txt2 = NULL, const char* txt3 = NULL, const char* txt4 = NULL, int duration = 0);
-  bool DisplayMessageLX200(LX200RETURN val, bool silentOk = true);
+  bool DisplayMessageOnStep(CMD_RESULT val, bool silentOk = true);
 };
 
 extern UI userInterface;

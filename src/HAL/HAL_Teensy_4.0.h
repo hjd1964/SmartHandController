@@ -13,9 +13,6 @@
   #include "../lib/nv/NV_EEPROM.h"
 #endif
 
-// Default serial port where OnStep is attached ------------------------------------------------------
-#define SERIAL_ONSTEP SERIAL_INTERFACE
-
 //----------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
 #define HAL_INIT() { analogReadResolution(10); nv.init(E2END + 1, true, 0, false); }

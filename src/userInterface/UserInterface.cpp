@@ -2,8 +2,8 @@
 // UserInterface, handle display and keypad
 
 #include "UserInterface.h"
-extern NVS nv;
-#include "../st4/St4Aux.h"
+
+#include "../libApp/st4Aux/St4Aux.h"
 #include "../catalogs/Catalog.h"
 #include "bitmaps/Bitmaps.h"
 
@@ -40,7 +40,7 @@ void longDec2Dec(long Dec, int& deg, int& min) {
   min = Dec % 60;
 }
 
-void UI::setup(const char version[], const int pin[7],const bool active[7], const int SerialBaud, const OLED model) {
+void UI::setup(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model) {
   // initialize and read defaults from NV as needed
   initNV();
   readNV();
@@ -52,14 +52,14 @@ void UI::setup(const char version[], const int pin[7],const bool active[7], cons
     pinMode(B_PIN1,INPUT_PULLUP);
     pinMode(B_PIN2,INPUT_PULLUP);
     delay(100);
-    int v1 = analogRead(B_PIN1);
-    int v2 = analogRead(B_PIN3);
-    buttonPad.setup(pin, active, v1, v2);
+    int thresholdEW = analogRead(B_PIN1);
+    int thresholdNS = analogRead(B_PIN3);
+    keyPad.setup(pin, active, thresholdNS, thresholdEW);
   #else
-    buttonPad.setup(pin, active, 0, 0);
+    keyPad.setup(pin, active, 0, 0);
   #endif
 
-  #if ST4_INTERFACE == ON
+  #if ST4_AUX_INTERFACE == ON
     auxST4.setup();
   #endif
 
@@ -113,7 +113,7 @@ void UI::setup(const char version[], const int pin[7],const bool active[7], cons
 
   // display the splash screen
   drawIntro();
-  tickButtons();
+  poll();
 
   for (int i = 0; i < 3; i++) {
     SERIAL_ONSTEP.print(":#");
@@ -131,8 +131,8 @@ again1:
   delay(2000);
 
   VLF(Abv "Attempting to connect");
-  LX200RETURN r = GetLX200(":GVP#", s);
-  if (r != LX200VALUEGET || (!strstr(s, "On-Step") && !strstr(s, "OnStepX"))) { if (++thisTry <= 8) goto again1; }
+  CMD_RESULT r = onStep.Get(":GVP#", s);
+  if (r != CR_VALUE_GET || (!strstr(s, "On-Step") && !strstr(s, "OnStepX"))) { if (++thisTry <= 8) goto again1; }
   VLF(Abv "Connection established");
 
 again2:
@@ -143,7 +143,7 @@ again2:
   // 1 = TOPOCENTRIC (does refraction)
   // 2 = ASTROMETRIC_J2000 (does refraction and precession/nutation)
   thisTry = 0;
-  if (GetLX200(":GXEE#", s) == LX200VALUEGET && s[0] >= '0' && s[0] <= '3' && s[1] == 0) {
+  if (onStep.Get(":GXEE#", s) == CR_VALUE_GET && s[0] >= '0' && s[0] <= '3' && s[1] == 0) {
     if (s[0] == '0') {
       VLF(Abv "Coordinates Observed Place");
       telescopeCoordinates = OBSERVED_PLACE; 
@@ -172,21 +172,20 @@ again2:
   }
 }
 
-void UI::tickButtons() {
-  buttonPad.tickButtons();
-  #if ST4_INTERFACE == ON
-    auxST4.tickButtons();
+void UI::poll() {
+  keyPad.poll();
+  #if ST4_AUX_INTERFACE == ON
+    auxST4.poll();
   #endif
 }
 
-void UI::update()
-{
-  tickButtons();
+void UI::update() {
+  poll();
   unsigned long top = millis();
 
   // sleep and wake up display
-  if (buttonPad.anyPressed()) {
-    if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; buttonPad.clearAllPressed(); time_last_action = millis(); }
+  if (keyPad.anyPressed()) {
+    if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; keyPad.clearAllPressed(); time_last_action = millis(); }
     if (lowContrast)  { display->setContrast(maxContrast); lowContrast = false; time_last_action = top; }
   } else if (sleepDisplay) return;
   if (display_blank_time && top - time_last_action > display_blank_time) { display->sleepOn(); sleepDisplay = true; return; }
@@ -225,36 +224,36 @@ void UI::update()
   // handle gotos and guiding
   if (status.connected && (status.getTrackingState() == Status::TRK_SLEWING || status.getParkState() == Status::PRK_PARKING)) {
     // gotos
-    if (buttonPad.nsewPressed()) {
+    if (keyPad.nsewPressed()) {
       SERIAL_ONSTEP.print(":Q#"); SERIAL_ONSTEP.flush();
       if (status.align != Status::ALI_OFF) status.align = static_cast<Status::AlignState>(status.align - 1); // try another align star?
       time_last_action = millis();
       display->sleepOff();
-      buttonPad.clearAllPressed();
+      keyPad.clearAllPressed();
       DisplayMessage(L_SLEW_MSG1, L_SLEW_MSG2 "!", 1000);
       return;
     }
   } else {
     // guiding
     buttonCommand = false;
-    #if ST4_INTERFACE == ON
-      if (!moveEast  && (buttonPad.e.isDown() || auxST4.e.isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
-      if (moveEast   && (buttonPad.e.isUp()   && auxST4.e.isUp()))   { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; buttonPad.e.clearPress(); auxST4.e.clearPress(); }
-      if (!moveWest  && (buttonPad.w.isDown() || auxST4.w.isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
-      if (moveWest   && (buttonPad.w.isUp()   && auxST4.w.isUp()))   { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; buttonPad.w.clearPress(); auxST4.w.clearPress(); }
-      if (!moveNorth && (buttonPad.n.isDown() || auxST4.n.isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
-      if (moveNorth  && (buttonPad.n.isUp()   && auxST4.n.isUp()))   { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; buttonPad.n.clearPress(); auxST4.n.clearPress(); }
-      if (!moveSouth && (buttonPad.s.isDown() || auxST4.s.isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
-      if (moveSouth  && (buttonPad.s.isUp()   && auxST4.s.isUp()))   { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; buttonPad.s.clearPress(); auxST4.s.clearPress(); }
+    #if ST4_AUX_INTERFACE == ON
+      if (!moveEast  && (keyPad.e->isDown() || auxST4.e->isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
+      if ( moveEast  && (keyPad.e->isUp()   && auxST4.e->isUp()))   { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; keyPad.e->clearPress(); auxST4.e->clearPress(); }
+      if (!moveWest  && (keyPad.w->isDown() || auxST4.w->isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
+      if ( moveWest  && (keyPad.w->isUp()   && auxST4.w->isUp()))   { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; keyPad.w->clearPress(); auxST4.w->clearPress(); }
+      if (!moveNorth && (keyPad.n->isDown() || auxST4.n->isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
+      if ( moveNorth && (keyPad.n->isUp()   && auxST4.n->isUp()))   { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; keyPad.n->clearPress(); auxST4.n->clearPress(); }
+      if (!moveSouth && (keyPad.s->isDown() || auxST4.s->isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
+      if ( moveSouth && (keyPad.s->isUp()   && auxST4.s->isUp()))   { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; keyPad.s->clearPress(); auxST4.s->clearPress(); }
     #else
-      if (!moveEast  && (buttonPad.e.isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
-      if (moveEast   && (buttonPad.e.isUp()  )) { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; buttonPad.e.clearPress(); }
-      if (!moveWest  && (buttonPad.w.isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
-      if (moveWest   && (buttonPad.w.isUp()  )) { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; buttonPad.w.clearPress(); }
-      if (!moveNorth && (buttonPad.n.isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
-      if (moveNorth  && (buttonPad.n.isUp()  )) { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; buttonPad.n.clearPress(); }
-      if (!moveSouth && (buttonPad.s.isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
-      if (moveSouth  && (buttonPad.s.isUp()  )) { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; buttonPad.s.clearPress(); }
+      if (!moveEast  && (keyPad.e->isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
+      if ( moveEast  && (keyPad.e->isUp()  )) { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; keyPad.e->clearPress(); }
+      if (!moveWest  && (keyPad.w->isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
+      if ( moveWest  && (keyPad.w->isUp()  )) { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; keyPad.w->clearPress(); }
+      if (!moveNorth && (keyPad.n->isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
+      if ( moveNorth && (keyPad.n->isUp()  )) { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; keyPad.n->clearPress(); }
+      if (!moveSouth && (keyPad.s->isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
+      if ( moveSouth && (keyPad.s->isUp()  )) { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; keyPad.s->clearPress(); }
     #endif
     if (buttonCommand) { time_last_action = millis(); return; }
   }
@@ -269,29 +268,29 @@ void UI::update()
   if (status.align != Status::ALI_OFF) featureKeyMode = 1;
   switch (featureKeyMode) {
     case 1:   // guide rate
-      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage, L_FKEY_GUIDE_DN); buttonCommand = true; } else
-      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage, L_FKEY_GUIDE_UP); buttonCommand = true; }
+      if (keyPad.F->wasPressed()) { activeGuideRate--; strcpy(briefMessage, L_FKEY_GUIDE_DN); buttonCommand = true; } else
+      if (keyPad.f->wasPressed()) { activeGuideRate++; strcpy(briefMessage, L_FKEY_GUIDE_UP); buttonCommand = true; }
       if (buttonCommand) {
         if (activeGuideRate < 4)  activeGuideRate = 4;
         if (activeGuideRate > 10) activeGuideRate = 10;
         char cmd[5] = ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
-        DisplayMessageLX200(SetLX200(cmd));
+        DisplayMessageOnStep(onStep.Set(cmd));
       }
     break;
     case 2:   // pulse guide rate
-      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage, L_FKEY_PGUIDE_DN); buttonCommand = true; } else
-      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage, L_FKEY_PGUIDE_UP); buttonCommand = true; }
+      if (keyPad.F->wasPressed()) { activeGuideRate--; strcpy(briefMessage, L_FKEY_PGUIDE_DN); buttonCommand = true; } else
+      if (keyPad.f->wasPressed()) { activeGuideRate++; strcpy(briefMessage, L_FKEY_PGUIDE_UP); buttonCommand = true; }
       if (buttonCommand) {
         if (activeGuideRate < 1) activeGuideRate = 1;
         if (activeGuideRate > 3) activeGuideRate = 3;
         char cmd[5] =  ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
-        DisplayMessageLX200(SetLX200(cmd));
+        DisplayMessageOnStep(onStep.Set(cmd));
       }
     break;
     case 3:   // util. light
       #if UTILITY_LIGHT != OFF
-        if (buttonPad.F.wasPressed()) { current_selection_utility_light--; strcpy(briefMessage, L_FKEY_LAMP_DN); buttonCommand = true; } else
-        if (buttonPad.f.wasPressed()) { current_selection_utility_light++; strcpy(briefMessage, L_FKEY_LAMP_UP); buttonCommand = true; }
+        if (keyPad.F->wasPressed()) { current_selection_utility_light--; strcpy(briefMessage, L_FKEY_LAMP_DN); buttonCommand = true; } else
+        if (keyPad.f->wasPressed()) { current_selection_utility_light++; strcpy(briefMessage, L_FKEY_LAMP_UP); buttonCommand = true; }
         if (buttonCommand) {
           if (current_selection_utility_light < 1) current_selection_utility_light = 1;
           if (current_selection_utility_light > 6) current_selection_utility_light = 6;
@@ -305,25 +304,25 @@ void UI::update()
       #endif
     break;
     case 4:  // reticule
-      if (buttonPad.F.wasPressed()) { SERIAL_ONSTEP.print(":B-#"); strcpy(briefMessage, L_FKEY_RETI_DN); } else
-      if (buttonPad.f.wasPressed()) { SERIAL_ONSTEP.print(":B+#"); strcpy(briefMessage, L_FKEY_RETI_UP); }
+      if (keyPad.F->wasPressed()) { SERIAL_ONSTEP.print(":B-#"); strcpy(briefMessage, L_FKEY_RETI_DN); } else
+      if (keyPad.f->wasPressed()) { SERIAL_ONSTEP.print(":B+#"); strcpy(briefMessage, L_FKEY_RETI_UP); }
     break;
     case 5:  // rotator
-      if (rotState == RS_STOPPED && buttonPad.F.isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROT_DN); buttonCommand = true; }
-      else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && buttonPad.F.isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; buttonPad.F.clearPress(); }
-      else if (rotState == RS_STOPPED && buttonPad.f.isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROT_UP); buttonCommand = true; }
-      else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && buttonPad.f.isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; buttonPad.f.clearPress(); }
-      else if (rotState == RS_CCW_SLOW && buttonPad.F.isDown() && buttonPad.F.timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROTF_DN); }
-      else if (rotState == RS_CW_SLOW  && buttonPad.f.isDown() && buttonPad.f.timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROTF_UP); }
+      if (rotState == RS_STOPPED && keyPad.F->isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROT_DN); buttonCommand = true; }
+      else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && keyPad.F->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.F->clearPress(); }
+      else if (rotState == RS_STOPPED && keyPad.f->isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROT_UP); buttonCommand = true; }
+      else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && keyPad.f->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.f->clearPress(); }
+      else if (rotState == RS_CCW_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROTF_DN); }
+      else if (rotState == RS_CW_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROTF_UP); }
     break;
     case 6: case 7: case 8: case 9: case 10: case 11:  // focusers
-      if (focusState == FS_STOPPED && buttonPad.F.isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand = true; }
-      else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && buttonPad.F.isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; buttonPad.F.clearPress(); }
-      else if (focusState == FS_STOPPED && buttonPad.f.isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand = true; }
-      else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && buttonPad.f.isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; buttonPad.f.clearPress(); }
+      if (focusState == FS_STOPPED && keyPad.F->isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand = true; }
+      else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && keyPad.F->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.F->clearPress(); }
+      else if (focusState == FS_STOPPED && keyPad.f->isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand = true; }
+      else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && keyPad.f->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.f->clearPress(); }
       #ifndef FOCUSER_ACCELERATE_DISABLE_ON
-        else if (focusState == FS_OUT_SLOW && buttonPad.F.isDown() && buttonPad.F.timeDown() > 5000) { focusState=FS_OUT_FAST; SERIAL_ONSTEP.print(":FF#:F+#"); strcpy(briefMessage, L_FKEY_FOCF_DN); }
-        else if (focusState == FS_IN_SLOW  && buttonPad.f.isDown() && buttonPad.f.timeDown() > 5000) { focusState=FS_IN_FAST;  SERIAL_ONSTEP.print(":FF#:F-#"); strcpy(briefMessage, L_FKEY_FOCF_UP); }
+        else if (focusState == FS_OUT_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { focusState=FS_OUT_FAST; SERIAL_ONSTEP.print(":FF#:F+#"); strcpy(briefMessage, L_FKEY_FOCF_DN); }
+        else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState=FS_IN_FAST;  SERIAL_ONSTEP.print(":FF#:F-#"); strcpy(briefMessage, L_FKEY_FOCF_UP); }
       #endif
     break;
   }
@@ -331,13 +330,13 @@ void UI::update()
 
   // -------------------------------------------------------------------------------------------------------------------
   // handle shift button features
-  if (buttonPad.shift.isDown()) {
+  if (keyPad.shift->isDown()) {
     // a long press brings up the main menu
-    if (buttonPad.shift.timeDown() > 1000 && status.align == Status::ALI_OFF) { menuMain(); time_last_action = millis(); } // bring up the menus
+    if (keyPad.shift->timeDown() > 1000 && status.align == Status::ALI_OFF) { menuMain(); time_last_action = millis(); } // bring up the menus
   } else {
     // wait long enough that a double press can happen before picking up other press events
-    if (buttonPad.shift.timeUp() > 250) {
-      if (buttonPad.shift.wasDoublePressed()) { 
+    if (keyPad.shift->timeUp() > 250) {
+      if (keyPad.shift->wasDoublePressed()) { 
         if (status.align == Status::ALI_OFF) {
           // display feature key menu OR...
           menuFeatureKey();
@@ -351,7 +350,7 @@ void UI::update()
         }
         time_last_action = millis();
       } else
-      if (buttonPad.shift.wasPressed()) {
+      if (keyPad.shift->wasPressed()) {
         if (status.align == Status::ALI_OFF) {
           // cycles through disp of Eq, Hor, Time, Ambient OR...
           page++;
@@ -439,7 +438,7 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
     
       if (curP == Status::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
       if (curP == Status::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
-      if (status.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
+      if (status.atHome())             { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
       {
         if (curT == Status::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
         if (curT == Status::TRK_ON) {
@@ -644,8 +643,8 @@ bool UI::SelectStarAlign() {
 
   cat_mgr.setIndex(0);
   if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, L_SELECT_STAR)) {
-      bool ok = DisplayMessageLX200(SyncSelectedStarLX200(cat_mgr.getIndex()),false);
+    if (display->UserInterfaceCatalog(&keyPad, L_SELECT_STAR)) {
+      bool ok = DisplayMessageOnStep(onStep.SyncSelectedStar(cat_mgr.getIndex()),false);
       return ok;
     }
   }
@@ -667,7 +666,7 @@ void UI::DisplayMessage(const char* txt1, const char* txt2, int duration) {
     x = (display->getDisplayWidth() - display->getStrWidth(txt1)) / 2;
     display->drawStr(x, y, txt1);
   } while (display->nextPage());
-  if (duration >= 0) delay(duration); else { buttonPad.waitForPress(); buttonPad.clearAllPressed(); }
+  if (duration >= 0) delay(duration); else { keyPad.waitForPress(); keyPad.clearAllPressed(); }
 }
 
 void UI::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration) {
@@ -699,39 +698,39 @@ void UI::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3
       display->drawStr(x, y, txt4);
     }
   } while (display->nextPage());
-  if (duration >= 0) delay(duration); else { buttonPad.waitForPress(); buttonPad.clearAllPressed(); }
+  if (duration >= 0) delay(duration); else { keyPad.waitForPress(); keyPad.clearAllPressed(); }
   display->setFont(LF_LARGE);
 }
 
-bool UI::DisplayMessageLX200(LX200RETURN val, bool silentOk) {
+bool UI::DisplayMessageOnStep(CMD_RESULT val, bool silentOk) {
   char text1[20] = "";
   char text2[20] = "";
   int time = -1;
-  if (val < LX200OK) {
-         if (val == LX200NOTOK)                    { sprintf(text1, L_LX200_NOTOK_1); sprintf(text2, L_LX200_NOTOK_2);  }
-    else if (val == LX200SETVALUEFAILED)           { sprintf(text1, L_LX200_SETVF_1); sprintf(text2, L_LX200_SETVF_2);  }
-    else if (val == LX200GETVALUEFAILED)           { sprintf(text1, L_LX200_GETVF_1); sprintf(text2, L_LX200_GETVF_2);  }
-    else if (val == LX200SETTARGETFAILED)          { sprintf(text1, L_LX200_SETTG_1); sprintf(text2, L_LX200_SETTG_2);  }
-    else if (val == LX200NOOBJECTSELECTED)         { sprintf(text1, L_LX200_OBJSE_1); sprintf(text2, L_LX200_OBJSE_2);  }
-    else if (val == LX200_GOTO_ERR_BELOW_HORIZON)  { sprintf(text1, L_LX200_TGHOR_1); sprintf(text2, L_LX200_TGHOR_2);  }
-    else if (val == LX200_GOTO_ERR_ABOVE_OVERHEAD) { sprintf(text1, L_LX200_TGOVH_1); sprintf(text2, L_LX200_TGOVH_2);  }
-    else if (val == LX200_GOTO_ERR_STANDBY)        { sprintf(text1, L_LX200_STNBF_1); sprintf(text2, L_LX200_STNBF_2);  }
-    else if (val == LX200_GOTO_ERR_PARK)           { sprintf(text1, L_LX200_PARKF_1); sprintf(text2, L_LX200_PARKF_2);  }
-    else if (val == LX200_GOTO_ERR_GOTO)           { sprintf(text1, L_LX200_GOGOF_1); sprintf(text2, L_LX200_GOGOF_2);  }
-    else if (val == LX200_GOTO_ERR_OUTSIDE_LIMITS) { sprintf(text1, L_LX200_LIMTF_1); sprintf(text2, L_LX200_LIMTF_2);  }
-    else if (val == LX200_GOTO_ERR_HARDWARE_FAULT) { sprintf(text1, L_LX200_HARDF_1); sprintf(text2, L_LX200_HARDF_2);  }
-    else if (val == LX200_GOTO_ERR_IN_MOTION)      { sprintf(text1, L_LX200_GOMOF_1); sprintf(text2, L_LX200_GOMOF_2);  }
-    else if (val == LX200_GOTO_ERR_UNSPECIFIED)    { sprintf(text1, L_LX200_UNSPF_1); sprintf(text2, L_LX200_UNSPF_2);  }
-    else { sprintf(text1, L_LX200_ERROR); sprintf(text2, "-1"); }
+  if (val < CR_OK) {
+         if (val == CR_NOT_OK)                  { sprintf(text1, L_CMD_NOTOK_1); sprintf(text2, L_CMD_NOTOK_2);  }
+    else if (val == CR_SET_VALUE_FAILED)        { sprintf(text1, L_CMD_SETVF_1); sprintf(text2, L_CMD_SETVF_2);  }
+    else if (val == CR_GET_VALUE_FAILED)        { sprintf(text1, L_CMD_GETVF_1); sprintf(text2, L_CMD_GETVF_2);  }
+    else if (val == CR_SET_TARGET_FAILED)       { sprintf(text1, L_CMD_SETTG_1); sprintf(text2, L_CMD_SETTG_2);  }
+    else if (val == CR_NO_OBJECT_SELECTED)      { sprintf(text1, L_CMD_OBJSE_1); sprintf(text2, L_CMD_OBJSE_2);  }
+    else if (val == CR_GOTO_ERR_BELOW_HORIZON)  { sprintf(text1, L_CMD_TGHOR_1); sprintf(text2, L_CMD_TGHOR_2);  }
+    else if (val == CR_GOTO_ERR_ABOVE_OVERHEAD) { sprintf(text1, L_CMD_TGOVH_1); sprintf(text2, L_CMD_TGOVH_2);  }
+    else if (val == CR_GOTO_ERR_STANDBY)        { sprintf(text1, L_CMD_STNBF_1); sprintf(text2, L_CMD_STNBF_2);  }
+    else if (val == CR_GOTO_ERR_PARK)           { sprintf(text1, L_CMD_PARKF_1); sprintf(text2, L_CMD_PARKF_2);  }
+    else if (val == CR_GOTO_ERR_GOTO)           { sprintf(text1, L_CMD_GOGOF_1); sprintf(text2, L_CMD_GOGOF_2);  }
+    else if (val == CR_GOTO_ERR_OUTSIDE_LIMITS) { sprintf(text1, L_CMD_LIMTF_1); sprintf(text2, L_CMD_LIMTF_2);  }
+    else if (val == CR_GOTO_ERR_HARDWARE_FAULT) { sprintf(text1, L_CMD_HARDF_1); sprintf(text2, L_CMD_HARDF_2);  }
+    else if (val == CR_GOTO_ERR_IN_MOTION)      { sprintf(text1, L_CMD_GOMOF_1); sprintf(text2, L_CMD_GOMOF_2);  }
+    else if (val == CR_GOTO_ERR_UNSPECIFIED)    { sprintf(text1, L_CMD_UNSPF_1); sprintf(text2, L_CMD_UNSPF_2);  }
+    else { sprintf(text1, L_CMD_ERROR); sprintf(text2, "-1"); }
     DisplayMessage(text1, text2, -1);
   } else if (!silentOk) {
     time = 1000;
-         if (val == LX200OK)            { sprintf(text1, L_LX200_ISAOK_1); sprintf(text2, L_LX200_ISAOK_2);  }
-    else if (val == LX200VALUESET)      { sprintf(text1, L_LX200_SETOK_1); sprintf(text2, L_LX200_SETOK_2);  }
-    else if (val == LX200VALUEGET)      { sprintf(text1, L_LX200_GETOK_1); sprintf(text2, L_LX200_GETOK_2);  }
-    else if (val == LX200SYNCED)        { sprintf(text1, L_LX200_SNCOK_1); sprintf(text2, L_LX200_SNCOK_2);  }
-    else if (val == LX200_GOTO_GOINGTO) { sprintf(text1, L_LX200_GOTOK_1); sprintf(text2, L_LX200_GOTOK_2);  }
+         if (val == CR_OK)            { sprintf(text1, L_CMD_ISAOK_1); sprintf(text2, L_CMD_ISAOK_2);  }
+    else if (val == CR_VALUE_SET)     { sprintf(text1, L_CMD_SETOK_1); sprintf(text2, L_CMD_SETOK_2);  }
+    else if (val == CR_VALUE_GET)     { sprintf(text1, L_CMD_GETOK_1); sprintf(text2, L_CMD_GETOK_2);  }
+    else if (val == CR_SYNCED)        { sprintf(text1, L_CMD_SNCOK_1); sprintf(text2, L_CMD_SNCOK_2);  }
+    else if (val == CR_GOTO_GOING_TO) { sprintf(text1, L_CMD_GOTOK_1); sprintf(text2, L_CMD_GOTOK_2);  }
     DisplayMessage(text1, text2, time);
   }
-  return isOk(val);
+  return onStep.isOk(val);
 }
