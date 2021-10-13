@@ -63,7 +63,7 @@ void setup(void) {
   VF(Abv "Setup, starting system services task (rate 10ms priority 7)... ");
   if (tasks.add(10, 0, true, 7, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
-  userInterface.setup(Version, pin, active, SERIAL_A_BAUD_DEFAULT, static_cast<UI::OLED>(DISPLAY_OLED));
+  userInterface.setup(Version, pin, active, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<UI::OLED>(DISPLAY_OLED));
 
   VLF(Abv "Starting UI loop");
 }

@@ -10,7 +10,7 @@
 #define MSB(i) (i >> 8)
 #define LSB(i) (i & 0xFF)
 
-#ifdef HAL_POLLING_MEGA2560_SERIAL_A
+#ifdef HAL_POLLING_MEGA2560_SERIAL_ONSTEP
 
 void PollingSerialA::begin(long baud) {
   // init the buffers

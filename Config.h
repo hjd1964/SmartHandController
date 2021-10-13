@@ -19,10 +19,10 @@
                                           //         SSD1309 is a 2.3" I2C display (w/Reset on ESP32 Pin23 or Teensy Pin14.)
 
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
-#define SERIAL_A               SERIAL_ST4 // .._ST4, SERIAL_ST4 for ST4 port sync comms, you can also use any other available Infreq
+#define SERIAL_ONSTEP          SERIAL_ST4 // .._ST4, SERIAL_ST4 for ST4 port sync comms, you can also use any other available Infreq
                                           //         serial port (if pins are unused,) Serial3 for example, on the Teensy3.2
                                           //         This is the serial interface connected to OnStep.
-#define SERIAL_A_BAUD_DEFAULT        9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
+#define SERIAL_ONSTEP_BAUD_DEFAULT   9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
                                           //         Only used for async serial communication with OnStep.
 
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------

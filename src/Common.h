@@ -18,10 +18,10 @@ extern bool connected;
     // echo strings to OnStep debug interface (supports embedded spaces and cr/lf)
     extern void debugPrint(const char* s);
 
-    #define D(x)       { if (connected) { SERIAL_A.print(":EC"); SERIAL_A.print(x); SERIAL_A.print("#"); } }
-    #define DF(x)      { if (connected) { SERIAL_A.print(":EC"); debugPrint(x); SERIAL_A.print("#"); } }
-    #define DL(x)      { if (connected) { SERIAL_A.print(":EC"); SERIAL_A.print(x); SERIAL_A.print("&#"); } }
-    #define DLF(x)     { if (connected) { SERIAL_A.print(":EC"); debugPrint(x); SERIAL_A.print("&#"); } }
+    #define D(x)       { if (connected) { SERIAL_ONSTEP.print(":EC"); SERIAL_ONSTEP.print(x); SERIAL_ONSTEP.print("#"); } }
+    #define DF(x)      { if (connected) { SERIAL_ONSTEP.print(":EC"); debugPrint(x); SERIAL_ONSTEP.print("#"); } }
+    #define DL(x)      { if (connected) { SERIAL_ONSTEP.print(":EC"); SERIAL_ONSTEP.print(x); SERIAL_ONSTEP.print("&#"); } }
+    #define DLF(x)     { if (connected) { SERIAL_ONSTEP.print(":EC"); debugPrint(x); SERIAL_ONSTEP.print("&#"); } }
   #else
     #define D(x)       SERIAL_DEBUG.print(x)
     #define DF(x)      SERIAL_DEBUG.print(F(x))

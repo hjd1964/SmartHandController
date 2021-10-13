@@ -169,8 +169,8 @@ CMD_RESULT OnStepCmd::SyncGoto(bool sync, float &Ra, float &Dec) {
 
   if (SetTargetRa(ivr1, ivr2, (int)fvr3) ==  CR_VALUE_SET && SetTargetDec(sign, ivd1, ivd2, (int)fvd3) == CR_VALUE_SET) {
     if (sync) {
-      SERIAL_A.print(":CS#");
-      SERIAL_A.flush();
+      SERIAL_ONSTEP.print(":CS#");
+      SERIAL_ONSTEP.flush();
       return CR_SYNCED;
     } else return Move2Target();
   } else return CR_SET_TARGET_FAILED;
@@ -322,7 +322,7 @@ CMD_RESULT OnStepCmd::GetLongitude(int &degree, int &minute, int &second) {
 }
 
 void OnStepCmd::serialRecvFlush() {
-  while (SERIAL_A.available() > 0) SERIAL_A.read();
+  while (SERIAL_ONSTEP.available() > 0) SERIAL_ONSTEP.read();
 }
 
 void OnStepCmd::char2RA(char* txt, unsigned int& hour, unsigned int& minute, unsigned int& second) {
@@ -341,24 +341,24 @@ void OnStepCmd::char2DEC(char* txt, int& deg, unsigned int& min, unsigned int& s
 
 // smart LX200 aware command and response over serial
 bool OnStepCmd::processCommand(char* command, char* response, unsigned long timeOutMs) {
-  SERIAL_A.setTimeout(timeOutMs);
+  SERIAL_ONSTEP.setTimeout(timeOutMs);
 
   // clear the read/write buffers
-  SERIAL_A.flush();
+  SERIAL_ONSTEP.flush();
   serialRecvFlush();
 
   // send the command
-  SERIAL_A.print(command);
+  SERIAL_ONSTEP.print(command);
 
   boolean noResponse = false;
   boolean shortResponse = false;
   if ((command[0] == (char)6) && (command[1] == 0)) shortResponse = true;
   if (command[0] == ':') {
     if (command[1] == '%') {
-      SERIAL_A.setTimeout(timeOutMs * 4);
+      SERIAL_ONSTEP.setTimeout(timeOutMs * 4);
     }
     if (command[1] == 'A') {
-      if (strchr("W123456789+", command[2])) { shortResponse = true; SERIAL_A.setTimeout(1000); }
+      if (strchr("W123456789+", command[2])) { shortResponse = true; SERIAL_ONSTEP.setTimeout(1000); }
     }
     if ((command[1] == 'F') || (command[1] == 'f')) {
       if (strchr("123456", command[2]) && command[3] != '#') {
@@ -399,7 +399,7 @@ bool OnStepCmd::processCommand(char* command, char* response, unsigned long time
     }
     if (command[1] == 'h') {
       if (strchr("F", command[2])) noResponse = true;
-      if (strchr("COPQR", command[2])) { shortResponse = true; SERIAL_A.setTimeout(timeOutMs * 2); }
+      if (strchr("COPQR", command[2])) { shortResponse = true; SERIAL_ONSTEP.setTimeout(timeOutMs * 2); }
     }
     if (command[1] == 'T') {
       if (strchr("QR+-SLK", command[2])) noResponse = true;
@@ -421,7 +421,7 @@ bool OnStepCmd::processCommand(char* command, char* response, unsigned long time
   }
   else
     if (shortResponse) {
-      response[SERIAL_A.readBytes(response, 1)] = 0;
+      response[SERIAL_ONSTEP.readBytes(response, 1)] = 0;
       return (response[0] != 0);
     }
     else {
@@ -430,8 +430,8 @@ bool OnStepCmd::processCommand(char* command, char* response, unsigned long time
       int responsePos = 0;
       char b = 0;
       while ((millis() - start < timeOutMs) && (b != '#')) {
-        if (SERIAL_A.available()) {
-          b = SERIAL_A.read();
+        if (SERIAL_ONSTEP.available()) {
+          b = SERIAL_ONSTEP.read();
           response[responsePos] = b; responsePos++; if (responsePos > 19) responsePos = 19; response[responsePos] = 0;
         }
         userInterface.poll();

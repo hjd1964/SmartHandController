@@ -15,11 +15,11 @@
   #include "../serial/Serial_Local.h"
 #endif
 
-#if SERIAL_A == HardSerial
-  #undef SERIAL_A
-  HardwareSerial HWSerialA(SERIAL_A_RX, SERIAL_A_TX);
-  #define SERIAL_A HWSerialA
-  #define SERIAL_A_RXTX_SET
+#if SERIAL_ONSTEP == HardSerial
+  #undef SERIAL_ONSTEP
+  HardwareSerial HWSerialA(SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
+  #define SERIAL_ONSTEP HWSerialA
+  #define SERIAL_ONSTEP_RXTX_SET
 #endif
 
 #if SERIAL_B == HardSerial
@@ -32,7 +32,7 @@
 
 SerialWrapper::SerialWrapper() {
   static uint8_t channel = 0;
-  #ifdef SERIAL_A
+  #ifdef SERIAL_ONSTEP
     if (!hasChannel(channel)) { thisChannel = channel; setChannel(channel); return; }
     channel++;
   #endif
@@ -74,12 +74,12 @@ void SerialWrapper::begin() { begin(9600); }
 
 void SerialWrapper::begin(long baud) {
   uint8_t channel = 0;
-  #ifdef SERIAL_A
+  #ifdef SERIAL_ONSTEP
     if (isChannel(channel++))
-      #if defined(SERIAL_A_RX) && defined(SERIAL_A_TX) && !defined(SERIAL_A_RXTX_SET)
-        SERIAL_A.begin(baud, SERIAL_8N1, SERIAL_A_RX, SERIAL_A_TX);
+      #if defined(SERIAL_ONSTEP_RX) && defined(SERIAL_ONSTEP_TX) && !defined(SERIAL_ONSTEP_RXTX_SET)
+        SERIAL_ONSTEP.begin(baud, SERIAL_8N1, SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
       #else
-        SERIAL_A.begin(baud);
+        SERIAL_ONSTEP.begin(baud);
       #endif
   #endif
   #ifdef SERIAL_B
@@ -125,8 +125,8 @@ void SerialWrapper::begin(long baud) {
 
 void SerialWrapper::end() {
   uint8_t channel = 0;
-  #ifdef SERIAL_A
-    if (isChannel(channel++)) SERIAL_A.end();
+  #ifdef SERIAL_ONSTEP
+    if (isChannel(channel++)) SERIAL_ONSTEP.end();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) SERIAL_B.end();
@@ -156,8 +156,8 @@ void SerialWrapper::end() {
 
 size_t SerialWrapper::write(uint8_t data) {
   uint8_t channel = 0;
-  #ifdef SERIAL_A
-    if (isChannel(channel++)) return SERIAL_A.write(data);
+  #ifdef SERIAL_ONSTEP
+    if (isChannel(channel++)) return SERIAL_ONSTEP.write(data);
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.write(data);
@@ -188,8 +188,8 @@ size_t SerialWrapper::write(uint8_t data) {
 
 size_t SerialWrapper::write(const uint8_t *data, size_t quantity) {
   uint8_t channel = 0;
-  #ifdef SERIAL_A
-    if (isChannel(channel++)) return SERIAL_A.write(data, quantity);
+  #ifdef SERIAL_ONSTEP
+    if (isChannel(channel++)) return SERIAL_ONSTEP.write(data, quantity);
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.write(data, quantity);
@@ -220,8 +220,8 @@ size_t SerialWrapper::write(const uint8_t *data, size_t quantity) {
 
 int SerialWrapper::available(void) {
   uint8_t channel = 0;
-  #ifdef SERIAL_A
-    if (isChannel(channel++)) return SERIAL_A.available();
+  #ifdef SERIAL_ONSTEP
+    if (isChannel(channel++)) return SERIAL_ONSTEP.available();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.available();
@@ -252,8 +252,8 @@ int SerialWrapper::available(void) {
 
 int SerialWrapper::read(void) {
   uint8_t channel = 0;
-  #ifdef SERIAL_A
-    if (isChannel(channel++)) return SERIAL_A.read();
+  #ifdef SERIAL_ONSTEP
+    if (isChannel(channel++)) return SERIAL_ONSTEP.read();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.read();
@@ -284,8 +284,8 @@ int SerialWrapper::read(void) {
 
 int SerialWrapper::peek(void) {
   uint8_t channel = 0;
-  #ifdef SERIAL_A
-    if (isChannel(channel++)) return SERIAL_A.peek();
+  #ifdef SERIAL_ONSTEP
+    if (isChannel(channel++)) return SERIAL_ONSTEP.peek();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.peek();
@@ -316,8 +316,8 @@ int SerialWrapper::peek(void) {
 
 void SerialWrapper::flush(void) {
   uint8_t channel = 0;
-  #ifdef SERIAL_A
-    if (isChannel(channel++)) SERIAL_A.flush();
+  #ifdef SERIAL_ONSTEP
+    if (isChannel(channel++)) SERIAL_ONSTEP.flush();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) SERIAL_B.flush();

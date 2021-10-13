@@ -57,7 +57,7 @@ class PollingSerial : public Stream {
     uint8_t xmit_tail = 0;
 };
 
-#ifdef HAL_POLLING_MEGA2560_SERIAL_A
+#ifdef HAL_POLLING_MEGA2560_SERIAL_ONSTEP
 class PollingSerialA : public PollingSerial {
   public:
     void begin(long baud);
