@@ -5,7 +5,7 @@
 
 #if defined(ST4_AUX_W_PIN) && defined(ST4_AUX_S_PIN) && defined(ST4_AUX_N_PIN) && defined(ST4_AUX_E_PIN)
 
-void AuxST4::setup() {
+void AuxST4::init() {
   if (ready) return;
 
   n = new Button(ST4_AUX_N_PIN, INPUT_PULLUP, LOW | HYST(debounceMs));
@@ -19,10 +19,10 @@ void AuxST4::setup() {
 void AuxST4::poll() {
   if (!ready) return;
 
-  n.poll();
-  s.poll();
-  e.poll();
-  w.poll();
+  n->poll();
+  s->poll();
+  e->poll();
+  w->poll();
 }
 
 AuxST4 auxST4;

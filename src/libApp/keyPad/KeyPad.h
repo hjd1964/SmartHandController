@@ -6,7 +6,7 @@
 
 class KeyPad {
 public:
-  void setup(const int pin[7], const int active[7], int thresholdNS, int thresholdEW);
+  void init(const int pin[7], const int active[7], int thresholdNS, int thresholdEW);
 
   void poll();
   bool anyPressed();
@@ -20,3 +20,5 @@ private:
   int debounceMs = 30;
   bool ready = false;
 };
+
+extern KeyPad keyPad;

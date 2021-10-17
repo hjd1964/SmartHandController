@@ -4,18 +4,26 @@
 
 #include "../../Common.h"
 
-#if defined(OPERATIONAL_MODE) && OPERATIONAL_MODE == WIFI
+#if defined(OPERATIONAL_MODE) && OPERATIONAL_MODE == WIFI && \
+    defined(SERIAL_IP_MODE) && (SERIAL_IP_MODE == STATION || SERIAL_IP_MODE == ACCESS_POINT)
 
-#if defined(ESP32) && (SERIAL_IP_MODE == STATION || SERIAL_IP_MODE == ACCESS_POINT)
+  #include "../wifi/WifiManager.h"
 
-  #include <WiFi.h>
-  #include <WiFiClient.h>
-  #include <WiFiAP.h>
+  #if defined(ESP32)
+    #include <WiFi.h>
+    #include <WiFiClient.h>
+    #include <WiFiAP.h>
+  #elif defined(ESP8266)
+    #include <ESP8266WiFi.h>
+    #include <WiFiClient.h>
+    #include <ESP8266WiFiAP.h>
+  #else
+    #error "Configuration (Config.h): No Wifi support is present for this device"
+  #endif
 
   class IPSerial : public Stream {
     public:
-      inline void begin() { begin(9999); }
-      void begin(long port);
+      void begin(long port, unsigned long clientTimeoutMs, bool persist = false);
       
       void end();
 
@@ -43,9 +51,10 @@
       WiFiClient cmdSvrClient;
 
       int port = -1;
-      unsigned long timeout = 60000;
-      unsigned long clientTimeout = 0;
-      bool resetTimeout = false;
+      unsigned long clientTimeoutMs;
+      unsigned long clientEndTimeMs = 0;
+      bool active = false;
+      bool persist = false;
 
       bool accessPointEnabled = SERIAL_IP_MODE == ACCESS_POINT;
       bool stationEnabled     = SERIAL_IP_MODE == STATION || SERIAL_IP_MODE == STATION_DHCP;
@@ -67,16 +76,13 @@
       IPAddress wifi_ap_sn = IPAddress AP_SN_MASK;
   };
 
-  #if STANDARD_COMMAND_CHANNEL == ON
+  #if defined(STANDARD_IPSERIAL_CHANNEL) && STANDARD_IPSERIAL_CHANNEL == ON
     extern IPSerial ipSerial;
     #define SERIAL_IP ipSerial
   #endif
 
-  #if PERSISTENT_COMMAND_CHANNEL == ON
+  #if defined(PERSISTENT_IPSERIAL_CHANNEL) && PERSISTENT_IPSERIAL_CHANNEL == ON
     extern IPSerial pipSerial;
     #define SERIAL_PIP pipSerial
   #endif
-
-#endif
-
 #endif

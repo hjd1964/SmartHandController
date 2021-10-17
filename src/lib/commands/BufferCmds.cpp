@@ -2,7 +2,7 @@
 // Command processing
 
 #include <Arduino.h>
-#include "../constants/Constants.h"
+#include "../Constants.h"
 #include "BufferCmds.h"
 
 void Buffer::init(int mountType) {

@@ -952,7 +952,7 @@ const char *Cat_Collinder_SubId=
 " Cr444a;";
 
 CAT_TYPES Cat_Collinder_Type=CAT_DSO_VCOMP;
-const dso_vcomp_t Cat_Collinder[NUM_COLLINDER] = {
+CAT_ATTR const dso_vcomp_t Cat_Collinder[NUM_COLLINDER] = {
   { 1, 16, 1, 1, 123,  1151,  22326 },
   { 1, 16, 1, 1,  90,  1361,  21921 },
   { 1, 16, 1, 1, 119,  1424,  23065 },

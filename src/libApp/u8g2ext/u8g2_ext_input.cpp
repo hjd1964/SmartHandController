@@ -615,21 +615,12 @@ uint8_t ext_UserInterfaceInputValueLongitude(u8g2_t *u8g2, KeyPad *extPad, long 
   return ext_UserInterfaceInputValueDMS(u8g2, extPad, L_LONGITUDE, value, -648000, 648000, 3, (char *)DEGREE_SYMBOL, (char *)"'", (char *)"\"", (char *)"W ", (char *)"E ", false);
 }
 
-void _gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
+void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
 {
   v3 = v % 60;
   v2 = (v / 60) % 60;
   v1 = v / 3600;
 }
-
-/*
-void _getdms(const long& v, short& v1, uint8_t& v2, uint8_t& v3)
-{
-  v3 = abs(v) % 60;
-  v2 = (abs(v) / 60) % 60;
-  v1 = v / 3600;
-}
-*/
 
 void add_days(uint8_t& year, uint8_t& month, uint8_t& day, int days2add)
 {

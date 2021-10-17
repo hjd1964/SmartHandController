@@ -51,7 +51,7 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
       case 2:
         if (sync) {
           bool isYes = true;
-          if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HERE "?", &isYes)) if (isYes) { DisplayMessageOnStep(onStep.Set(":CS#"),false); return MR_QUIT; }
+          if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HERE "?", &isYes)) if (isYes) { message.show(onStep.Set(":CS#"),false); return MR_QUIT; }
         } else {
           if (menuUser(sync) == MR_QUIT) return MR_QUIT;
         }
@@ -65,13 +65,13 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
       case 5:
       {
         bool GotoHome = false;
-        DisplayMessage(L_SG_HOME1, L_SG_HOME2, 2000);
+        message.show(L_SG_HOME1, L_SG_HOME2, 2000);
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HOME3 "?", &GotoHome)) {
           if (GotoHome) {
             char cmd[5];
             sprintf(cmd, ":hX#");
             cmd[2] = sync ? 'F' : 'C';
-            if (onStep.Set(cmd) == CR_VALUE_SET) DisplayMessage(sync ? L_SG_HOME4 : L_SG_HOME5, " " L_SG_HOME6, -1);
+            if (onStep.Set(cmd) == CR_VALUE_SET) message.show(sync ? L_SG_HOME4 : L_SG_HOME5, " " L_SG_HOME6, -1);
             return MR_QUIT;
           }
         }
@@ -138,10 +138,10 @@ MENU_RESULT UI::menuCatalog(bool sync, int number) {
   if (cat_mgr.isInitialized()) {
     if (cat_mgr.setIndex(cat_mgr.getIndex())) {
       if (display->UserInterfaceCatalog(&keyPad, title)) {
-        if (DisplayMessageOnStep(onStep.SyncGotoCat(sync), false)) return MR_QUIT;
+        if (message.show(onStep.SyncGotoCat(sync), false)) return MR_QUIT;
       }
-    } else DisplayMessage(cat_mgr.catalogTitle(), L_SG_NO_OBJECT, 2000);
-  } else DisplayMessage(cat_mgr.catalogTitle(), L_SG_NO_INIT "?", 2000);
+    } else message.show(cat_mgr.catalogTitle(), L_SG_NO_OBJECT, 2000);
+  } else message.show(cat_mgr.catalogTitle(), L_SG_NO_INIT "?", 2000);
   return MR_CANCEL;
 }
 
@@ -156,12 +156,12 @@ MENU_RESULT UI::menuSolarSys(bool sync) {
   if (current_selection>3) current_selection++;
   if (current_selection == 1)
   { 
-    DisplayMessage(L_SG_SOL_WARN1, L_SG_SOL_WARN2, 2000);
+    message.show(L_SG_SOL_WARN1, L_SG_SOL_WARN2, 2000);
     bool GotoSun = false;
     if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_GSUN "?", &GotoSun)) { if (!GotoSun) return MR_CANCEL; } else return MR_CANCEL;
   }
 
-  if (DisplayMessageOnStep(onStep.SyncGotoPlanet(sync, current_selection-1),false)) return MR_QUIT;
+  if (message.show(onStep.SyncGotoPlanet(sync, current_selection-1),false)) return MR_QUIT;
   return MR_CANCEL;
 }
 
@@ -192,7 +192,7 @@ MENU_RESULT UI::menuUser(bool sync) {
   }
 
   // no catalogs found, just exit
-  if (i <= 0) { DisplayMessage(L_SG_USER_MSG1, L_SG_USER_MSG2, 2000); return MR_OK; }
+  if (i <= 0) { message.show(L_SG_USER_MSG1, L_SG_USER_MSG2, 2000); return MR_OK; }
 
   int last_selection_UserCatalog = current_selection_UserCatalog;
   while (true) {
@@ -205,7 +205,7 @@ MENU_RESULT UI::menuUser(bool sync) {
 
     // show the catalog objects
     if (display->UserInterfaceUserCatalog(&keyPad, sync ? L_SG_SYNC_USER_ITEM : L_SG_GOTO_USER_ITEM)) {
-      if (DisplayMessageOnStep(onStep.Set(":LIG#"))) return MR_QUIT;
+      if (message.show(onStep.Set(":LIG#"))) return MR_QUIT;
     }
   }
 }
@@ -249,11 +249,11 @@ MENU_RESULT UI::menuFilters() {
         current_selection_filter_dblmin = 1;
         current_selection_filter_dblmax = 1;
         current_selection_filter_varmax = 1;
-        DisplayMessage(L_SG_FILT_MSG1, L_SG_FILT_MSG2, 1000);
+        message.show(L_SG_FILT_MSG1, L_SG_FILT_MSG2, 1000);
       break;
       case 2:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_FILT_MSG3 "?", &current_selection_filter_above)) {
-          if (current_selection_filter_above) DisplayMessage(L_SG_FILTER, L_ON, 1000); else DisplayMessage(L_SG_FILTER, L_OFF, 1000);
+          if (current_selection_filter_above) message.show(L_SG_FILTER, L_ON, 1000); else message.show(L_SG_FILTER, L_OFF, 1000);
         }
       break;
       case 3:
@@ -358,7 +358,7 @@ MENU_RESULT UI::menuFilterDblMinSep() {
     if (current_selection_filter_dblmin <= 1) break;                               // abort or inactive
     if (current_selection_filter_dblmax <= 1) break;                               // any minimum is ok
     if (current_selection_filter_dblmin <= current_selection_filter_dblmax) break; // minimum is below max, all is well exit
-    DisplayMessage(L_SG_SEP_MIN_MSG1, L_SG_SEP_MIN_MSG2, 2000);                    // provide a hint
+    message.show(L_SG_SEP_MIN_MSG1, L_SG_SEP_MIN_MSG2, 2000);                    // provide a hint
     current_selection_filter_dblmin=current_selection_filter_dblmax;               // 
   }
   return MR_OK;
@@ -374,7 +374,7 @@ MENU_RESULT UI::menuFilterDblMaxSep() {
     if (current_selection_filter_dblmax <= 1) break;                               // abort or inactive
     if (current_selection_filter_dblmin <= 1) break;                               // any maximum is ok
     if (current_selection_filter_dblmax >= current_selection_filter_dblmin) break; // maximum is above min, all is well exit
-    DisplayMessage(L_SG_SEP_MAX_MSG1, L_SG_SEP_MAX_MSG2, 2000);                    // provide a hint
+    message.show(L_SG_SEP_MAX_MSG1, L_SG_SEP_MAX_MSG2, 2000);                    // provide a hint
     current_selection_filter_dblmax = current_selection_filter_dblmin;             // 
   }
   return MR_OK;
@@ -399,7 +399,7 @@ MENU_RESULT UI::menuRADec(bool sync) {
     if (display->UserInterfaceInputValueDec(&keyPad, &angleDEC)) {
       float fD;
       secondsToFloat(angleDEC,fD);
-      if (DisplayMessageOnStep(onStep.SyncGoto(sync, fR, fD))) return MR_QUIT;
+      if (message.show(onStep.SyncGoto(sync, fR, fD))) return MR_QUIT;
     }
   }
   return MR_CANCEL;

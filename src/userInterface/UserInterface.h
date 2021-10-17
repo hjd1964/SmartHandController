@@ -7,6 +7,7 @@
 #include "../libApp/u8g2ext/u8g2_ext.h"
 #include "../libApp/status/Status.h"
 #include "../libApp/cmd/Cmd.h"
+#include "message/Message.h"
 
 #define SH1106 0
 #define SSD1306 1
@@ -25,6 +26,18 @@
 #define onstep_logo_height 68
 
 enum MENU_RESULT { MR_OK, MR_CANCEL, MR_QUIT };
+enum FocusState {FS_STOPPED, FS_IN_FAST, FS_IN_SLOW, FS_OUT_SLOW, FS_OUT_FAST};
+enum RotState {RS_STOPPED, RS_CW_FAST, RS_CW_SLOW, RS_CCW_SLOW, RS_CCW_FAST};
+
+#define DisplaySettingsSize 24
+typedef struct DisplaySettings {
+  int32_t maxContrastSelection;
+  int32_t dimTimeoutSelection;
+  int32_t blankTimeoutSelection;
+  uint8_t maxContrast;
+  unsigned long blankTimeout;
+  unsigned long dimTimeout;
+} DisplaySettings;
 
 class UI {
 public:
@@ -42,20 +55,19 @@ public:
 private:
   unsigned long maxT=0;
 
-  KeyPad keyPad;
+
   U8G2_EXT *display = NULL;
 
   Status status;
   char _version[20] = "Version ?";
   char briefMessage[40] = "";
 
+  DisplaySettings displaySettings = {1, 2, 3, 255, 0, 0};
+
   void updateMainDisplay( u8g2_uint_t page);
   bool sleepDisplay = false;
   bool lowContrast = false;
-  uint8_t maxContrast = 255;
   int Contrast[4] = {1, 66, 192, 255};
-  unsigned long display_blank_time;
-  unsigned long display_dim_time;
   bool buttonCommand = false;
   bool moveNorth = false;
   bool moveSouth = false;
@@ -98,8 +110,8 @@ private:
   long angleRA = 0;
   long angleDEC = 0;
 
-  void initNV();
-  void readNV();
+  FocusState focusState = FS_STOPPED;
+  RotState rotState = RS_STOPPED;
 
   void menuMain();
   void menuFeatureKey();
@@ -154,10 +166,6 @@ private:
   void menuMeridianE();
   void menuMeridianW();
   void menuFirmware();
-
-  void DisplayMessage(const char* txt1, const char* txt2 = NULL, int duration = 0);
-  void DisplayLongMessage(const char* txt1, const char* txt2 = NULL, const char* txt3 = NULL, const char* txt4 = NULL, int duration = 0);
-  bool DisplayMessageOnStep(CMD_RESULT val, bool silentOk = true);
 };
 
 extern UI userInterface;
