@@ -39,11 +39,11 @@ void UI::menuGotoSpeed() {
     current_selection_L3 = display->UserInterfaceSelectionList(&keyPad, L_MOUNT_SPEED, current_selection_L3, string_list_LimitsL2);
     switch (current_selection_L3)
     {
-    case 1: onStep.Set(":SX93,1#"); DisplayMessage(L_MOUNT_SPEED, "2X", 1500); break;
-    case 2: onStep.Set(":SX93,2#"); DisplayMessage(L_MOUNT_SPEED, "1.5X", 1500); break;
-    case 3: onStep.Set(":SX93,3#"); DisplayMessage(L_MOUNT_SPEED, "1X", 1500); break;
-    case 4: onStep.Set(":SX93,4#"); DisplayMessage(L_MOUNT_SPEED, "0.75X", 1500); break;
-    case 5: onStep.Set(":SX93,5#"); DisplayMessage(L_MOUNT_SPEED, "0.5X", 1500); break;
+    case 1: onStep.Set(":SX93,1#"); message.show(L_MOUNT_SPEED, "2X", 1500); break;
+    case 2: onStep.Set(":SX93,2#"); message.show(L_MOUNT_SPEED, "1.5X", 1500); break;
+    case 3: onStep.Set(":SX93,3#"); message.show(L_MOUNT_SPEED, "1X", 1500); break;
+    case 4: onStep.Set(":SX93,4#"); message.show(L_MOUNT_SPEED, "0.75X", 1500); break;
+    case 5: onStep.Set(":SX93,5#"); message.show(L_MOUNT_SPEED, "0.5X", 1500); break;
     }
   }
 }
@@ -67,11 +67,11 @@ void UI::menuBacklash()
 bool UI::menuSetBacklash(uint8_t &axis)
 {
   float backlash;
-  if (!DisplayMessageOnStep(onStep.readBacklash(axis, backlash))) return false;
+  if (!message.show(onStep.readBacklash(axis, backlash))) return false;
   char text[20];
   sprintf(text, L_MOUNT_BL " Axis%u", axis);
   if (display->UserInterfaceInputValueFloat(&keyPad, text, "", &backlash, 0, 3600, 4, 0, " " L_ARCSEC)) {
-    return DisplayMessageOnStep(onStep.writeBacklash(axis, backlash), false);
+    return message.show(onStep.writeBacklash(axis, backlash), false);
   }
   return true;
 }
@@ -107,48 +107,48 @@ void UI::menuLimits() {
 
 void UI::menuHorizon() {
   char out[20];
-  if (DisplayMessageOnStep(onStep.Get(":Gh#", out))) {
+  if (message.show(onStep.Get(":Gh#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
     if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_HORIZON, "", &angle, -10, 20, 2, 0, " degree")) {
       sprintf(out, ":Sh%+03d#", (int)angle);
-      DisplayMessageOnStep(onStep.Set(out), false);
+      message.show(onStep.Set(out), false);
     }
   }
 }
 
 void UI::menuOverhead() {
   char out[20];
-  if (DisplayMessageOnStep(onStep.Get(":Go#", out))) {
+  if (message.show(onStep.Get(":Go#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
     if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_OVERHEAD, "", &angle, 60, 91, 2, 0, " " L_DEGREE)) {
       sprintf(out, ":So%02d#", (int)angle);
-      DisplayMessageOnStep(onStep.Set(out), false);
+      message.show(onStep.Set(out), false);
     }
   }
 }
 
 void UI::menuMeridianE() {
   char out[20] = "";
-  if (DisplayMessageOnStep(onStep.Get(":GXE9#", out))) {
+  if (message.show(onStep.Get(":GXE9#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
     angle = round((angle * 15.0) / 60.0);
     if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_MERIDIAN_EAST, "", &angle, -180, 180, 3, 0, " " L_DEGREE)) {
       angle = round((angle * 60.0) / 15.0);
       sprintf(out, ":SXE9,%+02d#", (int)angle);
-      DisplayMessageOnStep(onStep.Set(out), false);
+      message.show(onStep.Set(out), false);
     }
   }
 }
 
 void UI::menuMeridianW() {
   char out[20] = "";
-  if (DisplayMessageOnStep(onStep.Get(":GXEA#", out))) {
+  if (message.show(onStep.Get(":GXEA#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
     angle = round((angle * 15.0) / 60.0);
     if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_MERIDIAN_WEST, "", &angle, -180, 180, 3, 0, " " L_DEGREE)) {
       angle = round((angle * 60.0) / 15.0);
       sprintf(out, ":SXEA,%+02d#", (int)angle);
-      DisplayMessageOnStep(onStep.Set(out), false);
+      message.show(onStep.Set(out), false);
     }
   }
 }
@@ -165,9 +165,9 @@ void UI::menuPier() {
     
     choice = display->UserInterfaceSelectionList(&keyPad, L_MOUNT_PPS, choice, L_PPS_BEST "\n" L_PPS_EAST "\n" L_PPS_WEST);
     if (choice) {
-      if (choice == 1) ok = DisplayMessageOnStep(onStep.Set(":SX96,B#"), false); else
-      if (choice == 2) ok = DisplayMessageOnStep(onStep.Set(":SX96,E#"), false); else
-      if (choice == 3) ok = DisplayMessageOnStep(onStep.Set(":SX96,W#"), false);
+      if (choice == 1) ok = message.show(onStep.Set(":SX96,B#"), false); else
+      if (choice == 2) ok = message.show(onStep.Set(":SX96,E#"), false); else
+      if (choice == 3) ok = message.show(onStep.Set(":SX96,W#"), false);
     }
   }
 }

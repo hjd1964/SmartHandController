@@ -3,23 +3,21 @@
 
 #include "SerialWrapper.h"
 
-#ifdef ESP32
-  #include "../serial/Serial_IP_ESP32.h"
-#endif
+#include "../serial/Serial_IP_Wifi.h"
 #include "../serial/Serial_IP_Ethernet.h"
 
 #ifdef MOUNT_PRESENT
-  #if ST4_AUX_INTERFACE == ON && ST4_HAND_CONTROL == ON
+  #if ST4_INTERFACE == ON && ST4_HAND_CONTROL == ON
     #include "../serial/Serial_ST4_Master.h"
   #endif
   #include "../serial/Serial_Local.h"
 #endif
 
-#if SERIAL_ONSTEP == HardSerial
-  #undef SERIAL_ONSTEP
-  HardwareSerial HWSerialA(SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
-  #define SERIAL_ONSTEP HWSerialA
-  #define SERIAL_ONSTEP_RXTX_SET
+#if SERIAL_A == HardSerial
+  #undef SERIAL_A
+  HardwareSerial HWSerialA(SERIAL_A_RX, SERIAL_A_TX);
+  #define SERIAL_A HWSerialA
+  #define SERIAL_A_RXTX_SET
 #endif
 
 #if SERIAL_B == HardSerial
@@ -29,10 +27,13 @@
   #define SERIAL_B_RXTX_SET
 #endif
 
+#ifdef SERIAL_BT
+  BluetoothSerial bluetoothSerial;
+#endif
 
 SerialWrapper::SerialWrapper() {
   static uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
+  #ifdef SERIAL_A
     if (!hasChannel(channel)) { thisChannel = channel; setChannel(channel); return; }
     channel++;
   #endif
@@ -68,18 +69,19 @@ SerialWrapper::SerialWrapper() {
     if (!hasChannel(channel)) { thisChannel = channel; setChannel(channel); return; }
     channel++;
   #endif
+  UNUSED(channel);
 }
 
 void SerialWrapper::begin() { begin(9600); }
 
 void SerialWrapper::begin(long baud) {
   uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
+  #ifdef SERIAL_A
     if (isChannel(channel++))
-      #if defined(SERIAL_ONSTEP_RX) && defined(SERIAL_ONSTEP_TX) && !defined(SERIAL_ONSTEP_RXTX_SET)
-        SERIAL_ONSTEP.begin(baud, SERIAL_8N1, SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
+      #if defined(SERIAL_A_RX) && defined(SERIAL_A_TX) && !defined(SERIAL_A_RXTX_SET)
+        SERIAL_A.begin(baud, SERIAL_8N1, SERIAL_A_RX, SERIAL_A_TX);
       #else
-        SERIAL_ONSTEP.begin(baud);
+        SERIAL_A.begin(baud);
       #endif
   #endif
   #ifdef SERIAL_B
@@ -113,20 +115,22 @@ void SerialWrapper::begin(long baud) {
     //if (isChannel(channel++)) SERIAL_BT.begin(SERIAL_BT_NAME); // started early in .ino file
   #endif
   #ifdef SERIAL_IP
-    if (isChannel(channel++)) SERIAL_IP.begin(9999);
+    if (isChannel(channel++)) SERIAL_IP.begin(9999, 2L*1000L);
   #endif
   #ifdef SERIAL_PIP
-    if (isChannel(channel++)) SERIAL_PIP.begin(9999);
+    if (isChannel(channel++)) SERIAL_PIP.begin(9998, 120L*1000L, true);
   #endif
   #ifdef SERIAL_LOCAL
     if (isChannel(channel++)) SERIAL_LOCAL.begin(baud);
   #endif
+  UNUSED(baud);
+  UNUSED(channel);
 }
 
 void SerialWrapper::end() {
   uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
-    if (isChannel(channel++)) SERIAL_ONSTEP.end();
+  #ifdef SERIAL_A
+    if (isChannel(channel++)) SERIAL_A.end();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) SERIAL_B.end();
@@ -152,12 +156,13 @@ void SerialWrapper::end() {
   #ifdef SERIAL_LOCAL
     if (isChannel(channel++)) SERIAL_LOCAL.end();
   #endif
+  UNUSED(channel);
 }
 
 size_t SerialWrapper::write(uint8_t data) {
   uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
-    if (isChannel(channel++)) return SERIAL_ONSTEP.write(data);
+  #ifdef SERIAL_A
+    if (isChannel(channel++)) return SERIAL_A.write(data);
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.write(data);
@@ -183,13 +188,15 @@ size_t SerialWrapper::write(uint8_t data) {
   #ifdef SERIAL_LOCAL
     if (isChannel(channel++)) return SERIAL_LOCAL.write(data);
   #endif
+  UNUSED(data);
+  UNUSED(channel);
   return -1;
 }
 
 size_t SerialWrapper::write(const uint8_t *data, size_t quantity) {
   uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
-    if (isChannel(channel++)) return SERIAL_ONSTEP.write(data, quantity);
+  #ifdef SERIAL_A
+    if (isChannel(channel++)) return SERIAL_A.write(data, quantity);
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.write(data, quantity);
@@ -215,13 +222,16 @@ size_t SerialWrapper::write(const uint8_t *data, size_t quantity) {
   #ifdef SERIAL_LOCAL
     if (isChannel(channel++)) return SERIAL_LOCAL.write(data, quantity);
   #endif
+  UNUSED(data);
+  UNUSED(quantity);
+  UNUSED(channel);
   return -1;
 }
 
-int SerialWrapper::available(void) {
+int SerialWrapper::available() {
   uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
-    if (isChannel(channel++)) return SERIAL_ONSTEP.available();
+  #ifdef SERIAL_A
+    if (isChannel(channel++)) return SERIAL_A.available();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.available();
@@ -247,13 +257,14 @@ int SerialWrapper::available(void) {
   #ifdef SERIAL_LOCAL
     if (isChannel(channel++)) return SERIAL_LOCAL.available();
   #endif
+  UNUSED(channel);
   return 0;
 }
 
-int SerialWrapper::read(void) {
+int SerialWrapper::read() {
   uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
-    if (isChannel(channel++)) return SERIAL_ONSTEP.read();
+  #ifdef SERIAL_A
+    if (isChannel(channel++)) return SERIAL_A.read();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.read();
@@ -279,13 +290,14 @@ int SerialWrapper::read(void) {
   #ifdef SERIAL_LOCAL
     if (isChannel(channel++)) return SERIAL_LOCAL.read();
   #endif
+  UNUSED(channel);
   return -1;
 }
 
-int SerialWrapper::peek(void) {
+int SerialWrapper::peek() {
   uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
-    if (isChannel(channel++)) return SERIAL_ONSTEP.peek();
+  #ifdef SERIAL_A
+    if (isChannel(channel++)) return SERIAL_A.peek();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) return SERIAL_B.peek();
@@ -311,13 +323,14 @@ int SerialWrapper::peek(void) {
   #ifdef SERIAL_LOCAL
     if (isChannel(channel++)) return SERIAL_LOCAL.peek();
   #endif
+  UNUSED(channel);
   return -1;
 }
 
-void SerialWrapper::flush(void) {
+void SerialWrapper::flush() {
   uint8_t channel = 0;
-  #ifdef SERIAL_ONSTEP
-    if (isChannel(channel++)) SERIAL_ONSTEP.flush();
+  #ifdef SERIAL_A
+    if (isChannel(channel++)) SERIAL_A.flush();
   #endif
   #ifdef SERIAL_B
     if (isChannel(channel++)) SERIAL_B.flush();
@@ -343,4 +356,5 @@ void SerialWrapper::flush(void) {
   #ifdef SERIAL_LOCAL
     if (isChannel(channel++)) SERIAL_LOCAL.flush();
   #endif
+  UNUSED(channel);
 }

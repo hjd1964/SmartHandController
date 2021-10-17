@@ -4,7 +4,7 @@
 
 #include "../../Common.h"
 
-void KeyPad::setup(const int pin[7], const int active[7], int thresholdNS, int thresholdEW) {
+void KeyPad::init(const int pin[7], const int active[7], int thresholdNS, int thresholdEW) {
   if (ready) return;
 
   if (thresholdNS == 0 && thresholdEW == 0) {
@@ -16,11 +16,15 @@ void KeyPad::setup(const int pin[7], const int active[7], int thresholdNS, int t
     F     = new Button(pin[5], INPUT_PULLUP, active[5] | HYST(debounceMs));
     f     = new Button(pin[6], INPUT_PULLUP, active[6] | HYST(debounceMs));
   } else {
-    shift = new Button(pin[0], INPUT_PULLUP, active[0] | THLD( thresholdNS) | HYST(300));
-    n     = new Button(pin[1], INPUT_PULLUP, active[1] | THLD(-thresholdNS) | HYST(300));
-    s     = new Button(pin[2], INPUT_PULLUP, active[2] | THLD( thresholdEW) | HYST(300));
-    e     = new Button(pin[3], INPUT_PULLUP, active[3] | THLD(-thresholdEW) | HYST(300));
-    w     = new Button(pin[4], INPUT_PULLUP, active[4] | HYST(debounceMs));
+    int active1 = active[1];
+    int active3 = active[3];
+    if (active1 == LOW) active1 = HIGH;
+    if (active3 == LOW) active3 = HIGH;
+    shift = new Button(pin[0], INPUT_PULLUP, active[0] | HYST(debounceMs));
+    n     = new Button(pin[1], INPUT_PULLUP, active1   | THLD(thresholdNS) | HYST(300));
+    s     = new Button(pin[2], INPUT_PULLUP, active[2] | THLD(thresholdNS) | HYST(300));
+    e     = new Button(pin[3], INPUT_PULLUP, active3   | THLD(thresholdEW) | HYST(300));
+    w     = new Button(pin[4], INPUT_PULLUP, active[4] | THLD(thresholdEW) | HYST(300));
     F     = new Button(pin[5], INPUT_PULLUP, active[5] | HYST(debounceMs));
     f     = new Button(pin[6], INPUT_PULLUP, active[6] | HYST(debounceMs));
   }
@@ -91,3 +95,5 @@ void KeyPad::clearAllPressed() {
   F->clearPress();
   f->clearPress();
 }
+
+KeyPad keyPad;

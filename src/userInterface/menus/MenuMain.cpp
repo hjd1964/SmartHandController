@@ -88,27 +88,27 @@ void UI::menuParking() {
     switch (current_selection_L1) {
       case 1:
         if (onStep.Set(":hP#")== CR_VALUE_SET) {
-          DisplayMessage(L_PARKING, L_TELESCOPE, 500); 
+          message.show(L_PARKING, L_TELESCOPE, 500); 
           current_selection_L1 = 0;
           current_selection_L0 = 0;
-        } else DisplayMessage(L_PARK, L_FAILED, 1000);
+        } else message.show(L_PARK, L_FAILED, 1000);
       break;
       case 2:
         if (onStep.Set(":hR#")== CR_VALUE_SET) {
-          DisplayMessage(L_UNPARKING, L_TELESCOPE, 500); 
+          message.show(L_UNPARKING, L_TELESCOPE, 500); 
           current_selection_L1 = 0;
-        } else DisplayMessage(L_UNPARK, L_FAILED, 1000);
+        } else message.show(L_UNPARK, L_FAILED, 1000);
       break;
       case 3: 
         boolean SetP=false; 
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_SETPARK "?", &SetP)) {
           if (SetP) {
             if (onStep.Set(":hQ#")== CR_VALUE_SET) {
-              DisplayMessage(L_SETPARK, L_OK, 500);
+              message.show(L_SETPARK, L_OK, 500);
               current_selection_L1 = 0;
-            } else DisplayMessage(L_SETPARK, L_FAILED, 1000); 
-          } else DisplayMessage(L_SETPARK, L_CANCELED, 500);
-        } else DisplayMessage(L_SETPARK, L_CANCELED, 500);
+            } else message.show(L_SETPARK, L_FAILED, 1000); 
+          } else message.show(L_SETPARK, L_CANCELED, 500);
+        } else message.show(L_SETPARK, L_CANCELED, 500);
       break;
     }
   }
@@ -130,17 +130,17 @@ void UI::menuTracking() {
       switch (current_selection_L1) {
         case 1:
           if (currentstate == Status::TRK_ON) {
-            if (onStep.Set(":Td#")== CR_VALUE_SET) { DisplayMessage(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
+            if (onStep.Set(":Td#")== CR_VALUE_SET) { message.show(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else message.show(L_SET_STATE, L_FAILED, 1000);
           } else {
-            if (onStep.Set(":Te#")== CR_VALUE_SET) { DisplayMessage(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
+            if (onStep.Set(":Te#")== CR_VALUE_SET) { message.show(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else message.show(L_SET_STATE, L_FAILED, 1000);
           }
         break;
-        case 2: DisplayMessageOnStep(onStep.Set(":TQ#"), false); break;
-        case 3: DisplayMessageOnStep(onStep.Set(":TS#"), false); break;
-        case 4: DisplayMessageOnStep(onStep.Set(":TL#"), false); break;
-        case 5: DisplayMessageOnStep(onStep.Set(":TR#"), false); break;
-        case 6: DisplayMessageOnStep(onStep.Set(":T+#"), false); break;
-        case 7: DisplayMessageOnStep(onStep.Set(":T-#"), false); break;
+        case 2: message.show(onStep.Set(":TQ#"), false); break;
+        case 3: message.show(onStep.Set(":TS#"), false); break;
+        case 4: message.show(onStep.Set(":TL#"), false); break;
+        case 5: message.show(onStep.Set(":TR#"), false); break;
+        case 6: message.show(onStep.Set(":T+#"), false); break;
+        case 7: message.show(onStep.Set(":T-#"), false); break;
       }
     }
   } else {
@@ -156,22 +156,22 @@ void UI::menuTracking() {
       switch (current_selection_L1) {
         case 1:
           if (currentstate == Status::TRK_ON) {
-            if (onStep.Set(":Td#")== CR_VALUE_SET) { DisplayMessage(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
+            if (onStep.Set(":Td#")== CR_VALUE_SET) { message.show(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else message.show(L_SET_STATE, L_FAILED, 1000);
           } else {
-            if (onStep.Set(":Te#")== CR_VALUE_SET) { DisplayMessage(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else DisplayMessage(L_SET_STATE, L_FAILED, 1000);
+            if (onStep.Set(":Te#")== CR_VALUE_SET) { message.show(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else message.show(L_SET_STATE, L_FAILED, 1000);
           }
         break;
-        case 2:  DisplayMessageOnStep(onStep.Set(":TQ#"), false); break;
-        case 3:  DisplayMessageOnStep(onStep.Set(":TS#"), false); break;
-        case 4:  DisplayMessageOnStep(onStep.Set(":TL#"), false); break;
-        case 5:  DisplayMessageOnStep(onStep.Set(":To#"), false); break;
-        case 6:  DisplayMessageOnStep(onStep.Set(":Tr#"), false); break;
-        case 7:  DisplayMessageOnStep(onStep.Set(":Tn#"), false); break;
-        case 8:  DisplayMessageOnStep(onStep.Set(":T1#"), false); break;
-        case 9:  DisplayMessageOnStep(onStep.Set(":T2#"), false); break;
-        case 10: DisplayMessageOnStep(onStep.Set(":TR#"), false); break;
-        case 11: DisplayMessageOnStep(onStep.Set(":T+#"), false); break;
-        case 12: DisplayMessageOnStep(onStep.Set(":T-#"), false); break;
+        case 2:  message.show(onStep.Set(":TQ#"), false); break;
+        case 3:  message.show(onStep.Set(":TS#"), false); break;
+        case 4:  message.show(onStep.Set(":TL#"), false); break;
+        case 5:  message.show(onStep.Set(":To#"), false); break;
+        case 6:  message.show(onStep.Set(":Tr#"), false); break;
+        case 7:  message.show(onStep.Set(":Tn#"), false); break;
+        case 8:  message.show(onStep.Set(":T1#"), false); break;
+        case 9:  message.show(onStep.Set(":T2#"), false); break;
+        case 10: message.show(onStep.Set(":TR#"), false); break;
+        case 11: message.show(onStep.Set(":T+#"), false); break;
+        case 12: message.show(onStep.Set(":T-#"), false); break;
       }
     }
   }
@@ -186,11 +186,11 @@ void UI::menuPEC() {
     current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_PEC, current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {
-    case 1: DisplayMessageOnStep(onStep.Set(":$QZ+#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_PLAYING, 1000); break;
-    case 2: DisplayMessageOnStep(onStep.Set(":$QZ-#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_STOPPED, 1000); break;
-    case 3: DisplayMessageOnStep(onStep.Set(":$QZZ#"), false); break;
-    case 4: DisplayMessageOnStep(onStep.Set(":$QZ/#"), true); current_selection_L0 = 0; current_selection_L1 = 0; DisplayMessage(L_PEC, L_PEC_RECORDING, 1000); break;
-    case 5: DisplayMessageOnStep(onStep.Set(":$QZ!#"), false); break;
+    case 1: message.show(onStep.Set(":$QZ+#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_PLAYING, 1000); break;
+    case 2: message.show(onStep.Set(":$QZ-#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_STOPPED, 1000); break;
+    case 3: message.show(onStep.Set(":$QZZ#"), false); break;
+    case 4: message.show(onStep.Set(":$QZ/#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_RECORDING, 1000); break;
+    case 5: message.show(onStep.Set(":$QZ!#"), false); break;
     default: break;
     }
   }

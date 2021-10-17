@@ -49,25 +49,25 @@ void UI::menuSettings() {
 void UI::menuLocalDateTime() {
   char out[20];
   // Date
-  if (DisplayMessageOnStep(onStep.Get(":GC#", out))) {
+  if (message.show(onStep.Get(":GC#", out))) {
     char* pEnd;
     uint8_t month = strtol(&out[0], &pEnd, 10);
     uint8_t day = strtol(&out[3], &pEnd, 10);
     uint8_t year = strtol(&out[6], &pEnd, 10);
     if (display->UserInterfaceInputValueDate(&keyPad, L_SET_LOCAL_DATE, year, month, day)) {
-      sprintf(out, ":SC%02d/%02d/%02d#", month, day, year); DisplayMessageOnStep(onStep.Set(out),false);
+      sprintf(out, ":SC%02d/%02d/%02d#", month, day, year); message.show(onStep.Set(out),false);
       // Time
       long value;
       boolean pmf=false;
       boolean dst=false;
-      if (DisplayMessageOnStep(onStep.GetTime(value))) {
+      if (message.show(onStep.GetTime(value))) {
         if ((!hrs24) && (value>=43200)) { value-=43200; pmf=true; }
         if (display->UserInterfaceInputValueTime(&keyPad, &value, hrs24)) {
           if (hrs24 || (display->UserInterfaceInputValueBoolean(&keyPad, L_SET_LOCAL_PM "?", &pmf))) {
             if (pmf) value+=43200; // AM or PM?
             if (display->UserInterfaceInputValueBoolean(&keyPad, L_SET_LOCAL_DST "?", &dst)) {
               if (dst) value-=3600; // Dst?
-              DisplayMessageOnStep(onStep.SetTime(value),false);
+              message.show(onStep.SetTime(value),false);
             }
           }
         }
@@ -83,7 +83,7 @@ void UI::menuDisplay() {
     current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, L_DISPLAY, current_selection_L2, string_list_Display);
     switch (current_selection_L2) {
       case 1:
-        DisplayMessage(L_SET_DISP_MSG1, L_SET_DISP_MSG2, 1500);
+        message.show(L_SET_DISP_MSG1, L_SET_DISP_MSG2, 1500);
         sleepDisplay = true;
         display->sleepOn();
         current_selection_L2 = 0;
@@ -105,42 +105,45 @@ void UI::menuDisplay() {
 
 void UI::menuContrast() {
   const char *string_list_Display = L_SET_DISP_MIN "\n" L_SET_DISP_LOW "\n" L_SET_DISP_HIGH "\n" L_SET_DISP_MAX;
-  current_selection_L3 = nv.readL(EE_dispMaxContrast);
+  current_selection_L3 = displaySettings.maxContrastSelection + 1;
   
   current_selection_L3 = display->UserInterfaceSelectionList(&keyPad, L_SET_DISP_CONTRAST, current_selection_L3, string_list_Display);
   if (current_selection_L3 > 0) {
-    maxContrast = UI::Contrast[current_selection_L3 - 1];
-    display->setContrast(maxContrast);
-    nv.write(EE_dispMaxContrast, (int32_t)current_selection_L3);
+    displaySettings.maxContrastSelection = current_selection_L3 - 1;
+    displaySettings.maxContrast = UI::Contrast[displaySettings.maxContrastSelection];
+    display->setContrast(displaySettings.maxContrast);
+    nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
   }
 }
 
 void UI::menuDimTimeout() {
   const char *string_list_Display = L_DISABLE "\n""30 " L_SEC_ABV "\n""60 " L_SEC_ABV;
-  current_selection_L3 = nv.readL(EE_dispDimTimeout);
+  current_selection_L3 = displaySettings.dimTimeoutSelection + 1;
 
   current_selection_L3 = display->UserInterfaceSelectionList(&keyPad, L_SET_DISP_DIM_TO, current_selection_L3, string_list_Display);
   if (current_selection_L3 > 0) {
-    display_dim_time = (current_selection_L3 - 1) * 30000;
-    nv.write(EE_dispDimTimeout, (int32_t)current_selection_L3);
+    displaySettings.dimTimeoutSelection = current_selection_L3 - 1;
+    displaySettings.dimTimeout = displaySettings.dimTimeoutSelection * 30000;
+    nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
   }
 }
 
 void UI::menuBlankTimeout() {
   const char *string_list_Display = L_DISABLE "\n""1 " L_MIN_ABV "\n""2 " L_MIN_ABV "\n""3 " L_MIN_ABV "\n""4 " L_MIN_ABV "\n""5 " L_MIN_ABV;
-  current_selection_L3 = nv.readL(EE_dispBlankTimeout);
+  current_selection_L3 = displaySettings.blankTimeoutSelection + 1;
 
   current_selection_L3 = display->UserInterfaceSelectionList(&keyPad, L_SET_DISP_BLANK_TO, current_selection_L3, string_list_Display);
   if (current_selection_L3 > 0) {
-    display_blank_time = (current_selection_L3 - 1) * 60 * 1000;
-    nv.write(EE_dispBlankTimeout, (int32_t)current_selection_L3);
+    displaySettings.blankTimeoutSelection = current_selection_L3 - 1;
+    displaySettings.blankTimeout = displaySettings.blankTimeoutSelection * 60 * 1000;
+    nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
   }
 }
 
 void UI::menuSound() {
   boolean sound = false;
   if (display->UserInterfaceInputValueBoolean(&keyPad, L_SET_BUZZER, &sound)) {
-    if (sound) DisplayMessageOnStep(onStep.Set(":SX97,1#"),false); else DisplayMessageOnStep(onStep.Set(":SX97,0#"),false);
+    if (sound) message.show(onStep.Set(":SX97,1#"),false); else message.show(onStep.Set(":SX97,0#"),false);
   }
 }
 
@@ -153,16 +156,16 @@ void UI::menuMeridianFlips() {
     current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, L_SET_MF, current_selection_L2, string_list);
     switch (current_selection_L2) {
       case 1:
-        DisplayMessageOnStep(onStep.Set(":MN#"),false);
+        message.show(onStep.Set(":MN#"),false);
       break;
       case 2:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_SET_MF_AF, &autoflip)) {
-          if (autoflip) DisplayMessageOnStep(onStep.Set(":SX95,1#"),false); else DisplayMessageOnStep(onStep.Set(":SX95,0#"),false);
+          if (autoflip) message.show(onStep.Set(":SX95,1#"),false); else message.show(onStep.Set(":SX95,0#"),false);
         }
       break;
       case 3:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_SET_MF_PF, &pause)) {
-          if (pause) DisplayMessageOnStep(onStep.Set(":SX97,1#"),false); else DisplayMessageOnStep(onStep.Set(":SX97,0#"),false);
+          if (pause) message.show(onStep.Set(":SX97,1#"),false); else message.show(onStep.Set(":SX97,0#"),false);
         }
       break;
     }
@@ -185,7 +188,7 @@ void UI::menuSite() {
 
 void UI::menuSites() {
   int val;
-  if (DisplayMessageOnStep(onStep.GetSite(val))) {
+  if (message.show(onStep.GetSite(val))) {
     current_selection_L3 = val;
     const char *string_list_SiteL3 = L_SET_SITE_NUM " 1" "\n" L_SET_SITE_NUM " 2" "\n" L_SET_SITE_NUM " 3" "\n" L_SET_SITE_NUM " 4";
     current_selection_L3 = display->UserInterfaceSelectionList(&keyPad, L_SET_SITE_NUM_TITLE, current_selection_L3, string_list_SiteL3);
@@ -198,7 +201,7 @@ void UI::menuSites() {
 
 void UI::menuLatitude() {
   char out[20];
-  if (DisplayMessageOnStep(onStep.Get(":Gt#", out))) {
+  if (message.show(onStep.Get(":Gt#", out))) {
     char* pEnd;
     int degree = (int)strtol(&out[0], &pEnd, 10);
     int minute = (int)strtol(&out[4], &pEnd, 10);
@@ -210,14 +213,14 @@ void UI::menuLatitude() {
       minute = abs(angle % 60);
       degree = angle / 60;
       sprintf(out, ":St%+03d*%02d#", degree, minute);
-      DisplayMessageOnStep(onStep.Set(out),false);
+      message.show(onStep.Set(out),false);
     }
   }
 }
 
 void UI::menuLongitude() {
   char out[20];
-  if (DisplayMessageOnStep(onStep.Get(":Gg#", out))) {
+  if (message.show(onStep.Get(":Gg#", out))) {
     char* pEnd;
     int degree = (int)strtol(&out[0], &pEnd, 10);
     int minute = (int)strtol(&out[5], &pEnd, 10);
@@ -229,14 +232,14 @@ void UI::menuLongitude() {
       minute = abs(angle) % 60;
       degree = angle / 60;
       sprintf(out, ":Sg%+04d*%02d#", degree, minute);
-      DisplayMessageOnStep(onStep.Set(out), false);
+      message.show(onStep.Set(out), false);
     }
   }
 }
 
 void UI::menuZone() {
   char out[20];
-  if (DisplayMessageOnStep(onStep.Get(":GG#", out))) {
+  if (message.show(onStep.Get(":GG#", out))) {
     char* pEnd;
     int hr = (int)strtol(&out[0], &pEnd, 10);
 
@@ -249,7 +252,7 @@ void UI::menuZone() {
         hr = b;
         if (negative) hr = -hr;
         sprintf(out, ":SG%+02d#", hr);
-        DisplayMessageOnStep(onStep.Set(out), false);
+        message.show(onStep.Set(out), false);
       }
     }
   }
@@ -259,15 +262,15 @@ void UI::menuFirmware() {
   char out[20];
   
   sprintf(out,"SHC %s", _version);
-  DisplayMessage(out, __DATE__, 3000);
+  message.show(out, __DATE__, 3000);
 
   char temp1[20];
   char temp2[20];
-  if ( (DisplayMessageOnStep(onStep.Get(":GVN#", temp1)))&&(DisplayMessageOnStep(onStep.Get(":GVD#", temp2))) )
+  if ( (message.show(onStep.Get(":GVN#", temp1)))&&(message.show(onStep.Get(":GVD#", temp2))) )
   { for (char* p = temp1; (p = strchr(p, '#')); ++p) { *p = 0;} 
     for (char* p = temp2; (p = strchr(p, '#')); ++p) { *p = 0;} 
     sprintf(out,"OnStep %s",temp1);
-    DisplayMessage(out, temp2, 3000);
+    message.show(out, temp2, 3000);
   }
 }
 
@@ -285,12 +288,12 @@ void UI::menuFocuser(uint8_t foc) {
     switch (current_selection_L2) {
       case 1:
         sprintf(cmd, ":FA%u#:Fh#", foc);
-        DisplayMessageOnStep(onStep.Set(cmd),false);
+        message.show(onStep.Set(cmd),false);
       break;
       case 2:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_FOC_AT_HALF, &isOk)) {
           sprintf(cmd, ":FA%u#:FH#", foc);
-          if (isOk) { DisplayMessageOnStep(onStep.Set(cmd), false); }
+          if (isOk) { message.show(onStep.Set(cmd), false); }
         }
       break;
       case 3:
@@ -300,9 +303,9 @@ void UI::menuFocuser(uint8_t foc) {
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_FOC_TC, &isOk)) {
           sprintf(cmd, ":FA%u#", foc);
           if (isOk) {
-            if (DisplayMessageOnStep(onStep.Set(cmd))) DisplayMessageOnStep(onStep.Set(":Fc1#"), false);
+            if (message.show(onStep.Set(cmd))) message.show(onStep.Set(":Fc1#"), false);
           } else {
-            if (DisplayMessageOnStep(onStep.Set(cmd))) DisplayMessageOnStep(onStep.Set(":Fc0#"), false);
+            if (message.show(onStep.Set(cmd))) message.show(onStep.Set(":Fc0#"), false);
           }
         }
       break;
@@ -318,7 +321,7 @@ void UI::menuFocuser(uint8_t foc) {
 
 bool UI::menuSetFocBacklash(uint8_t &foc) {
   float backlash;
-  if (!DisplayMessageOnStep(onStep.readFocBacklash(foc, backlash))) return false;
+  if (!message.show(onStep.readFocBacklash(foc, backlash))) return false;
   char text[20];
   if (status.getFocuserCount() > 1)
     sprintf(text, "Foc.%u " L_FOC_BACKLASH, foc);
@@ -326,35 +329,35 @@ bool UI::menuSetFocBacklash(uint8_t &foc) {
     sprintf(text, "Focuser " L_FOC_BACKLASH);
   if (display->UserInterfaceInputValueFloat(&keyPad, text, "", &backlash, 0, 999, 3, 0, " " L_FOC_BL_UNITS))
   {
-    return DisplayMessageOnStep(onStep.writeFocBacklash(foc, backlash), false);
+    return message.show(onStep.writeFocBacklash(foc, backlash), false);
   }
   return true;
 }
 
 bool UI::menuSetFocTCCoef(uint8_t &foc) {
   float tccoef;
-  if (!DisplayMessageOnStep(onStep.readFocTCCoef(foc, tccoef))) return false;
+  if (!message.show(onStep.readFocTCCoef(foc, tccoef))) return false;
   char text[20];
   if (status.getFocuserCount() > 1)
     sprintf(text, "Foc.%u " L_FOC_TC_COEF, foc);
   else
     sprintf(text, "Focuser " L_FOC_TC_COEF);
   if (display->UserInterfaceInputValueFloat(&keyPad, text, "", &tccoef, -999, 999, 4, 0, " " L_MICRON_PER_C)) {
-    return DisplayMessageOnStep(onStep.writeFocTCCoef(foc, tccoef), false);
+    return message.show(onStep.writeFocTCCoef(foc, tccoef), false);
   }
   return true;
 }
 
 bool UI::menuSetFocTCDeadband(uint8_t &foc) {
   float deadband;
-  if (!DisplayMessageOnStep(onStep.readFocTCDeadband(foc, deadband))) return false;
+  if (!message.show(onStep.readFocTCDeadband(foc, deadband))) return false;
   char text[20];
   if (status.getFocuserCount() > 1)
     sprintf(text, "Foc.%u " L_FOC_TC_DEADBAND, foc);
   else
     sprintf(text, "Focuser " L_FOC_TC_DEADBAND);
   if (display->UserInterfaceInputValueFloat(&keyPad, text, "", &deadband, 1, 999, 3, 0, " " L_FOC_TC_DB_UNITS)) {
-    return DisplayMessageOnStep(onStep.writeFocTCDeadband(foc, deadband), false);
+    return message.show(onStep.writeFocTCDeadband(foc, deadband), false);
   }
   return true;
 }
@@ -370,21 +373,21 @@ void UI::menuRotator() {
     current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, L_ROTATOR, current_selection_L2, string_list_SiteL2);
     bool isOk = false;
     switch (current_selection_L2) {
-      case 1: onStep.Set(":rC#"); DisplayMessage(L_VALUE, L_SETV "!", 1500); break;
+      case 1: onStep.Set(":rC#"); message.show(L_VALUE, L_SETV "!", 1500); break;
       case 2:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_ROT_AT_HOME_ZERO "?", &isOk)) {
-          if (isOk) { onStep.Set(":rF#"); DisplayMessage(L_VALUE, L_SETV "!", 1500); }
+          if (isOk) { onStep.Set(":rF#"); message.show(L_VALUE, L_SETV "!", 1500); }
         }
       break;
       case 3:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_ROT_DEROT " " L_ON "?", &isOk)) {
-          if (isOk) { onStep.Set(":r+#"); DisplayMessage(L_VALUE, L_SETV "!", 1500); } else { onStep.Set(":r-#"); DisplayMessage(L_VALUE, L_SETV "!", 1500); }
+          if (isOk) { onStep.Set(":r+#"); message.show(L_VALUE, L_SETV "!", 1500); } else { onStep.Set(":r-#"); message.show(L_VALUE, L_SETV "!", 1500); }
         }
       break;
-      case 4: DisplayMessageOnStep(onStep.Set(":rP#"),true); break;
+      case 4: message.show(onStep.Set(":rP#"),true); break;
       case 5:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_ROT_REVERSE "?", &isOk)) {
-          if (isOk) { onStep.Set(":rR#"); DisplayMessage(L_VALUE, L_SETV "!", 1500); }
+          if (isOk) { onStep.Set(":rR#"); message.show(L_VALUE, L_SETV "!", 1500); }
         }
       break;
     }

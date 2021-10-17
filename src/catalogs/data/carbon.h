@@ -133,7 +133,7 @@ const char *Cat_Carbon_SubId=
 ;
 
 CAT_TYPES Cat_Carbon_Type=CAT_VAR_STAR; 
-const var_star_t Cat_Carbon[NUM_CARBON] = {
+CAT_ATTR const var_star_t Cat_Carbon[NUM_CARBON] = {
 { 1,  0, 24, 0,   70,  4360,  860,  690, 00.45861, 35.58722 },         //AQ And,    00h 27m 31s, +35° 35′ 14″, And
 { 1,  0, 24, 1,    0,  8450,  870,  830, 00.90361, 24.06694 },         //HD 5223,   00h 54m 13s, +24° 04′ 01″, And
 { 1,  0, 24, 0,   20,  4180, 1180,  770, 23.64583, 35.77250 },         //ST And,    23h 38m 45s, +35° 46′ 21″, And

@@ -67,38 +67,38 @@ void UI::menuAlignment() {
         char s1[20] = ""; strcat(s1, "PE:"); strcat(s1, r2); strcat(s1, ", PZ:"); strcat(s1, r3);
         char s2[20] = ""; strcat(s2, "DO (cone):"); strcat(s2, r4);
         char s3[20] = ""; strcat(s3, "PD:"); strcat(s3, r5); strcat(s3, ", TF:"); strcat(s3, r8);
-        DisplayLongMessage("Align results (in \")", s1, s2, s3, -1);
+        message.show("Align results (in \")", s1, s2, s3, -1);
       }
     } else  
     if (clearAlign) {
       if ((onStep.Set(":SX02,0#") == CR_VALUE_SET) && (onStep.Set(":SX03,0#") == CR_VALUE_SET) &&
           (onStep.Set(":SX04,0#") == CR_VALUE_SET) && (onStep.Set(":SX05,0#") == CR_VALUE_SET) &&
           (onStep.Set(":SX06,0#") == CR_VALUE_SET) && (onStep.Set(":SX07,0#") == CR_VALUE_SET) &&
-          (onStep.Set(":SX08,0#") == CR_VALUE_SET)) DisplayMessageOnStep(CR_VALUE_SET,false); else DisplayMessageOnStep(CR_SET_VALUE_FAILED,false);
+          (onStep.Set(":SX08,0#") == CR_VALUE_SET)) message.show(CR_VALUE_SET,false); else message.show(CR_SET_VALUE_FAILED,false);
     } else
     if (resetAlign) {
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
-      if (onStep.Set(":hF#") == CR_VALUE_SET) DisplayMessage(L_ALGN_RESUME0, L_ALGN_RESUME1, -1);
+      if (onStep.Set(":hF#") == CR_VALUE_SET) message.show(L_ALGN_RESUME0, L_ALGN_RESUME1, -1);
     } else
     if (starsForAlign>0) {
       // check if date/time is set, if not set it
-      if (!status.hasDateTime()) { DisplayMessage(L_ALGN_RESUME2, L_ALGN_RESUME3, 2000); menuLocalDateTime(); }
+      if (!status.hasDateTime()) { message.show(L_ALGN_RESUME2, L_ALGN_RESUME3, 2000); menuLocalDateTime(); }
 
       // start the align
       char s[20]; sprintf(s,":A%d#",starsForAlign);
-      if (onStep.Set(s) == CR_VALUE_SET) status.aliMode = (Status::AlignMode)starsForAlign; else DisplayMessage(L_ALIGNMENT, L_FAILED "!", -1);
-      if (onStep.Set(":R7#") == CR_VALUE_SET) { DisplayMessage(L_ALGN_RESUME4, L_ALGN_RESUME5, 1000);  activeGuideRate=8; }
+      if (onStep.Set(s) == CR_VALUE_SET) status.aliMode = (Status::AlignMode)starsForAlign; else message.show(L_ALIGNMENT, L_FAILED "!", -1);
+      if (onStep.Set(":R7#") == CR_VALUE_SET) { message.show(L_ALGN_RESUME4, L_ALGN_RESUME5, 1000);  activeGuideRate=8; }
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
     } else
     if (refinePA) {
-      DisplayMessage(L_ALGN_REFINE_MSG1, L_ALGN_REFINE_MSG2, 3500);
-      DisplayMessage(L_ALGN_REFINE_MSG3, L_ALGN_REFINE_MSG4, 3500);
-      DisplayMessage(L_ALGN_REFINE_MSG5, L_ALGN_REFINE_MSG6, 3500);
-      DisplayMessage(L_ALGN_REFINE_MSG7, L_ALGN_REFINE_MSG8, 3500);
-      DisplayMessage(L_ALGN_REFINE_MSG9, L_ALGN_REFINE_MSG10,4500);
-      DisplayMessage(L_ALGN_REFINE_MSG11,L_ALGN_REFINE_MSG12,3500);
+      message.show(L_ALGN_REFINE_MSG1, L_ALGN_REFINE_MSG2, 3500);
+      message.show(L_ALGN_REFINE_MSG3, L_ALGN_REFINE_MSG4, 3500);
+      message.show(L_ALGN_REFINE_MSG5, L_ALGN_REFINE_MSG6, 3500);
+      message.show(L_ALGN_REFINE_MSG7, L_ALGN_REFINE_MSG8, 3500);
+      message.show(L_ALGN_REFINE_MSG9, L_ALGN_REFINE_MSG10,4500);
+      message.show(L_ALGN_REFINE_MSG11,L_ALGN_REFINE_MSG12,3500);
       if (display->UserInterfaceInputValueBoolean(&keyPad, L_ALGN_REFINE_MSG13, &refinePA)) {
-        if ((refinePA) && (onStep.Set(":MP#") == CR_VALUE_SET)) DisplayMessage(L_ALGN_REFINE_MSG14, L_ALGN_REFINE_MSG15, -1);
+        if ((refinePA) && (onStep.Set(":MP#") == CR_VALUE_SET)) message.show(L_ALGN_REFINE_MSG14, L_ALGN_REFINE_MSG15, -1);
         if (refinePA) { current_selection_L0 = 0; current_selection_L1 = 0; } // Quit Menu
       }
     }

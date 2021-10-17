@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// LX200 command processing
+// OnStep command processing
 
 #include <Ephemeris.h> // https://github.com/MarScaper/ephemeris
 #include "../../catalogs/Catalog.h"

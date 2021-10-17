@@ -20,7 +20,7 @@
 #endif
 #define FRACTIONAL_SEC_MS           (lround(1000.0F/FRACTIONAL_SEC))
 
-#include "../commands/ProcessCmds.h"
+#include "../../libApp/commands/ProcessCmds.h"
 #include "motor/Motor.h"
 #include "motor/stepDir/StepDir.h"
 #include "motor/servo/Servo.h"
@@ -294,7 +294,6 @@ class Axis {
 
     uint8_t axisNumber = 0;
     char axisPrefix[13] = "MSG: Axis_, ";
-    char axisMonitor[8] = "mntrAx_";
 
     bool enabled = false;        // enable/disable logical state (disabled is powered down)
     bool limitsCheck = true;     // enable/disable numeric position range limits (doesn't apply to limit switches)

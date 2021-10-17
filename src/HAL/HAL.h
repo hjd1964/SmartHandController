@@ -37,6 +37,11 @@
   #define MCU_STR "Teensy4.0"
   #include "HAL_Teensy_4.0.h"
 
+#elif defined(ARDUINO_TEENSY41)
+  // Teensy 4.1
+  #define MCU_STR "Teensy4.1"
+  #include "HAL_Teensy_4.1.h"
+
 #elif defined(ARDUINO_ARCH_SAMD)
   // ARDUINO M0
   #define MCU_STR "ARDUINO M0"
@@ -69,7 +74,7 @@
   #define FPSTR
 #endif
 
-// create null decoration for non-Teensy4.x processors
-#ifndef DMAMEM
-  #define DMAMEM
+// create null decoration for catalogs as needed
+#ifndef CAT_ATTR
+  #define CAT_ATTR
 #endif

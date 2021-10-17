@@ -3,11 +3,11 @@
 
 #include "Serial_ST4_Master.h"
 
-#ifdef SERIAL_ST4_SERVER_PRESENT
+#if defined(SERIAL_ST4_MASTER) && SERIAL_ST4_MASTER == ON
 
 #if SST4_CLOCK_OUT != OFF && SST4_DATA_OUT != OFF && SST4_DATA_IN != OFF && SST4_TONE != OFF
 
-#include "../constants/Constants.h"
+#include "../Constants.h"
 #include "../tasks/OnTask.h"
 
 #include "Stream.h"

@@ -55,17 +55,17 @@ void setup(void) {
   if (DEBUG == ON || DEBUG == VERBOSE) SERIAL_DEBUG.begin(SERIAL_DEBUG_BAUD);
   delay(2000);
 
-  VF(Abv "Smart Hand Controller "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
-  VF(Abv "MCU = "); VLF(MCU_STR);
+  VF("MSG: Smart Hand Controller "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
+  VF("MSG: MCU = "); VLF(MCU_STR);
   
   // System services
   // add task for system services, runs at 10ms intervals so commiting 1KB of NV takes about 10 seconds
-  VF(Abv "Setup, starting system services task (rate 10ms priority 7)... ");
+  VF("MSG: Setup, starting system services task (rate 10ms priority 7)... ");
   if (tasks.add(10, 0, true, 7, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
   userInterface.setup(Version, pin, active, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<UI::OLED>(DISPLAY_OLED));
 
-  VLF(Abv "Starting UI loop");
+  VLF("MSG: Starting UI loop");
 }
 
 void loop() {

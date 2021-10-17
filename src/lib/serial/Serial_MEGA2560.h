@@ -4,7 +4,7 @@
 
 #include "../../Common.h"
 
-#ifdef SERIAL_MEGA2560_PRESENT
+#if defined(SERIAL_MEGA2560) && SERIAL_MEGA2560 == ON
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
@@ -57,7 +57,7 @@ class PollingSerial : public Stream {
     uint8_t xmit_tail = 0;
 };
 
-#ifdef HAL_POLLING_MEGA2560_SERIAL_ONSTEP
+#ifdef HAL_POLLING_MEGA2560_SERIAL_A
 class PollingSerialA : public PollingSerial {
   public:
     void begin(long baud);

@@ -6,13 +6,13 @@
 
 #if defined(ST4_AUX_W_PIN) && defined(ST4_AUX_S_PIN) && defined(ST4_AUX_N_PIN) && defined(ST4_AUX_E_PIN)
 
-#include "../../buttons/PushButton.h"
+#include "../../lib/pushButton/PushButton.h"
 
 class AuxST4 {
   public:
-    void setup();
+    void init();
     void poll();
-    button *n, *s, *e, *w;
+    Button *n, *s, *e, *w;
   private:
     int debounceMs = 20;
     bool ready = false;

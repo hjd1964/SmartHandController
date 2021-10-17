@@ -22,7 +22,7 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 
 #include "Serial_ST4_Slave.h"
 
-#ifdef SERIAL_ST4_SLAVE_PRESENT
+#if defined(SERIAL_ST4_SLAVE) && SERIAL_ST4_SLAVE == ON
 
 #define INTERVAL 40000 // microseconds
 
