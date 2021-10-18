@@ -6,8 +6,8 @@ void Message::init(U8G2_EXT *display) {
 }
 
 void Message::show(const char* txt1, const char* txt2, int duration) {
-  uint8_t x;
-  uint8_t y = 40;
+  u8g2_uint_t x;
+  u8g2_uint_t y = 40;
 
   display->firstPage();
   do {
@@ -30,11 +30,40 @@ void Message::show(const char* txt1, const char* txt2, int duration) {
   }
 }
 
+void Message::show(const char* txt1, const char* txt2, const char* txt3, int duration) {
+  u8g2_uint_t x;
+  u8g2_uint_t y = 40;
+
+  display->firstPage();
+  do {
+    if (txt2 != NULL) {
+      y = 50;
+      x = (display->getDisplayWidth() - display->getStrWidth(txt2)) / 2;
+      display->drawStr(x, y, txt2);
+      if (txt3 != NULL) {
+        x = display->getDisplayWidth() - (display->getStrWidth(txt3) + 15);
+        display->drawStr(x, y, txt3);
+      }
+      y = 25;
+    }
+
+    x = (display->getDisplayWidth() - display->getStrWidth(txt1)) / 2;
+    display->drawStr(x, y, txt1);
+  } while (display->nextPage());
+
+  if (duration >= 0) {
+    delay(duration);
+  } else {
+    keyPad.waitForPress();
+    keyPad.clearAllPressed();
+  }
+}
+
 void Message::show(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration) {
   display->setFont(LF_STANDARD);
-  uint8_t h = 15;
-  uint8_t x = 0;
-  uint8_t y = h;
+  u8g2_uint_t h = 15;
+  u8g2_uint_t x = 0;
+  u8g2_uint_t y = h;
 
   display->firstPage();
   do {
@@ -100,6 +129,26 @@ bool Message::show(CMD_RESULT cmdResult, bool silentOk) {
     show(text1, text2, time);
   }
   return onStep.isOk(cmdResult);
+}
+
+void Message::brief(const char* txt1, int duration) {
+  strcpy(briefMessage, txt1);
+  briefMessageEndTime = millis() + duration;
+  showing = true;
+}
+
+bool Message::briefShowing() {
+  if (showing && (long)(millis() - briefMessageEndTime) > 0) showing = false;
+  return showing;
+}
+
+void Message::briefShow() {
+  if (showing) {
+    u8g2_uint_t x = display->getDisplayWidth();
+    u8g2_uint_t x1 = display->getUTF8Width(briefMessage);
+    u8g2_uint_t y = 36;
+    display->drawUTF8(x/2 - x1/2, y + 8, briefMessage);
+  }
 }
 
 Message message;

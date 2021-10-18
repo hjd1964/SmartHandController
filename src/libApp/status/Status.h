@@ -11,7 +11,7 @@ public:
     ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED, ERR_ALT_MAX, ERR_WEATHER_INIT, ERR_SITE_INIT
   };
 
-  enum AlignMode { ALIM_OFF, ALIM_ONE, ALIM_TWO, ALIM_THREE, ALIM_FOUR, ALIM_FIVE, ALIM_SIX, ALIM_SEVEN, ALIM_EIGHT, ALIM_NINE };
+  enum AlignMode {ALIM_OFF, ALIM_ONE, ALIM_TWO, ALIM_THREE, ALIM_FOUR, ALIM_FIVE, ALIM_SIX, ALIM_SEVEN, ALIM_EIGHT, ALIM_NINE};
   enum AlignState {
     ALI_OFF,
     ALI_SELECT_STAR_1, ALI_SLEW_STAR_1, ALI_RECENTER_1,
@@ -24,6 +24,7 @@ public:
     ALI_SELECT_STAR_8, ALI_SLEW_STAR_8, ALI_RECENTER_8,
     ALI_SELECT_STAR_9, ALI_SLEW_STAR_9, ALI_RECENTER_9
   };
+
   enum Mount { GEM, FEM };
   enum TrackState { TRK_OFF, TRK_ON, TRK_SLEWING, TRK_UNKNOW };
   enum TrackRate { TR_SIDEREAL, TR_LUNAR, TR_SOLAR, TR_KING, TR_UNKNOW };
@@ -31,36 +32,7 @@ public:
   enum ParkState { PRK_UNPARKED, PRK_PARKING, PRK_PARKED, PRK_FAILED, PRK_UNKNOW };
   enum PierState { PIER_NONE, PIER_E, PIER_W, PIER_UNKNOW };
 
-public: 
-  AlignState      align = ALI_OFF;
-  AlignMode       aliMode = ALIM_ONE;
-  unsigned short  alignSelectedStar = 1;
-  int             alignMaxNumStars = -1;
-
-  Errors lastError = Status::ERR_NONE;
-
-  char TempRa[20];
-  char TempDec[20];
-  unsigned long lastStateRaDec;
-  char TempAz[20];
-  char TempAlt[20];
-  unsigned long lastStateAzAlt;
-  char TempUniversalTime[20];
-  char TempSidereal[20];
-  unsigned long lastStateTime;
-  char TelStatus[20];
-  unsigned long lastStateTel;
-  unsigned long updateSeq=0;
 public:
-  bool connected = true;
-  bool hasInfoRa = false;
-  bool hasInfoDec = false;
-  bool hasInfoAz = false;
-  bool hasInfoAlt = false;
-  bool hasInfoUTC = false;
-  bool hasInfoSidereal = false;
-  bool hasTelStatus = false;
-  unsigned long lastState;
   void updateRaDec(boolean immediate=false);
   void updateAzAlt(boolean immediate=false);
   void updateTime(boolean immediate=false);
@@ -97,7 +69,41 @@ public:
   bool hasDeRotator();
   bool hasReticle();
   bool hasDateTime();
-  bool addStar();
+
+  bool alignAddStar();
+  bool alignSelectStar();
+  bool alignSlewStar();
+  bool alignRecenterStar();
+
+  AlignState      align = ALI_OFF;
+  AlignMode       aliMode = ALIM_ONE;
+  unsigned short  alignSelectedStar = 1;
+  int             alignMaxNumStars = -1;
+
+  Errors lastError = Status::ERR_NONE;
+
+  char TempRa[20];
+  char TempDec[20];
+  unsigned long lastStateRaDec;
+  char TempAz[20];
+  char TempAlt[20];
+  unsigned long lastStateAzAlt;
+  char TempUniversalTime[20];
+  char TempSidereal[20];
+  unsigned long lastStateTime;
+  char TelStatus[20];
+  unsigned long lastStateTel;
+  unsigned long updateSeq=0;
+
+  bool connected = false;
+  bool hasInfoRa = false;
+  bool hasInfoDec = false;
+  bool hasInfoAz = false;
+  bool hasInfoAlt = false;
+  bool hasInfoUTC = false;
+  bool hasInfoSidereal = false;
+  bool hasTelStatus = false;
+  unsigned long lastState;
 
 private:
   int focuserCount = 0;
