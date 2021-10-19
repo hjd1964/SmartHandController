@@ -28,6 +28,7 @@ class SWiFi : public Stream {
     inline size_t write(long n) { return write((uint8_t)n); }
     inline size_t write(unsigned int n) { return write((uint8_t)n); }
     inline size_t write(int n) { return write((uint8_t)n); }
+    virtual int availableForWrite() { return 1; }
     using Print::write;
 
 
