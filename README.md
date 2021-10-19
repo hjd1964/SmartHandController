@@ -1,10 +1,6 @@
 OnStep Smart Hand Controller (SHC)
 ==================================
 
-# SerialWiFi Fork Notes
-
-The WiFi code increases code size a lot. Need to change partition scheme to make the SHC fit: "No OTA (2MB APP/2MB SPIFFS)".
-
 # Important Note
 
 THERE ARE SEVERAL GITHUB BRANCHES OF THE SMART HAND CONTROLLER:
