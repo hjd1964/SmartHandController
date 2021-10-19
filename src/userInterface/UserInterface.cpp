@@ -260,8 +260,8 @@ void UI::poll() {
     // util. light
     case 3:
       #if UTILITY_LIGHT != OFF
-        if (keyPad.F->wasPressed()) { current_selection_utility_light--; strcpy(briefMessage, L_FKEY_LAMP_DN); buttonCommand = true; } else
-        if (keyPad.f->wasPressed()) { current_selection_utility_light++; strcpy(briefMessage, L_FKEY_LAMP_UP); buttonCommand = true; }
+        if (keyPad.F->wasPressed()) { current_selection_utility_light--; message.brief(L_FKEY_LAMP_DN); buttonCommand = true; } else
+        if (keyPad.f->wasPressed()) { current_selection_utility_light++; message.brief(L_FKEY_LAMP_UP); buttonCommand = true; }
         if (buttonCommand) {
           if (current_selection_utility_light < 1) current_selection_utility_light = 1;
           if (current_selection_utility_light > 6) current_selection_utility_light = 6;
