@@ -6,40 +6,60 @@
 #include "../../lib/convert/Convert.h"
 
 void Status::updateRaDec(boolean immediate) {
-  if (((millis() - lastStateRaDec > BACKGROUND_CMD_RATE) && connected) || immediate)
-  {
-    if (updateSeq%3 == 1 || immediate) { hasInfoRa = onStep.Get(":GR#", TempRa) == CR_VALUE_GET; if (!hasInfoRa) connected = true; }
-    if (updateSeq%3 == 2 || immediate) { hasInfoDec = onStep.Get(":GD#", TempDec) == CR_VALUE_GET; if (!hasInfoDec) connected = true; lastStateRaDec = millis(); }
+  if (((millis() - lastStateRaDec > BACKGROUND_CMD_RATE) && connected) || immediate) {
+    if (updateSeq%3 == 1 || immediate) {
+      hasInfoRa = onStep.Get(":GR#", TempRa) == CR_VALUE_GET;
+      if (!hasInfoRa) connected = false;
+    }
+    if (updateSeq%3 == 2 || immediate) {
+      hasInfoDec = onStep.Get(":GD#", TempDec) == CR_VALUE_GET;
+      if (!hasInfoDec) connected = false;
+      lastStateRaDec = millis();
+    }
   }
 };
 
 void Status::updateAzAlt(boolean immediate) {
-  if (((millis() - lastStateAzAlt > BACKGROUND_CMD_RATE) && connected) || immediate)
-  {
-    if (updateSeq%3 == 1 || immediate) { hasInfoAz = onStep.Get(":GZ#", TempAz) == CR_VALUE_GET; if (!hasInfoAz) connected = true; }
-    if (updateSeq%3 == 2 || immediate) { hasInfoAlt = onStep.Get(":GA#", TempAlt) == CR_VALUE_GET; if (!hasInfoAlt) connected = true; lastStateAzAlt = millis(); }
+  if (((millis() - lastStateAzAlt > BACKGROUND_CMD_RATE) && connected) || immediate) {
+    if (updateSeq%3 == 1 || immediate) {
+      hasInfoAz = onStep.Get(":GZ#", TempAz) == CR_VALUE_GET;
+      if (!hasInfoAz) connected = false;
+    }
+    if (updateSeq%3 == 2 || immediate) {
+      hasInfoAlt = onStep.Get(":GA#", TempAlt) == CR_VALUE_GET;
+      if (!hasInfoAlt) connected = false;
+      lastStateAzAlt = millis();
+    }
   }
 }
 
 void Status::updateTime(boolean immediate) {
-  if (((millis() - lastStateTime > BACKGROUND_CMD_RATE) && connected) || immediate)
-  {
-    if (updateSeq%3 == 1 || immediate) { hasInfoUTC = onStep.Get(":GX80#", TempUniversalTime) == CR_VALUE_GET; if (!hasInfoUTC) connected = true; }
-    if (updateSeq%3 == 2 || immediate) { hasInfoSidereal = onStep.Get(":GS#", TempSidereal) == CR_VALUE_GET; if (!hasInfoSidereal) connected = true; lastStateTime = millis(); }
+  if (((millis() - lastStateTime > BACKGROUND_CMD_RATE) && connected) || immediate) {
+    if (updateSeq%3 == 1 || immediate) {
+      hasInfoUTC = onStep.Get(":GX80#", TempUniversalTime) == CR_VALUE_GET;
+      if (!hasInfoUTC) connected = false;
+    }
+    if (updateSeq%3 == 2 || immediate) {
+      hasInfoSidereal = onStep.Get(":GS#", TempSidereal) == CR_VALUE_GET;
+      if (!hasInfoSidereal) connected = false;
+      lastStateTime = millis();
+    }
   }
 };
 
 void Status::updateTel(boolean immediate) {
-  if (((millis() - lastStateTel > BACKGROUND_CMD_RATE) && connected) || immediate)
-  {
-    if (updateSeq%3 == 0 || immediate) { hasTelStatus = onStep.Get(":Gu#", TelStatus) == CR_VALUE_GET; if (!hasTelStatus) connected = true; lastStateTel = millis(); }
+  if (((millis() - lastStateTel > BACKGROUND_CMD_RATE) && connected) || immediate) {
+    if (updateSeq%3 == 0 || immediate) {
+      hasTelStatus = onStep.Get(":Gu#", TelStatus) == CR_VALUE_GET;
+      if (!hasTelStatus) connected = false;
+      lastStateTel = millis();
+    }
   }
 };
 
 bool Status::getRA(double &RA) {
   char temp[20] = "";
-  if (onStep.Get(":GR#", temp) == CR_VALUE_GET) 
-  {
+  if (onStep.Get(":GR#", temp) == CR_VALUE_GET) {
     int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
     double f;
     convert.hmsToDouble(&f, temp);
@@ -272,28 +292,6 @@ bool Status::hasDateTime() {
   return dateTime;
 }
 
-bool Status::addStar() {
-  if (align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3 || align == ALI_RECENTER_4 || align == ALI_RECENTER_5 || align == ALI_RECENTER_6 || align == ALI_RECENTER_7 || align == ALI_RECENTER_8 || align == ALI_RECENTER_9) {
-    if (onStep.Set(":A+#") == CR_VALUE_SET) {
-      if (aliMode == ALIM_ONE || 
-         (aliMode == ALIM_TWO   && align == ALI_RECENTER_2) ||
-         (aliMode == ALIM_THREE && align == ALI_RECENTER_3) ||
-         (aliMode == ALIM_FOUR  && align == ALI_RECENTER_4) ||
-         (aliMode == ALIM_FIVE  && align == ALI_RECENTER_5) ||
-         (aliMode == ALIM_SIX   && align == ALI_RECENTER_6) ||
-         (aliMode == ALIM_SEVEN && align == ALI_RECENTER_7) ||
-         (aliMode == ALIM_EIGHT && align == ALI_RECENTER_8) ||
-         (aliMode == ALIM_NINE  && align == ALI_RECENTER_9)) { align = ALI_OFF; return true; } else { align = static_cast<AlignState>(align+1); return true; }
-    } else {
-      align = ALI_OFF;
-      return false;
-    }
-  } else {
-    align = ALI_OFF;
-    return false;
-  }
-}
-
 bool Status::getT(double &T) {
   char temp[20] = "";
   static double f = 0;
@@ -353,3 +351,43 @@ bool Status::getDP(double &DP) {
     }
   if (hasValue) { DP = f; return true; } else return false;
 };
+
+bool Status::alignAddStar() {
+  if (align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3 || align == ALI_RECENTER_4 || align == ALI_RECENTER_5 || align == ALI_RECENTER_6 || align == ALI_RECENTER_7 || align == ALI_RECENTER_8 || align == ALI_RECENTER_9) {
+    if (onStep.Set(":A+#") == CR_VALUE_SET) {
+      if (aliMode == ALIM_ONE || 
+         (aliMode == ALIM_TWO   && align == ALI_RECENTER_2) ||
+         (aliMode == ALIM_THREE && align == ALI_RECENTER_3) ||
+         (aliMode == ALIM_FOUR  && align == ALI_RECENTER_4) ||
+         (aliMode == ALIM_FIVE  && align == ALI_RECENTER_5) ||
+         (aliMode == ALIM_SIX   && align == ALI_RECENTER_6) ||
+         (aliMode == ALIM_SEVEN && align == ALI_RECENTER_7) ||
+         (aliMode == ALIM_EIGHT && align == ALI_RECENTER_8) ||
+         (aliMode == ALIM_NINE  && align == ALI_RECENTER_9)) { align = ALI_OFF; return true; } else { align = static_cast<AlignState>(align+1); return true; }
+    } else {
+      align = ALI_OFF;
+      return false;
+    }
+  } else {
+    align = ALI_OFF;
+    return false;
+  }
+}
+
+bool Status::alignSelectStar() {
+  return align == ALI_SELECT_STAR_1 || align == ALI_SELECT_STAR_2 || align == ALI_SELECT_STAR_3 ||
+         align == ALI_SELECT_STAR_4 || align == ALI_SELECT_STAR_5 || align == ALI_SELECT_STAR_6 ||
+         align == ALI_SELECT_STAR_7 || align == ALI_SELECT_STAR_8 || align == ALI_SELECT_STAR_9;
+}
+
+bool Status::alignSlewStar() {
+  return align == ALI_SLEW_STAR_1 || align == ALI_SLEW_STAR_2 || align == ALI_SLEW_STAR_3 ||
+         align == ALI_SLEW_STAR_4 || align == ALI_SLEW_STAR_5 || align == ALI_SLEW_STAR_6 ||
+         align == ALI_SLEW_STAR_7 || align == ALI_SLEW_STAR_8 || align == ALI_SLEW_STAR_9;
+}
+
+bool Status::alignRecenterStar() {
+  return align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3 ||
+         align == ALI_RECENTER_4 || align == ALI_RECENTER_5 || align == ALI_RECENTER_6 ||
+         align == ALI_RECENTER_7 || align == ALI_RECENTER_8 || align == ALI_RECENTER_9;
+}

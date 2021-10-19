@@ -30,7 +30,7 @@
 #define Product               "SHC"
 #define FirmwareVersionMajor  "3"
 #define FirmwareVersionMinor  "1"
-#define FirmwareVersionPatch  "a"
+#define FirmwareVersionPatch  "b"
 
 #include "src/Common.h"
 NVS nv;
@@ -40,9 +40,6 @@ NVS nv;
 const char Version[] = "Version " FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch;
 const int pin[7] = {B_PIN0, B_PIN1, B_PIN2, B_PIN3, B_PIN4, B_PIN5, B_PIN6};
 const int active[7] = {B_PIN0_ACTIVE_STATE, B_PIN1_ACTIVE_STATE, B_PIN2_ACTIVE_STATE, B_PIN3_ACTIVE_STATE, B_PIN4_ACTIVE_STATE, B_PIN5_ACTIVE_STATE, B_PIN6_ACTIVE_STATE};
-
-UI userInterface;
-bool connected = false;
 
 void systemServices() {
   nv.poll();
@@ -63,12 +60,11 @@ void setup(void) {
   VF("MSG: Setup, starting system services task (rate 10ms priority 7)... ");
   if (tasks.add(10, 0, true, 7, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
-  userInterface.setup(Version, pin, active, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<UI::OLED>(DISPLAY_OLED));
+  userInterface.init(Version, pin, active, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<OLED>(DISPLAY_OLED));
 
   VLF("MSG: Starting UI loop");
 }
 
 void loop() {
-  userInterface.update();
   tasks.yield();
 }

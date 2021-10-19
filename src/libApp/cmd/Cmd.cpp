@@ -2,6 +2,8 @@
 // OnStep command processing
 
 #include <Ephemeris.h> // https://github.com/MarScaper/ephemeris
+
+#include "../../lib/tasks/OnTask.h"
 #include "../../catalogs/Catalog.h"
 #include "../../userInterface/UserInterface.h"
 #include "Cmd.h"
@@ -434,7 +436,7 @@ bool OnStepCmd::processCommand(char* command, char* response, unsigned long time
           b = SERIAL_ONSTEP.read();
           response[responsePos] = b; responsePos++; if (responsePos > 19) responsePos = 19; response[responsePos] = 0;
         }
-        userInterface.poll();
+        Y;
       }
       return (response[0] != 0);
     }

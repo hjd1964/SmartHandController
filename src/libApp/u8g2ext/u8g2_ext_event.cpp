@@ -8,9 +8,9 @@
 #include "../../lib/tasks/OnTask.h"
 
 uint8_t ext_GetMenuEvent(KeyPad* extPad) {
-  tasks.yield();
+  // allow higher priority tasks to run, like the keyPad polling
+  Y;
 
-  extPad->poll();
   if (extPad->shift->wasClicked()) return  U8X8_MSG_GPIO_MENU_HOME;
   if ((extPad->n->isDown() && (extPad->n->timeDown() > 1000)) || extPad->n->wasClicked()) {
     extPad->n->clearPress();
@@ -34,7 +34,7 @@ uint8_t ext_GetMenuEvent(KeyPad* extPad) {
       tasks.yield(t);
     }
 
-    if (extPad->s->timeDown()>5000) return MSG_MENU_DOWN_FAST; else return U8X8_MSG_GPIO_MENU_DOWN;
+    if (extPad->s->timeDown() > 5000) return MSG_MENU_DOWN_FAST; else return U8X8_MSG_GPIO_MENU_DOWN;
   }
   if (extPad->e->wasClicked()) return U8X8_MSG_GPIO_MENU_PREV;
   if (extPad->w->wasClicked()) return U8X8_MSG_GPIO_MENU_NEXT;

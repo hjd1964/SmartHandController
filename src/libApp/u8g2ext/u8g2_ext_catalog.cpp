@@ -230,7 +230,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectTypeStr());
   
       // Constellation Abberviation
-      sprintf(line,"%s",cat_mgr.constellationStr());
+      sprintf(line, "%s", cat_mgr.constellationStr());
       step0 = u8g2_GetUTF8Width(u8g2, line);
       u8g2_DrawUTF8(u8g2, dx-step0, y, line);
   

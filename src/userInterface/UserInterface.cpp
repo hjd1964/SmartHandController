@@ -3,15 +3,20 @@
 
 #include "UserInterface.h"
 
+#include "../lib/tasks/OnTask.h"
 #include "../lib/nv/NV.h"
 extern NVS nv;
 #include "../libApp/st4Aux/St4Aux.h"
 #include "../catalogs/Catalog.h"
 #include "bitmaps/Bitmaps.h"
 
-extern bool connected;
+void updateWrapper() { userInterface.poll(); }
+void keyPadWrapper() { keyPad.poll(); }
+#if ST4_AUX_INTERFACE == ON
+  void auxST4Wrapper() { auxST4.poll(); }
+#endif
 
-void UI::setup(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model) {
+void UI::init(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model) {
 
   if (!nv.isKeyValid(INIT_NV_KEY)) {
     VF("MSG: NV, invalid key wipe "); V(nv.size); VLF(" bytes");
@@ -52,9 +57,13 @@ void UI::setup(const char version[], const int pin[7], const int active[7], cons
   #else
     keyPad.init(pin, active, 0, 0);
   #endif
+  VF("MSG: UserInterface, start KeyPad monitor task (rate 10ms priority 1)... ");
+  if (tasks.add(10, 0, true, 1, keyPadWrapper, "Keypad")) { VLF("success"); } else { VLF("FAILED!"); }
 
   #if ST4_AUX_INTERFACE == ON
     auxST4.init();
+    VF("MSG: UserInterface, start AuxST4 monitor task (rate 10ms priority 1)... ");
+    if (tasks.add(10, 0, true, 1, auxST4Wrapper, "AuxST4")) { VLF("success"); } else { VLF("FAILED!"); }
   #endif
 
   #if UTILITY_LIGHT != OFF
@@ -108,82 +117,22 @@ void UI::setup(const char version[], const int pin[7], const int active[7], cons
 
   // display the splash screen
   drawIntro();
-  poll();
 
-  for (int i = 0; i < 3; i++) {
-    SERIAL_ONSTEP.print(":#");
-    delay(400);
-    SERIAL_ONSTEP.flush();
-    delay(100);
-  }
-
-  // OnStep establish connection
-  char s[20] = "";
-  int thisTry = 0;
-again1:
-
-  if (thisTry++ % 2) {
-    message.show(L_ESTABLISHING, L_CONNECTION " .", 500);
-  } else {
-    message.show(L_ESTABLISHING, L_CONNECTION "  ", 500);
-  }
-
-  delay(500);
-
-  VLF("MSG: Attempting to connect");
-  CMD_RESULT r = onStep.Get(":GVP#", s);
-  if (r != CR_VALUE_GET || !strstr(s, "On-Step")) goto again1;
-
-  VLF("MSG: Connection established");
-
-again2:
-  delay(2000);
-
-  // OnStep coordinate mode for getting and setting RA/Dec
-  // 0 = OBSERVED_PLACE (same as not supported)
-  // 1 = TOPOCENTRIC (does refraction)
-  // 2 = ASTROMETRIC_J2000 (does refraction and precession/nutation)
-  thisTry = 0;
-  if (onStep.Get(":GXEE#", s) == CR_VALUE_GET && s[0] >= '0' && s[0] <= '3' && s[1] == 0) {
-    if (s[0] == '0') {
-      VLF("MSG: Coordinates Observed Place");
-      telescopeCoordinates = OBSERVED_PLACE; 
-      message.show(L_CONNECTION, L_OK "!", 1000);
-      connected = true;
-    } else 
-    if (s[0] == '1') {
-      VLF("MSG: Coordinates Topocentric");
-      telescopeCoordinates = TOPOCENTRIC; 
-      message.show(L_CONNECTION, L_OK "!", 1000);
-      connected = true;
-    } else 
-    if (s[0] == '2') {
-      VLF("MSG: Coordinates J2000");
-      telescopeCoordinates = ASTROMETRIC_J2000;
-      message.show(L_CONNECTION, L_OK "!", 1000);
-      connected = true;
-    }
-  } else {
-    if (++thisTry <= 3) goto again2;
-    VLF("MSG: Warning, get coords failed");
-    VLF("MSG: fallback to Observed Place");
-    telescopeCoordinates = OBSERVED_PLACE;
-    message.show(L_CONNECTION, L_WARNING "!", 1000);
-    message.show(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
-  }
+  VF("MSG: UserInterface, start UI update task (rate 30ms priority 6)... ");
+  if (tasks.add(30, 0, true, 6, updateWrapper, "UIupd")) { VLF("success"); } else { VLF("FAILED!"); }
 }
 
 void UI::poll() {
-  keyPad.poll();
-  #if ST4_AUX_INTERFACE == ON
-    auxST4.poll();
-  #endif
-}
+  // -----------------------------------------------------------------------------------------------------
+  // connect/reconnect
+  if (!status.connected) {
+    if (!firstConnect) { message.show(L_DISCONNECT_MSG, L_CONNECTION, 2000); firstConnect = false; }
+    connect();
+  }
 
-void UI::update() {
-  poll();
-  unsigned long top = millis();
+  unsigned long time_now = millis();
 
+  // -----------------------------------------------------------------------------------------------------
   // sleep and wake up display
   if (keyPad.anyPressed()) {
     if (sleepDisplay) {
@@ -197,35 +146,36 @@ void UI::update() {
     if (lowContrast) {
       display->setContrast(displaySettings.maxContrast);
       lowContrast = false;
-      time_last_action = top;
+      time_last_action = time_now;
     }
   } else if (sleepDisplay) return;
-  if (displaySettings.blankTimeout && top - time_last_action > displaySettings.blankTimeout) {
+  if (displaySettings.blankTimeout && (long)(time_now - time_last_action) > displaySettings.blankTimeout) {
     display->sleepOn();
     sleepDisplay = true;
     return;
   }
-  if (displaySettings.dimTimeout && top - time_last_action > displaySettings.dimTimeout && !lowContrast) {
+  if (displaySettings.dimTimeout && !lowContrast && (long)(time_now - time_last_action) > displaySettings.dimTimeout) {
     display->setContrast(0);
     lowContrast = true;
     return;
   }
 
+  // -----------------------------------------------------------------------------------------------------
+  // main display
+
   // show align state
-  if (status.align == Status::ALI_SELECT_STAR_1 || status.align == Status::ALI_SELECT_STAR_2 || status.align == Status::ALI_SELECT_STAR_3 ||
-      status.align == Status::ALI_SELECT_STAR_4 || status.align == Status::ALI_SELECT_STAR_5 || status.align == Status::ALI_SELECT_STAR_6 ||
-      status.align == Status::ALI_SELECT_STAR_7 || status.align == Status::ALI_SELECT_STAR_8 || status.align == Status::ALI_SELECT_STAR_9) {
-    char msg[10] = L_STAR "# ?";
-    if (status.align == Status::ALI_SELECT_STAR_1) strcpy(msg, L_STAR " #1");
-    if (status.align == Status::ALI_SELECT_STAR_2) strcpy(msg, L_STAR " #2");
-    if (status.align == Status::ALI_SELECT_STAR_3) strcpy(msg, L_STAR " #3");
-    if (status.align == Status::ALI_SELECT_STAR_4) strcpy(msg, L_STAR " #4");
-    if (status.align == Status::ALI_SELECT_STAR_5) strcpy(msg, L_STAR " #5");
-    if (status.align == Status::ALI_SELECT_STAR_6) strcpy(msg, L_STAR " #6");
-    if (status.align == Status::ALI_SELECT_STAR_7) strcpy(msg, L_STAR " #7");
-    if (status.align == Status::ALI_SELECT_STAR_8) strcpy(msg, L_STAR " #8");
-    if (status.align == Status::ALI_SELECT_STAR_9) strcpy(msg, L_STAR " #9");
-    message.show(L_ALIGN_MSG1, L_ALIGN_MSG2, "", msg, -1);
+  if (status.alignSelectStar()) {
+    char alignMessage[10] = L_STAR "# ?";
+    if (status.align == Status::ALI_SELECT_STAR_1) strcpy(alignMessage, L_STAR " #1");
+    if (status.align == Status::ALI_SELECT_STAR_2) strcpy(alignMessage, L_STAR " #2");
+    if (status.align == Status::ALI_SELECT_STAR_3) strcpy(alignMessage, L_STAR " #3");
+    if (status.align == Status::ALI_SELECT_STAR_4) strcpy(alignMessage, L_STAR " #4");
+    if (status.align == Status::ALI_SELECT_STAR_5) strcpy(alignMessage, L_STAR " #5");
+    if (status.align == Status::ALI_SELECT_STAR_6) strcpy(alignMessage, L_STAR " #6");
+    if (status.align == Status::ALI_SELECT_STAR_7) strcpy(alignMessage, L_STAR " #7");
+    if (status.align == Status::ALI_SELECT_STAR_8) strcpy(alignMessage, L_STAR " #8");
+    if (status.align == Status::ALI_SELECT_STAR_9) strcpy(alignMessage, L_STAR " #9");
+    message.show(L_ALIGN_MSG1, L_ALIGN_MSG2, "", alignMessage, -1);
 
     // bring up the list of stars so user can goto the alignment star
     if (!SelectStarAlign()) { message.show(L_ALIGNMENT, L_ABORTED, -1); status.align = Status::ALI_OFF; return; }
@@ -235,26 +185,27 @@ void UI::update() {
   } else
 
   // otherwise update the main display
-  if (top - lastpageupdate > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
+  if ((long)(time_now - lastpageupdate) > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
 
-  // let the user know if the comms are down
-  if (status.connected == false) message.show(L_DISCONNECT_MSG1, L_DISCONNECT_MSG2, -1);
+  // -----------------------------------------------------------------------------------------------------
+  // keypad
 
-  // -------------------------------------------------------------------------------------------------------------------
-  // handle gotos and guiding
-  if (status.connected && (status.getTrackingState() == Status::TRK_SLEWING || status.getParkState() == Status::PRK_PARKING)) {
-    // gotos
+  // stop gotos
+  if (status.getTrackingState() == Status::TRK_SLEWING || status.getParkState() == Status::PRK_PARKING) {
     if (keyPad.nsewPressed()) {
       SERIAL_ONSTEP.print(":Q#"); SERIAL_ONSTEP.flush();
-      if (status.align != Status::ALI_OFF) status.align = static_cast<Status::AlignState>(status.align - 1); // try another align star?
+      // if aligning, try another align star
+      if (status.align != Status::ALI_OFF) status.align = static_cast<Status::AlignState>(status.align - 1);
       time_last_action = millis();
       display->sleepOff();
       keyPad.clearAllPressed();
       message.show(L_SLEW_MSG1, L_SLEW_MSG2 "!", 1000);
       return;
     }
-  } else {
-    // guiding
+  } else
+
+  // guiding
+  {
     buttonCommand = false;
     #if ST4_AUX_INTERFACE == ON
       if (!moveEast  && (keyPad.e->isDown() || auxST4.e->isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
@@ -278,14 +229,14 @@ void UI::update() {
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
-  // -------------------------------------------------------------------------------------------------------------------
-  // handle the feature buttons
+  // feature keys
   buttonCommand = false;
   if (status.align != Status::ALI_OFF) featureKeyMode = 1;
   switch (featureKeyMode) {
-    case 1:   // guide rate
-      if (keyPad.F->wasPressed()) { activeGuideRate--; strcpy(briefMessage, L_FKEY_GUIDE_DN); buttonCommand = true; } else
-      if (keyPad.f->wasPressed()) { activeGuideRate++; strcpy(briefMessage, L_FKEY_GUIDE_UP); buttonCommand = true; }
+    // adjust guide rate
+    case 1:
+      if (keyPad.F->wasPressed()) { activeGuideRate--; message.brief(L_FKEY_GUIDE_DN); buttonCommand = true; } else
+      if (keyPad.f->wasPressed()) { activeGuideRate++; message.brief(L_FKEY_GUIDE_UP); buttonCommand = true; }
       if (buttonCommand) {
         if (activeGuideRate < 4)  activeGuideRate = 4;
         if (activeGuideRate > 10) activeGuideRate = 10;
@@ -293,9 +244,11 @@ void UI::update() {
         message.show(onStep.Set(cmd));
       }
     break;
-    case 2:   // pulse guide rate
-      if (keyPad.F->wasPressed()) { activeGuideRate--; strcpy(briefMessage, L_FKEY_PGUIDE_DN); buttonCommand = true; } else
-      if (keyPad.f->wasPressed()) { activeGuideRate++; strcpy(briefMessage, L_FKEY_PGUIDE_UP); buttonCommand = true; }
+
+    // adjust pulse guide rate
+    case 2:
+      if (keyPad.F->wasPressed()) { activeGuideRate--; message.brief(L_FKEY_PGUIDE_DN); buttonCommand = true; } else
+      if (keyPad.f->wasPressed()) { activeGuideRate++; message.brief(L_FKEY_PGUIDE_UP); buttonCommand = true; }
       if (buttonCommand) {
         if (activeGuideRate < 1) activeGuideRate = 1;
         if (activeGuideRate > 3) activeGuideRate = 3;
@@ -303,7 +256,9 @@ void UI::update() {
         message.show(onStep.Set(cmd));
       }
     break;
-    case 3:   // util. light
+
+    // util. light
+    case 3:
       #if UTILITY_LIGHT != OFF
         if (keyPad.F->wasPressed()) { current_selection_utility_light--; strcpy(briefMessage, L_FKEY_LAMP_DN); buttonCommand = true; } else
         if (keyPad.f->wasPressed()) { current_selection_utility_light++; strcpy(briefMessage, L_FKEY_LAMP_UP); buttonCommand = true; }
@@ -319,48 +274,58 @@ void UI::update() {
         }
       #endif
     break;
-    case 4:  // reticle
-      if (keyPad.F->wasPressed()) { SERIAL_ONSTEP.print(":B-#"); strcpy(briefMessage, L_FKEY_RETI_DN); } else
-      if (keyPad.f->wasPressed()) { SERIAL_ONSTEP.print(":B+#"); strcpy(briefMessage, L_FKEY_RETI_UP); }
+
+    // reticle
+    case 4:
+      if (keyPad.F->wasPressed()) { SERIAL_ONSTEP.print(":B-#"); message.brief(L_FKEY_RETI_DN); } else
+      if (keyPad.f->wasPressed()) { SERIAL_ONSTEP.print(":B+#"); message.brief(L_FKEY_RETI_UP); }
     break;
-    case 5:  // rotator
-      if (rotState == RS_STOPPED && keyPad.F->isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROT_DN); buttonCommand = true; }
+
+    // rotator
+    case 5:
+      if (rotState == RS_STOPPED && keyPad.F->isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); message.brief(L_FKEY_ROT_DN); buttonCommand = true; }
       else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && keyPad.F->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.F->clearPress(); }
-      else if (rotState == RS_STOPPED && keyPad.f->isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROT_UP); buttonCommand = true; }
+      else if (rotState == RS_STOPPED && keyPad.f->isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); message.brief(L_FKEY_ROT_UP); buttonCommand = true; }
       else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && keyPad.f->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.f->clearPress(); }
-      else if (rotState == RS_CCW_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); strcpy(briefMessage, L_FKEY_ROTF_DN); }
-      else if (rotState == RS_CW_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); strcpy(briefMessage, L_FKEY_ROTF_UP); }
+      else if (rotState == RS_CCW_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); message.brief(L_FKEY_ROTF_DN); }
+      else if (rotState == RS_CW_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); message.brief(L_FKEY_ROTF_UP); }
     break;
-    case 6: case 7: case 8: case 9: case 10: case 11:  // focusers
-      if (focusState == FS_STOPPED && keyPad.F->isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand = true; }
+
+    // focusers
+    case 6: case 7: case 8: case 9: case 10: case 11:
+      if (focusState == FS_STOPPED && keyPad.F->isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":FS#:F+#"); message.brief(L_FKEY_FOC_DN); buttonCommand = true; }
       else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && keyPad.F->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.F->clearPress(); }
-      else if (focusState == FS_STOPPED && keyPad.f->isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand = true; }
+      else if (focusState == FS_STOPPED && keyPad.f->isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":FS#:F-#"); message.brief(L_FKEY_FOC_UP); buttonCommand = true; }
       else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && keyPad.f->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.f->clearPress(); }
       #ifndef FOCUSER_ACCELERATE_DISABLE_ON
-        else if (focusState == FS_OUT_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { focusState = FS_OUT_FAST; SERIAL_ONSTEP.print(":FF#:F+#"); strcpy(briefMessage, L_FKEY_FOCF_DN); }
-        else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState = FS_IN_FAST;  SERIAL_ONSTEP.print(":FF#:F-#"); strcpy(briefMessage, L_FKEY_FOCF_UP); }
+        else if (focusState == FS_OUT_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { focusState = FS_OUT_FAST; SERIAL_ONSTEP.print(":FF#:F+#"); message.brief(L_FKEY_FOCF_DN); }
+        else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState = FS_IN_FAST;  SERIAL_ONSTEP.print(":FF#:F-#"); message.brief(L_FKEY_FOCF_UP); }
       #endif
     break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
 
-  // -------------------------------------------------------------------------------------------------------------------
-  // handle shift button features
+  // a long press brings up the main menu
   if (keyPad.shift->isDown()) {
-    // a long press brings up the main menu
-    if (keyPad.shift->timeDown() > 1000 && status.align == Status::ALI_OFF) { menuMain(); time_last_action = millis(); } // bring up the menus
-  } else {
+    if (keyPad.shift->timeDown() > 1000 && status.align == Status::ALI_OFF) {
+      // bring up the menus
+      menuMain();
+      time_last_action = millis();
+    }
+  } else
+
+  // check for a double click
+  {
     // wait long enough that a double press can happen before picking up other press events
     if (keyPad.shift->timeUp() > 250) {
-      if (keyPad.shift->wasDoublePressed()) { 
+
+      if (keyPad.shift->wasDoublePressed()) {
         if (status.align == Status::ALI_OFF) {
-          // display feature key menu OR...
+          // bring up the feature key menu
           menuFeatureKey();
         } else {
-          // ...if aligning, go back and select a different star
-          if (status.align == Status::ALI_RECENTER_1 || status.align == Status::ALI_RECENTER_2 || status.align == Status::ALI_RECENTER_3 ||
-             status.align == Status::ALI_RECENTER_4 || status.align == Status::ALI_RECENTER_5 || status.align == Status::ALI_RECENTER_6 ||
-             status.align == Status::ALI_RECENTER_7 || status.align == Status::ALI_RECENTER_8 || status.align == Status::ALI_RECENTER_9) {
+          // if aligning, go back and select a different star
+          if (status.alignRecenterStar()) {
             status.align = static_cast<Status::AlignState>(status.align - 2);
           }
         }
@@ -377,10 +342,8 @@ void UI::update() {
           #endif
         } else {
           // ...if aligning, accept the align star
-          if ((status.align == Status::ALI_RECENTER_1 || status.align == Status::ALI_RECENTER_2 || status.align == Status::ALI_RECENTER_3 ||
-             status.align == Status::ALI_RECENTER_4 || status.align == Status::ALI_RECENTER_5 || status.align == Status::ALI_RECENTER_6 ||
-             status.align == Status::ALI_RECENTER_7 || status.align == Status::ALI_RECENTER_8 || status.align == Status::ALI_RECENTER_9)) {
-            if (status.addStar()) { if (status.align == Status::ALI_OFF) message.show(L_ALIGNMENT, L_SUCCESS "!", 2000); else message.show(L_ADD_STAR, L_SUCCESS "!", 2000); } else message.show(L_ADD_STAR, L_FAILED "!", -1);
+          if (status.alignRecenterStar()) {
+            if (status.alignAddStar()) { if (status.align == Status::ALI_OFF) message.show(L_ALIGNMENT, L_SUCCESS "!", 2000); else message.show(L_ADD_STAR, L_SUCCESS "!", 2000); } else message.show(L_ADD_STAR, L_FAILED "!", -1);
           }
         }
         time_last_action = millis();
@@ -389,10 +352,9 @@ void UI::update() {
   }
 }
 
-void UI::updateMainDisplay( u8g2_uint_t page) {
-  u8g2_t *u8g2 = display->getU8g2();
+void UI::updateMainDisplay(u8g2_uint_t page) {
   display->setFont(LF_LARGE);
-  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  u8g2_uint_t line_height = display->getAscent() - display->getDescent() + MY_BORDER_SIZE;
 
   // get the status
   status.connected = true;
@@ -402,13 +364,12 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
 
   // detect align mode
   if (status.hasTelStatus && status.align != Status::ALI_OFF) {
-    status.updateTel(true); // really make sure we have the status
+    // really make sure we have the status
+    status.updateTel(true);
     Status::TrackState curT = status.getTrackingState();
-    if (curT != Status::TRK_SLEWING && 
-       (status.align == Status::ALI_SLEW_STAR_1 || status.align == Status::ALI_SLEW_STAR_2 || status.align == Status::ALI_SLEW_STAR_3 || 
-        status.align == Status::ALI_SLEW_STAR_4 || status.align == Status::ALI_SLEW_STAR_5 || status.align == Status::ALI_SLEW_STAR_6 ||
-        status.align == Status::ALI_SLEW_STAR_7 || status.align == Status::ALI_SLEW_STAR_8 || status.align == Status::ALI_SLEW_STAR_9)
-       ) status.align = static_cast<Status::AlignState > (status.align + 1);
+    if (curT != Status::TRK_SLEWING && status.alignSlewStar()) {
+      status.align = static_cast<Status::AlignState > (status.align + 1);
+    }
     page = 4;
   }
 
@@ -417,22 +378,10 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
   else if (page == 1) status.updateAzAlt();
   else if (page == 2) status.updateTime();
 
-  // prep. brief message, simply place the message in the briefMessage string and it'll show for one second
-  static char lastMessage[40] = "";
-  static unsigned long startTime = 0;
-  if (strlen(briefMessage) != 0) {
-    startTime = millis();
-    strcpy(lastMessage, briefMessage);
-    strcpy(briefMessage, "");
-  }
-  if (strlen(lastMessage) != 0) {
-    if ((long)(millis() - startTime) > 1000) strcpy(lastMessage, "");
-  }
-
   // the graphics loop
-  u8g2_FirstPage(u8g2);
+  display->firstPage();
   do {
-    u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2);
+    u8g2_uint_t x = display->getDisplayWidth();
 
     // OnStep status
     if (status.hasTelStatus) { 
@@ -447,7 +396,7 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
         if (pgr != gr && pgr >= 0 && pgr < 3) strcat(string_Speed[gr], string_PSpeed[pgr]); 
         if (gr >= 0 && gr <= 9) {
           display->setFont(LF_STANDARD);
-          u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[gr]);
+          display->drawUTF8(0, icon_height, string_Speed[gr]);
           display->setFont(LF_LARGE);
         }
       }
@@ -523,10 +472,7 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
     }
 
     // show brief message
-    if (strlen(lastMessage) != 0) {
-      x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;  u8g2_uint_t x1 = u8g2_GetStrWidth(u8g2, lastMessage);
-      u8g2_DrawUTF8(u8g2, (x/2) - (x1/2), y + 8, lastMessage);
-    } else
+    if (message.briefShowing()) message.briefShow(); else
 
     // show equatorial coordinates
     if (page == 0) {
@@ -534,19 +480,19 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
         char rs[20]; strcpy(rs, status.TempRa);
         int l = strlen(rs);
         if (l > 1) rs[l - 1] = 0;
-        u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2) - u8g2_GetUTF8Width(u8g2, "00000000");
+        u8g2_uint_t x = display->getDisplayWidth() - display->getUTF8Width("00000000");
         u8g2_uint_t y = 36;
 
-        u8g2_DrawUTF8(u8g2, 0, y, L_RA);
+        display->drawUTF8(0, y, L_RA);
         display->DrawFwNumeric(x, y, rs);
 
         char ds[20]; strcpy(ds, status.TempDec);
         l = strlen(ds);
         if (l > 1) ds[l - 1] = 0;
         if (l > 8) { ds[3] = '\xb0'; ds[6] = '\''; }
-        x = u8g2_GetDisplayWidth(u8g2) - u8g2_GetUTF8Width(u8g2, "000000000");
+        x = display->getDisplayWidth() - display->getUTF8Width("000000000");
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, L_DEC); 
+        display->drawUTF8(0, y, L_DEC); 
         display->DrawFwNumeric(x, y, ds);
       }
     } else
@@ -559,9 +505,9 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
         int l = strlen(zs);
         if (l > 1) zs[l - 1] = 0;
         if (l > 8) { zs[3] = '\xb0'; zs[6] = '\''; }
-        x = u8g2_GetDisplayWidth(u8g2) - u8g2_GetUTF8Width(u8g2, "000000000");
+        x = display->getDisplayWidth() - display->getUTF8Width("000000000");
         u8g2_uint_t y = 36;
-        u8g2_DrawUTF8(u8g2, 0, y, L_AZ);
+        display->drawUTF8(0, y, L_AZ);
         display->DrawFwNumeric(x, y, zs);
 
         char as[20]; strcpy(as, status.TempAlt);
@@ -569,7 +515,7 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
         if (l > 1) as[l - 1] = 0;
         if (l > 8) { as[3] = '\xb0'; as[6] = '\''; }
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, L_ALT);
+        display->drawUTF8(0, y, L_ALT);
         display->DrawFwNumeric(x, y, as);
       }
     } else
@@ -580,16 +526,18 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
         char us[20]; strcpy(us, status.TempUniversalTime);
         int l = strlen(us);
         if (l > 1) us[l - 1] = 0;
-        x = u8g2_GetDisplayWidth(u8g2) - u8g2_GetUTF8Width(u8g2, "00000000");
+        x = display->getDisplayWidth() - display->getUTF8Width("00000000");
         u8g2_uint_t y = 36;
-        display->setFont(LF_STANDARD); u8g2_DrawUTF8(u8g2, 0, y, "UT"); display->setFont(LF_LARGE);
+        display->setFont(LF_STANDARD);
+        display->drawUTF8(0, y, "UT");
+        display->setFont(LF_LARGE);
         display->DrawFwNumeric(x, y, us);
 
         char ss[20]; strcpy(ss,status.TempSidereal);
         l = strlen(ss);
         if (l > 1) ss[l - 1] = 0;
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, "LST");
+        display->drawUTF8(0, y, "LST");
         display->DrawFwNumeric(x, y, ss);
       }
     } else
@@ -603,7 +551,7 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
       if (status.getT(T) && status.getP(P) && status.getH(H) && status.getDP(DP)) {
         char temp[20], line[20];
         u8g2_uint_t y = 36;
-        u8g2_uint_t dx = u8g2_GetDisplayWidth(u8g2);
+        u8g2_uint_t dx = display->getDisplayWidth();
 
         dtostrf(T, 3, 1, temp);
         sprintf(line, "T%s\xb0%s", temp, "C");
@@ -631,17 +579,17 @@ void UI::updateMainDisplay( u8g2_uint_t page) {
       char txt[20];
       if ((status.align - 1) % 3 == 1) sprintf(txt, L_SLEWING_TO_STAR " %u", (status.align - 1) / 3 + 1); else
       if ((status.align - 1) % 3 == 2) sprintf(txt, L_RECENTER_STAR " %u", (status.align - 1) / 3 + 1);
-      u8g2_DrawUTF8(u8g2, 0, y, txt);
+      display->drawUTF8(0, y, txt);
 
       y += line_height + 4;
-      u8g2_SetFont(u8g2, LF_GREEK);
-      u8g2_DrawGlyph(u8g2, 0, y, 945 + cat_mgr.bayerFlam());
+      display->setFont(LF_GREEK);
+      display->drawGlyph(0, y, 945 + cat_mgr.bayerFlam());
 
-      const uint8_t* myfont = u8g2->font; u8g2_SetFont(u8g2, myfont);
-      u8g2_DrawUTF8(u8g2, 16, y, cat_mgr.constellationStr());
+      display->setFont(LF_LARGE);
+      display->drawUTF8(16, y, cat_mgr.constellationStr());
     }
-    
-  } while (u8g2_NextPage(u8g2));
+
+  } while (display->nextPage());
   lastpageupdate = millis();
 }
 
@@ -670,3 +618,64 @@ bool UI::SelectStarAlign() {
   }
   return false;
 }
+
+void UI::connect() {
+  char s[20] = "";
+  int thisTry = 0;
+again1:
+  VLF("MSG: Connect, looking for OnStep");
+  for (int i = 0; i < 3; i++) {
+    SERIAL_ONSTEP.print(":#");
+    delay(400);
+    SERIAL_ONSTEP.flush();
+    delay(100);
+  }
+
+  message.show(L_ESTABLISHING, L_CONNECTION, (thisTry++ % 2) ? "." : "", 500);
+
+  delay(500);
+
+  CMD_RESULT r = onStep.Get(":GVP#", s);
+  if (r != CR_VALUE_GET || !strstr(s, "On-Step")) goto again1;
+
+  VLF("MSG: Connect, found OnStep");
+
+again2:
+  delay(2000);
+
+  // OnStep coordinate mode for getting and setting RA/Dec
+  // 0 = OBSERVED_PLACE (same as not supported)
+  // 1 = TOPOCENTRIC (does refraction)
+  // 2 = ASTROMETRIC_J2000 (does refraction and precession/nutation)
+  thisTry = 0;
+  if (onStep.Get(":GXEE#", s) == CR_VALUE_GET && s[0] >= '0' && s[0] <= '3' && s[1] == 0) {
+    if (s[0] == '0') {
+      VLF("MSG: Connect, coords Observed Place");
+      telescopeCoordinates = OBSERVED_PLACE; 
+      message.show(L_CONNECTION, L_OK "!", 1000);
+      status.connected = true;
+    } else 
+    if (s[0] == '1') {
+      VLF("MSG: Connect, coords Topocentric");
+      telescopeCoordinates = TOPOCENTRIC; 
+      message.show(L_CONNECTION, L_OK "!", 1000);
+      status.connected = true;
+    } else 
+    if (s[0] == '2') {
+      VLF("MSG: Connect, coords J2000");
+      telescopeCoordinates = ASTROMETRIC_J2000;
+      message.show(L_CONNECTION, L_OK "!", 1000);
+      status.connected = true;
+    }
+  } else {
+    if (++thisTry <= 3) goto again2;
+    VLF("WRN: Connect, get coords failed");
+    VLF("MSG: Connect, fallback Observed Place");
+    telescopeCoordinates = OBSERVED_PLACE;
+    message.show(L_CONNECTION, L_WARNING "!", 1000);
+    message.show(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
+  }
+  status.connected = true;
+}
+
+UI userInterface;
