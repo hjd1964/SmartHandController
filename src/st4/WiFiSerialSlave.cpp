@@ -36,7 +36,7 @@ void SWiFi::end() {
 }
 
 void SWiFi::paused(bool state){
-    // dummy, not sure if this needs to be implemented
+    // dummy, not needed for WiFi implementation
 }
 
 bool SWiFi::active(){
@@ -72,13 +72,13 @@ int SWiFi::available(void) {
 
 int SWiFi::read(void) {
   int c = cmdSvrClient.read();
-  D("OnStep response: "); DL(c);
+  //D("OnStep response: "); DL(c);
   if (c == 0) c = -1;
   return c;
 }
 
 int SWiFi::peek(void) {
-    // dummy, not sure if this needs to be implemented
+    // dummy, not needed for WiFi implementation
     return 1;
 }
 
