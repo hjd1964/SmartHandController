@@ -37,6 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MY_BORDER_SIZE 1
 #include "u8g2_ext_selection.h"
+#include "../../locales/Locale.h"
 
 /*
 Draw a string at x,y

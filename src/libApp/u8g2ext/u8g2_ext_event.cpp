@@ -3,8 +3,6 @@
 
 #include "../../../Config.h"
 #include "../../Constants.h"
-#include "../../locales/Locales.h"
-#include "../../locales/Locale.h"
 #include "../../lib/tasks/OnTask.h"
 
 uint8_t ext_GetMenuEvent(KeyPad* extPad) {
