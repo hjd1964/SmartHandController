@@ -1,3 +1,4 @@
+#pragma once
 
 // setup for Wifi IP communications to OnStep
 // for other settings see the WiFiManager class
