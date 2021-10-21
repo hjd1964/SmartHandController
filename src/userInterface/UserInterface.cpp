@@ -82,7 +82,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   if (model == OLED_SH1106) display = new U8G2_EXT_SH1106_128X64_NONAME_1_HW_I2C(U8G2_R0); else
   if (model == OLED_SSD1306) display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0); else
   if (model == OLED_SSD1309) display = new U8G2_EXT_SSD1309_128X64_NONAME_F_HW_I2C(U8G2_R0);
-  
+
   display->begin();
   display->setContrast(displaySettings.maxContrast);
   display->setFont(LF_STANDARD);
@@ -409,7 +409,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
       if (curP == Status::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
       if (status.atHome())             { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
       {
-        if (curT == Status::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
+        if (curT == Status::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, slewing_bits); x -= icon_width + 1; } else
         if (curT == Status::TRK_ON) {
           if (curTR == Status::TR_SIDEREAL) {
             switch (status.getRateCompensation()) {
