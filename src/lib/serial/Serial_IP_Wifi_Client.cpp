@@ -74,13 +74,13 @@
   }
 
   int IPSerial::read(void) {
-    if (!active || !isConnected()) return 0;
+    if (!active || !isConnected()) return -1;
 
     return cmdSvrClient.read();
   }
 
   int IPSerial::peek(void) {
-    if (!active || !isConnected()) return 0;
+    if (!active || !isConnected()) return -1;
 
     return cmdSvrClient.peek();
   }
