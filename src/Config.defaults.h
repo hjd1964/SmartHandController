@@ -27,3 +27,12 @@
 #ifndef STANDARD_IPSERIAL_CHANNEL
 #define STANDARD_IPSERIAL_CHANNEL ON
 #endif
+
+#ifndef STA_ENABLED
+#define STA_ENABLED true
+#endif
+
+// use LAN DHCP addresses
+#ifndef STA_DHCP_ENABLED
+#define STA_DHCP_ENABLED true
+#endif
