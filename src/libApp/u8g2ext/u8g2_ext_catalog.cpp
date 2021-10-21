@@ -56,7 +56,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
 
   uint8_t step0;
   const uint8_t* myfont = u8g2->font;
-  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  u8g2_uint_t line_height = u8g2_GetAscentEx(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   char line[32];
 
@@ -302,7 +302,7 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, KeyPad* extPad, const char *title)
   uint8_t event;
   CATALOG_DISPLAY_MODES thisDisplayMode=DM_INFO;
 
-  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  u8g2_uint_t line_height = u8g2_GetAscentEx(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
 
   u8g2_SetFontPosBaseline(u8g2);
@@ -311,7 +311,7 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, KeyPad* extPad, const char *title)
     bool firstPass=true;
     u8g2_FirstPage(u8g2);
     do  {
-      yy = u8g2_GetAscent(u8g2);
+      yy = u8g2_GetAscentEx(u8g2);
       if (title_lines > 0) {
         yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
         u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));
@@ -354,7 +354,7 @@ static uint8_t ext_draw_user_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 {
   u8g2_uint_t x = 0;
 
-  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  u8g2_uint_t line_height = u8g2_GetAscentEx(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   char line1[128];
   char line2[128];
@@ -417,7 +417,7 @@ bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, KeyPad* extPad, const char *titl
 
   uint8_t event;
 
-  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  u8g2_uint_t line_height = u8g2_GetAscentEx(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
 
   u8g2_SetFontPosBaseline(u8g2);
@@ -427,7 +427,7 @@ bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, KeyPad* extPad, const char *titl
   for (;;) {
     u8g2_FirstPage(u8g2);
     do  {
-      yy = u8g2_GetAscent(u8g2);
+      yy = u8g2_GetAscentEx(u8g2);
       if (title_lines > 0) {
         yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
         u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));

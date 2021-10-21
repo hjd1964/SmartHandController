@@ -40,109 +40,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../locales/Locale.h"
 
 /*
-Draw a string at x,y
-Center string within w (left adjust if w < pixel len of s)
-
-Side effects:
-u8g2_SetFontDirection(u8g2, 0);
-u8g2_SetFontPosBaseline(u8g2);
-
-*/
-//void ext_DrawUTF8Line(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, const char *s, uint8_t border_size, uint8_t is_invert)
-//{
-//  u8g2_uint_t d, str_width;
-//  u8g2_uint_t fx, fy, fw, fh;
-//
-//  /* only horizontal strings are supported, so force this here */
-//  u8g2_SetFontDirection(u8g2, 0);
-//
-//  /* revert y position back to baseline ref */
-//  y += u8g2->font_calc_vref(u8g2);
-//
-//  /* calculate the width of the string in pixel */
-//  str_width = u8g2_GetUTF8Width(u8g2, s);
-//
-//  /* calculate delta d within the box */
-//  d = 0;
-//  if (str_width < w)
-//  {
-//    d = w;
-//    d -= str_width;
-//    d /= 2;
-//  }
-//  else
-//  {
-//    w = str_width;
-//  }
-//
-//  /* caluclate text box */
-//  fx = x;
-//  fy = y - u8g2_GetAscent(u8g2);
-//  fw = w;
-//  fh = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2);
-//
-//  /* draw the box, if inverted */
-//  u8g2_SetDrawColor(u8g2, 1);
-//  if (is_invert)
-//  {
-//    u8g2_DrawBox(u8g2, fx, fy, fw, fh);
-//  }
-//
-//  /* draw the frame */
-//  while (border_size > 0)
-//  {
-//    fx--;
-//    fy--;
-//    fw += 2;
-//    fh += 2;
-//    u8g2_DrawFrame(u8g2, fx, fy, fw, fh);
-//    border_size--;
-//  }
-//
-//  if (is_invert)
-//  {
-//    u8g2_SetDrawColor(u8g2, 0);
-//  }
-//  else
-//  {
-//    u8g2_SetDrawColor(u8g2, 1);
-//  }
-//
-//  /* draw the text */
-//  u8g2_DrawUTF8(u8g2, x + d, y, s);
-//
-//  /* revert draw color */
-//  u8g2_SetDrawColor(u8g2, 1);
-//
-//}
-
-
-/*
-draw several lines at position x,y.
-lines are stored in s and must be separated with '\n'.
-lines can be centered with respect to "w"
-if s == NULL nothing is drawn and 0 is returned
-returns the number of lines in s multiplied with line_height
-*/
-//u8g2_uint_t ext_DrawUTF8Lines(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t line_height, const char *s)
-//{
-//  uint8_t i;
-//  uint8_t cnt;
-//  u8g2_uint_t yy = 0;
-//  cnt = u8x8_GetStringLineCnt(s);
-//  //printf("str=%s\n", s);
-//  //printf("cnt=%d, y=%d, line_height=%d\n", cnt, y, line_height);
-//  for (i = 0; i < cnt; i++)
-//  {
-//    //printf("  i=%d, y=%d, line_height=%d\n", i, y, line_height);
-//    u8g2_DrawUTF8Line(u8g2, x, y, w, u8x8_GetStringLineStart(i, s), 0, 0);
-//    y += line_height;
-//    yy += line_height;
-//  }
-//  return yy;
-//}
-
-/*
 selection list with string line
 returns line height
 */
@@ -153,7 +50,7 @@ static u8g2_uint_t u8g2_draw_selection_list_line(u8g2_t *u8g2, u8sl_t *u8sl, u8g
   uint8_t border_size = 0;
   uint8_t is_invert = 0;
 
-  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  u8g2_uint_t line_height = u8g2_GetAscentEx(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   /* calculate offset from display upper border */
   yy = idx;
@@ -164,7 +61,7 @@ static u8g2_uint_t u8g2_draw_selection_list_line(u8g2_t *u8g2, u8sl_t *u8sl, u8g
   /* check whether this is the current cursor line */
   if (idx == u8sl->current_pos)
   {
-    border_size = MY_BORDER_SIZE;
+    border_size = MY_SELECTION_BORDER_SIZE;
     is_invert = 1;
   }
 
@@ -206,7 +103,7 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, KeyPad *extPad, const char 
 
   uint8_t event;
 
-  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  u8g2_uint_t line_height = u8g2_GetAscentEx(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
   uint8_t display_lines;
@@ -239,11 +136,11 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, KeyPad *extPad, const char 
     u8g2_FirstPage(u8g2);
     do
     {
-      yy = u8g2_GetAscent(u8g2);
+      yy = u8g2_GetAscentEx(u8g2);
       if (title_lines > 0)
       {
         yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
-        u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));
+        u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1 - u8g2_OffsetY, u8g2_GetDisplayWidth(u8g2));
         yy += 3;
       }
       u8g2_DrawSelectionList(u8g2, &u8sl, yy, sl);
@@ -258,11 +155,11 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, KeyPad *extPad, const char 
       if (event == U8X8_MSG_GPIO_MENU_NEXT) { return u8sl.current_pos + 1; } else
       if (event == U8X8_MSG_GPIO_MENU_PREV) { return 0; } else
       if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) { 
-        if (!wrap && (u8sl.current_pos+1 >= u8sl.total)) u8sl.current_pos-=1; 
+        if (!wrap && (u8sl.current_pos+1 >= u8sl.total)) u8sl.current_pos -= 1; 
         u8sl_Next(&u8sl); break; 
       } else
       if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) {
-        if (!wrap && (u8sl.current_pos == 0)) u8sl.current_pos+=1;
+        if (!wrap && (u8sl.current_pos == 0)) u8sl.current_pos += 1;
         u8sl_Prev(&u8sl); break;
       }
     }

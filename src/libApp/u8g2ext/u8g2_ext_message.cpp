@@ -115,7 +115,7 @@ u8g2_uint_t ext_UserInterfaceMessage(u8g2_t *u8g2, KeyPad *extPad, const char *t
 
 
   /* calculate line height */
-  line_height = u8g2_GetAscent(u8g2);
+  line_height = u8g2_GetAscentEx(u8g2);
   line_height -= u8g2_GetDescent(u8g2);
 
   /* calculate overall height of the message box in lines*/
@@ -140,7 +140,7 @@ u8g2_uint_t ext_UserInterfaceMessage(u8g2_t *u8g2, KeyPad *extPad, const char *t
     y -= pixel_height;
     y /= 2;
   }
-  y += u8g2_GetAscent(u8g2);
+  y += u8g2_GetAscentEx(u8g2);
 
 
   for (;;)
