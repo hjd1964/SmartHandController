@@ -71,7 +71,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     // Double star mode
     // |Σ0060AB ηCas 3.52,7.36|
     // |----name----    2225ly|
-    // |Sep 2.5" PA 225       |
+    // |Sep 2.5"        PA 225|
   
     // Variable star mode
     // |bAnd         11.2,15.2|
@@ -170,18 +170,18 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       x = 0;
       y += line_height;
       if (cat_mgr.isDblStarCatalog()) {
-        // |Sep 2.5" PA 225       |
+        // |Sep 2.5"        PA 225|
         char seps[16];
-        float f=cat_mgr.separation();
-        if (f>=0) dtostrf(f, 5, 1, seps); else strcpy(seps,"?.?");
-        x=u8g2_DrawUTF8(u8g2, 0, y, "Sep");
-        sprintf(line,"%s\"",seps);
-        ext_DrawFwNumeric(u8g2, x, y, line);
+        float f = cat_mgr.separation();
+        if (f >= 0) dtostrf(f, 5, 1, seps); else strcpy(seps,"?.?");
 
-        int p=cat_mgr.positionAngle();
-        if (p>=0) sprintf(line,"%3d\xb0",p); else sprintf(line,"  ?\xb0");
-        x=ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
-        u8g2_DrawUTF8(u8g2, dx-(u8g2_GetUTF8Width(u8g2, "PA ")+x), y, "PA ");
+        sprintf(line, "Sep %s\"", seps);
+        x = u8g2_DrawUTF8(u8g2, 0, y, line);
+
+        int p = cat_mgr.positionAngle();
+        if (p >= 0) sprintf(line, "%3d\xb0", p); else sprintf(line,"  ?\xb0");
+        x = ext_DrawFwNumeric(u8g2, dx - ext_GetFwNumericWidth(u8g2, line), y, line);
+        u8g2_DrawUTF8(u8g2, dx - (u8g2_GetUTF8Width(u8g2, "PA ") + x), y, "PA ");
       } else
       if (cat_mgr.isVarStarCatalog()) {
         // |Per 2.5d              |
