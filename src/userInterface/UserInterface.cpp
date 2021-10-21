@@ -82,7 +82,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   if (model == OLED_SH1106) display = new U8G2_EXT_SH1106_128X64_NONAME_1_HW_I2C(U8G2_R0); else
   if (model == OLED_SSD1306) display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0); else
   if (model == OLED_SSD1309) display = new U8G2_EXT_SSD1309_128X64_NONAME_F_HW_I2C(U8G2_R0);
-  
+
   display->begin();
   display->setContrast(displaySettings.maxContrast);
   display->setFont(LF_STANDARD);
@@ -125,10 +125,11 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
 void UI::poll() {
   // -----------------------------------------------------------------------------------------------------
   // connect/reconnect
-  if (!status.connected) {
+  static unsigned long lastConnectedTime = 0;
+  if (!status.connected && (long)(millis() - lastConnectedTime) > 2000) {
     if (!firstConnect) { message.show(L_DISCONNECT_MSG, L_CONNECTION, 2000); firstConnect = false; }
     connect();
-  }
+  } else lastConnectedTime = millis();
 
   unsigned long time_now = millis();
 
@@ -354,7 +355,10 @@ void UI::poll() {
 
 void UI::updateMainDisplay(u8g2_uint_t page) {
   display->setFont(LF_LARGE);
-  u8g2_uint_t line_height = display->getAscent() - display->getDescent() + MY_BORDER_SIZE;
+  u8g2_uint_t line_height = display->getAscent() - display->getDescent() + 1;
+  #ifdef ESP32
+    line_height -= 3;
+  #endif
 
   // get the status
   status.connected = true;
@@ -396,7 +400,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
         if (pgr != gr && pgr >= 0 && pgr < 3) strcat(string_Speed[gr], string_PSpeed[pgr]); 
         if (gr >= 0 && gr <= 9) {
           display->setFont(LF_STANDARD);
-          display->drawUTF8(0, icon_height, string_Speed[gr]);
+          display->drawUTF8(0, icon_height - 2, string_Speed[gr]);
           display->setFont(LF_LARGE);
         }
       }
@@ -409,7 +413,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
       if (curP == Status::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
       if (status.atHome())             { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
       {
-        if (curT == Status::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
+        if (curT == Status::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, slewing_bits); x -= icon_width + 1; } else
         if (curT == Status::TRK_ON) {
           if (curTR == Status::TR_SIDEREAL) {
             switch (status.getRateCompensation()) {
@@ -480,7 +484,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
         char rs[20]; strcpy(rs, status.TempRa);
         int l = strlen(rs);
         if (l > 1) rs[l - 1] = 0;
-        u8g2_uint_t x = display->getDisplayWidth() - display->getUTF8Width("00000000");
+        u8g2_uint_t x = display->getDisplayWidth() - display->getUTF8Width("000000000");
         u8g2_uint_t y = 36;
 
         display->drawUTF8(0, y, L_RA);
@@ -490,7 +494,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
         l = strlen(ds);
         if (l > 1) ds[l - 1] = 0;
         if (l > 8) { ds[3] = '\xb0'; ds[6] = '\''; }
-        x = display->getDisplayWidth() - display->getUTF8Width("000000000");
+        x = display->getDisplayWidth() - display->getUTF8Width("0000000000");
         y += line_height + 4;
         display->drawUTF8(0, y, L_DEC); 
         display->DrawFwNumeric(x, y, ds);
@@ -505,7 +509,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
         int l = strlen(zs);
         if (l > 1) zs[l - 1] = 0;
         if (l > 8) { zs[3] = '\xb0'; zs[6] = '\''; }
-        x = display->getDisplayWidth() - display->getUTF8Width("000000000");
+        x = display->getDisplayWidth() - display->getUTF8Width("0000000000");
         u8g2_uint_t y = 36;
         display->drawUTF8(0, y, L_AZ);
         display->DrawFwNumeric(x, y, zs);
@@ -526,7 +530,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
         char us[20]; strcpy(us, status.TempUniversalTime);
         int l = strlen(us);
         if (l > 1) us[l - 1] = 0;
-        x = display->getDisplayWidth() - display->getUTF8Width("00000000");
+        x = display->getDisplayWidth() - display->getUTF8Width("000000000");
         u8g2_uint_t y = 36;
         display->setFont(LF_STANDARD);
         display->drawUTF8(0, y, "UT");

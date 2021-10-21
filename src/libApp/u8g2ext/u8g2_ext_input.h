@@ -2,8 +2,6 @@
 #include <U8g2lib.h>
 #include "u8g2_ext_event.h"
 
-#include "../../Common.h"
-
 /*
 
 u8g2_ext.c
@@ -38,6 +36,12 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
+#ifdef ESP32
+  #define u8g2_GetAscentEx(x) (u8g2_GetAscent(x) - 3)
+#else
+  #define u8g2_GetAscentEx(x) u8g2_GetAscent(x)
+#endif
 
 /*
 return:

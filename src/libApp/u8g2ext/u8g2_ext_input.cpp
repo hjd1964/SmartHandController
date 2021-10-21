@@ -60,7 +60,7 @@ uint8_t ext_UserInterfaceInputValueBoolean(u8g2_t *u8g2, KeyPad* extPad, const c
   u8g2_SetFontPosBaseline(u8g2);
 
   /* calculate line height */
-  line_height = u8g2_GetAscent(u8g2);
+  line_height = u8g2_GetAscentEx(u8g2);
   line_height -= u8g2_GetDescent(u8g2);
 
   /* calculate overall height of the input value box */
@@ -139,7 +139,7 @@ uint8_t ext_UserInterfaceInputValueInteger(u8g2_t *u8g2, KeyPad* extPad, const c
   u8g2_SetFontPosBaseline(u8g2);
 
   /* calculate line height */
-  line_height = u8g2_GetAscent(u8g2);
+  line_height = u8g2_GetAscentEx(u8g2);
   line_height -= u8g2_GetDescent(u8g2);
 
   /* calculate overall height of the input value box */
@@ -227,7 +227,7 @@ uint8_t ext_UserInterfaceInputValueFloat(u8g2_t *u8g2, KeyPad* extPad, const cha
   u8g2_SetFontPosBaseline(u8g2);
 
   /* calculate line height */
-  line_height = u8g2_GetAscent(u8g2);
+  line_height = u8g2_GetAscentEx(u8g2);
   line_height -= u8g2_GetDescent(u8g2);
 
   /* calculate overall height of the input value box */
@@ -371,7 +371,7 @@ uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, KeyPad* extPad, const char 
   u8g2_SetFontPosBaseline(u8g2);
 
   /* calculate line height */
-  line_height = u8g2_GetAscent(u8g2);
+  line_height = u8g2_GetAscentEx(u8g2);
   line_height -= u8g2_GetDescent(u8g2);
 
   /* calculate overall height of the input value box */
@@ -506,7 +506,7 @@ uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, KeyPad* extPad, const char
   u8g2_SetFontPosBaseline(u8g2);
 
   /* calculate line height */
-  line_height = u8g2_GetAscent(u8g2);
+  line_height = u8g2_GetAscentEx(u8g2);
   line_height -= u8g2_GetDescent(u8g2);
 
   /* calculate overall height of the input value box */

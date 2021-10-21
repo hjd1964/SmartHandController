@@ -3,6 +3,8 @@
 #pragma once
 
 // misc.
+#define PROD_ABV                    "SHC" // Friendly three letter product abbreviation
+
 #define METRIC                      -200
 #define IMPERIAL                    -201
 #define LOCALE_DEFAULT              -202
@@ -13,8 +15,6 @@
 
 #define TIMEOUT_CMD                 1000  // Default 1000 ms, 1 second
 #define BACKGROUND_CMD_RATE         300   // Default 300 ms, regulates the background command rate
-
-#define Abv                         "SHC: "
 
 // NV -------------------------------------------------------------------------------------------------------------------
 #define INIT_NV_KEY                 159301352UL
