@@ -2,12 +2,10 @@
 #pragma once
 
 #include "../../../Common.h"
+#include "../EthernetManager.h"
 
-#if !defined(SERIAL_IP_MODE) && \
-    (OPERATIONAL_MODE == ETHERNET_W5100 || OPERATIONAL_MODE == ETHERNET_W5500) && \
-    (STANDARD_COMMAND_CHANNEL == ON || PERSISTENT_COMMAND_CHANNEL == ON)
-
-  #include "../EthernetManager.h"
+#if (OPERATIONAL_MODE == ETHERNET_W5100 || OPERATIONAL_MODE == ETHERNET_W5500) && \
+    COMMAND_SERVER != OFF
 
   class CmdServer {
     public:

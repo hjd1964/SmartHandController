@@ -1,39 +1,31 @@
 #pragma once
 
+// activate ST4 port serial interface
+#define SERIAL_ST4
+#define SERIAL_ST4_SLAVE ON
+#define SERIAL_ST4_SLAVE_PRESENT
+
 // setup for Wifi IP communications to OnStep
 // for other settings see the WiFiManager class
 
-// use friendly name for OnStep IP address
-#ifdef ONSTEP_IP_ADDR
-#define TARGET_IP_ADDR1 ONSTEP_IP_ADDR
+#ifndef SERIAL_IP_MODE
+  #define SERIAL_IP_MODE OFF
 #endif
 
-#ifdef ONSTEP_SSID
-#define STA_SSID ONSTEP_SSID
-#endif
+#if SERIAL_IP_MODE == STATION
 
-#ifdef ONSTEP_PASSWORD
-#define STA_PASSWORD ONSTEP_PASSWORD
-#endif
+    // first, you must have an Wifi or Ethernet device:  OFF or WIFI, ETHERNET_W5100, ETHERNET_W5500
+    #define OPERATIONAL_MODE WIFI
 
-// enable wifi ip operation if serial IP mode is selected
-#if SERIAL_IP_MODE != OFF && defined(ESP32)
-#define OPERATIONAL_MODE WIFI
-#endif
+    // optional Arduino Serial class work-alike IP channel to port 9998 as a client (connects to a server)
+    #define SERIAL_CLIENT ON                  // ON for SERIAL_IP at port 9998
 
-// and it's a serial ip client (not server)
-#define SERIAL_IP_CLIENT
+    // use friendly names for OnStep IP address, SSID, password
+    #define TARGET_IP_ADDR1  ONSTEP_IP_ADDR
+    #define STA_SSID         ONSTEP_SSID
+    #define STA_PASSWORD     ONSTEP_PASSWORD
 
-// use the standard ip connection on port 9999
-#ifndef STANDARD_IPSERIAL_CHANNEL
-#define STANDARD_IPSERIAL_CHANNEL ON
-#endif
+    #define STA_ENABLED      true
+    #define STA_DHCP_ENABLED true             // use LAN DHCP addresses
 
-#ifndef STA_ENABLED
-#define STA_ENABLED true
-#endif
-
-// use LAN DHCP addresses
-#ifndef STA_DHCP_ENABLED
-#define STA_DHCP_ENABLED true
 #endif
