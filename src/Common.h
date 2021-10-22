@@ -2,11 +2,6 @@
 
 #include <Arduino.h>
 
-#define SERIAL_ST4_SLAVE ON
-// activate ST4 port serial interface
-#define SERIAL_ST4
-#define SERIAL_ST4_SLAVE_PRESENT
-
 #include "Constants.h"
 #include "lib/Constants.h"
 #include "locales/Locales.h"
