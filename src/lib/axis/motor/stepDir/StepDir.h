@@ -9,6 +9,10 @@
 #include "StepDirDrivers.h"
 #include "../Motor.h"
 
+#define DirSetRev 253
+#define DirSetFwd 254
+#define DirNone 255
+
 typedef struct StepDirPins {
   int16_t   step;
   uint8_t   stepState;
@@ -27,7 +31,7 @@ class StepDirMotor : public Motor {
     // sets up the driver step/dir/enable pins
     bool init(void (*volatile move)(), void (*volatile moveFF)() = NULL, void (*volatile moveFR)() = NULL);
 
-    // set driver reverse state
+    // set driver default reverse state
     void setReverse(int8_t state);
 
     // set default driver microsteps and current
@@ -57,8 +61,14 @@ class StepDirMotor : public Motor {
     // set slewing state (hint that we are about to slew or are done slewing)
     void setSlewing(bool state);
 
+    // monitor and respond to motor state as required
+    void poll();
+
+    // change motor direction
+    void updateMotorDirection();
+
     // sets dir as required and moves coord toward target at setFrequencySteps() rate
-    void move(const int8_t stepPin, const int8_t dirPin);
+    void move(const int8_t stepPin);
 
     // fast forward axis movement, no backlash, no mode switching
     void moveFF(const int8_t stepPin);

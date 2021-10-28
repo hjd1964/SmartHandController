@@ -72,10 +72,11 @@ bool StepDirMotor::init(void (*volatile move)(), void (*volatile moveFF)(), void
   return true;
 }
 
-// set driver reverse state
+// set driver default reverse state
 void StepDirMotor::setReverse(int8_t state) {
   if (state == OFF) { dirFwd = LOW; dirRev = HIGH; } else { dirFwd = HIGH; dirRev = LOW; }
-  digitalWriteF(Pins->dir, dirFwd);
+  digitalWriteEx(Pins->dir, dirFwd);
+  direction = dirFwd;
 }
 
 // set default driver microsteps and current
@@ -214,15 +215,32 @@ bool StepDirMotor::enableMoveFast(const bool fast) {
   } else return false;
 }
 
-#if STEP_WAVE_FORM == SQUARE
-  IRAM_ATTR void StepDirMotor::move(const int8_t stepPin, const int8_t dirPin) {
-    #ifdef SHARED_DIRECTION_PINS
-      if (axisNumber > 2 && takeStep) {
-        digitalWriteF(dirPin, direction);
-        delayMicroseconds(1);
-      }
-    #endif
+// monitor and respond to motor state as required
+void StepDirMotor::poll() {
+  #if defined(GPIO_DIRECTION_PINS) || defined(SHARED_DIRECTION_PINS)
+    updateMotorDirection();
+  #endif
+}
 
+IRAM_ATTR void StepDirMotor::updateMotorDirection() {
+  if (direction == DirSetRev) {
+    digitalWriteEx(Pins->dir, dirRev);
+    #ifdef SHARED_DIRECTION_PINS
+      if (axisNumber > 2) delayMicroseconds(1);
+    #endif
+    direction = dirRev;
+  } else
+  if (direction == DirSetFwd) {
+    digitalWriteEx(Pins->dir, dirFwd);
+    #ifdef SHARED_DIRECTION_PINS
+      if (axisNumber > 2) delayMicroseconds(1);
+    #endif
+    direction = dirFwd;
+  }
+}
+
+#if STEP_WAVE_FORM == SQUARE
+  IRAM_ATTR void StepDirMotor::move(const int8_t stepPin) {
     if (microstepModeControl == MMC_SLEWING_REQUEST && (motorSteps + backlashSteps) % homeSteps == 0) {
       microstepModeControl = MMC_SLEWING_PAUSE;
       tasks.immediate(mtrHandle);
@@ -240,7 +258,7 @@ bool StepDirMotor::enableMoveFast(const bool fast) {
         }
         digitalWriteF(stepPin, stepSet);
       } else
-      if (direction == dirFwd || inBacklash) {
+      if (direction == dirFwd) {
         if (backlashSteps < backlashAmountSteps) {
           backlashSteps++;
           inBacklash = backlashSteps < backlashAmountSteps;
@@ -253,21 +271,24 @@ bool StepDirMotor::enableMoveFast(const bool fast) {
     } else {
       if (synchronized && !inBacklash) targetSteps += step;
       if (motorSteps > targetSteps) {
-        direction = dirRev;
-        #ifdef SHARED_DIRECTION_PINS
-          if (axisNumber <= 2) digitalWriteF(dirPin, direction);
-        #else
-          digitalWriteF(dirPin, direction);
-        #endif
+        if (direction != dirRev) {
+          direction = DirSetRev;
+          #if !defined(GPIO_DIRECTION_PINS) && !defined(SHARED_DIRECTION_PINS)
+            updateMotorDirection();
+          #endif
+        }
       } else
       if (motorSteps < targetSteps) {
-        direction = dirFwd;
-        #ifdef SHARED_DIRECTION_PINS
-          if (axisNumber <= 2) digitalWriteF(dirPin, direction);
-        #else
-          digitalWriteF(dirPin, direction);
-        #endif
-      } else direction = 255;
+        if (direction != dirFwd) {
+          direction = DirSetFwd;
+          #if !defined(GPIO_DIRECTION_PINS) && !defined(SHARED_DIRECTION_PINS)
+            updateMotorDirection();
+          #endif
+        }
+      } else {
+        if (!inBacklash) direction = DirNone;
+      }
+
       digitalWriteF(stepPin, stepClr);
     }
 
@@ -300,7 +321,7 @@ bool StepDirMotor::enableMoveFast(const bool fast) {
     takeStep = !takeStep;
   }
 #else
-  IRAM_ATTR void StepDirMotor::move(const int8_t stepPin, const int8_t dirPin) {
+  IRAM_ATTR void StepDirMotor::move(const int8_t stepPin) {
     digitalWriteF(stepPin, stepClr);
 
     if (microstepModeControl == MMC_SLEWING_REQUEST && (motorSteps + backlashSteps) % homeSteps == 0) {
@@ -312,13 +333,23 @@ bool StepDirMotor::enableMoveFast(const bool fast) {
     if (synchronized && !inBacklash) targetSteps += step;
 
     if (motorSteps > targetSteps) {
-      direction = dirRev;
-      digitalWriteF(dirPin, direction);
+      if (direction != dirRev) {
+        direction = DirSetRev;
+        #if !defined(GPIO_DIRECTION_PINS) && !defined(SHARED_DIRECTION_PINS)
+          updateMotorDirection();
+        #endif
+      }
     } else
     if (motorSteps < targetSteps) {
-      direction = dirFwd;
-      digitalWriteF(dirPin, direction);
-    } else direction = 255;
+      if (direction != dirFwd) {
+        direction = DirSetFwd;
+        #if !defined(GPIO_DIRECTION_PINS) && !defined(SHARED_DIRECTION_PINS)
+          updateMotorDirection();
+        #endif
+      }
+    } else {
+      if (!inBacklash) direction = DirNone;
+    }
 
     if (direction == dirRev) {
       if (backlashSteps > 0) {
@@ -331,7 +362,7 @@ bool StepDirMotor::enableMoveFast(const bool fast) {
       if (axisNumber > 2) delayMicroseconds(1);
       digitalWriteF(stepPin, stepSet);
     } else
-    if (direction == dirFwd || inBacklash) {
+    if (direction == dirFwd) {
       if (backlashSteps < backlashAmountSteps) {
         backlashSteps++;
         inBacklash = backlashSteps < backlashAmountSteps;
