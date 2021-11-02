@@ -427,7 +427,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
           } else
           if (curTR == Status::TR_LUNAR) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_lun_bits); x -= icon_width + 1; } else
           if (curTR == Status::TR_SOLAR) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; } else
-                                         { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }
+          if (curTR == Status::TR_KING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_kng_bits); x -= icon_width + 1; }
         } else
         if (curT == Status::TRK_OFF) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, no_tracking_bits); x -= icon_width + 1; }
 
