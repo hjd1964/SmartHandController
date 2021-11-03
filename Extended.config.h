@@ -27,7 +27,7 @@
 #define ONSTEP_PASSWORD        "password" //  "password", Wifi Station mode password.                                         Adjust
 #define ONSTEP_IP_ADDR      {192,168,0,1} //  ..168,0,1}, Wifi Target IP Address to connect to.                               Adjust
 
-#define ONSTEP_ALT_FALLBACK         false //       false, activate alternate if station fails to connect.                     Option
+#define ONSTEP_ALT_FALLBACK           OFF //         OFF, ON activates alternate if station fails to connect.                 Option
 #define ONSTEP_SSID_ALT          "ONSTEP" //    "OnStep", Wifi alternate Station SSID to connnect to.                         Adjust
 #define ONSTEP_PASSWORD_ALT    "password" //  "password", Wifi alternate Station mode password.                               Adjust
 #define ONSTEP_IP_ADDR_ALT  {192,168,0,1} //  ..168,0,1}, Wifi alternate Target IP Address to connect to.                     Adjust

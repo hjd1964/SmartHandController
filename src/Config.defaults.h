@@ -19,9 +19,13 @@
   // optional Arduino Serial class work-alike IP channel to port 9998 as a client (connects to a server)
   #define SERIAL_CLIENT          ON
 
-  // set station mode with optional alternate fallback
+  // set station mode
   #define STA_ENABLED            true
-  #define STA_ALT_FALLBACK       ONSTEP_ALT_FALLBACK
+
+  // optional alternate fallback
+  #if ONSTEP_ALT_FALLBACK == ON
+  #define STA_ALT_FALLBACK       true
+  #endif
 
   // use friendly names for OnStep IP address, SSID, password
   #define STA_DHCP_ENABLED       true
