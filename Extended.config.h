@@ -23,7 +23,11 @@
 #define SERIAL_IP_MODE                OFF //         OFF, Use STATION to enable the interface (ESP32 only.)                   Option
                                           //              then specify SERIAL_IP as the serial port in Config.h
 
-#define ONSTEP_IP_ADDR      {192,168,0,1} //  ..168,0,1}, Wifi Target IP Address to connect to.                               Adjust
-
 #define ONSTEP_SSID              "ONSTEP" //    "OnStep", Wifi Station SSID to connnect to.                                   Adjust
 #define ONSTEP_PASSWORD        "password" //  "password", Wifi Station mode password.                                         Adjust
+#define ONSTEP_IP_ADDR      {192,168,0,1} //  ..168,0,1}, Wifi Target IP Address to connect to.                               Adjust
+
+#define ONSTEP_ALT_FALLBACK           OFF //         OFF, ON activates alternate if station fails to connect.                 Option
+#define ONSTEP_SSID_ALT          "ONSTEP" //    "OnStep", Wifi alternate Station SSID to connnect to.                         Adjust
+#define ONSTEP_PASSWORD_ALT    "password" //  "password", Wifi alternate Station mode password.                               Adjust
+#define ONSTEP_IP_ADDR_ALT  {192,168,0,1} //  ..168,0,1}, Wifi alternate Target IP Address to connect to.                     Adjust
