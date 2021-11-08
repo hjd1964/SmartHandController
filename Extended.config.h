@@ -20,7 +20,7 @@
 
 // IP ADDRESS SETTINGS -------------------------------------------------------------------------------------------------------------
 
-#define SERIAL_IP_MODE                OFF //         OFF, Use STATION to enable the interface (ESP32 only.)                   Option
+#define SERIAL_IP_MODE                OFF //         OFF, Use STATION to enable the interface on port 9996 (ESP32 only.)      Option
                                           //              then specify SERIAL_IP as the serial port in Config.h
 
 #define ONSTEP_SSID              "ONSTEP" //    "OnStep", Wifi Station SSID to connnect to.                                   Adjust

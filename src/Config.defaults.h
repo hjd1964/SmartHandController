@@ -16,7 +16,7 @@
   // first, you must have an Wifi or Ethernet device:  OFF or WIFI, ETHERNET_W5100, ETHERNET_W5500
   #define OPERATIONAL_MODE       WIFI
 
-  // optional Arduino Serial class work-alike IP channel to port 9998 as a client (connects to a server)
+  // optional Arduino Serial class work-alike IP channel to port 9996 as a client (connects to a server)
   #define SERIAL_CLIENT          ON
 
   // set station mode
