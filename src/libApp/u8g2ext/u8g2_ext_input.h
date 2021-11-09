@@ -37,11 +37,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifdef ESP32
-  #define u8g2_GetAscentEx(x) (u8g2_GetAscent(x) - 3)
-#else
+//#ifdef ESP32
+//  #define u8g2_GetAscentEx(x) (u8g2_GetAscent(x) - 3)
+//#else
   #define u8g2_GetAscentEx(x) u8g2_GetAscent(x)
-#endif
+//#endif
 
 /*
 return:
