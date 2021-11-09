@@ -147,6 +147,7 @@ private:
 
   unsigned long lastpageupdate = millis();
   unsigned long time_last_action = millis();
+  unsigned long time_keep_alive = millis();
 
   byte page = 0;
   uint8_t current_selection_L0 = 1;
@@ -170,6 +171,8 @@ private:
 
   long angleRA = 0;
   long angleDEC = 0;
+
+  long serialBaud = 9600;
 };
 
 extern UI userInterface;
