@@ -145,12 +145,22 @@ void UI::poll() {
       lowContrast = false;
       time_last_action = time_now;
     }
-  } else if (sleepDisplay) return;
+  } else
+  if (sleepDisplay) {
+    if ((long)time_now - time_keep_alive > 5000) {
+      SERIAL_ONSTEP.print(":#");
+      time_keep_alive = millis();
+    }
+    return;
+  }
+
   if (displaySettings.blankTimeout && (long)(time_now - time_last_action) > displaySettings.blankTimeout) {
     display->sleepOn();
+    time_keep_alive = millis();
     sleepDisplay = true;
     return;
   }
+
   if (displaySettings.dimTimeout && !lowContrast && (long)(time_now - time_last_action) > displaySettings.dimTimeout) {
     display->setContrast(0);
     lowContrast = true;
