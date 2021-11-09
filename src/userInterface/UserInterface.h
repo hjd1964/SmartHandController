@@ -170,6 +170,8 @@ private:
 
   long angleRA = 0;
   long angleDEC = 0;
+
+  long serialBaud = 9600;
 };
 
 extern UI userInterface;

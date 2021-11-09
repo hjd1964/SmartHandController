@@ -17,6 +17,7 @@ void keyPadWrapper() { keyPad.poll(); }
 #endif
 
 void UI::init(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model) {
+  serialBaud = SerialBaud;
 
   if (!nv.isKeyValid(INIT_NV_KEY)) {
     VF("MSG: NV, invalid key wipe "); V(nv.size); VLF(" bytes");
@@ -88,11 +89,9 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   display->setFont(LF_STANDARD);
   message.init(display);
 
-  // establish comms and clear the channel
-  SERIAL_ONSTEP.begin(SerialBaud);
+  // display the splash screen
+  drawIntro();
 
-  delay(500);
-  
   // get guide commands ready, use single byte for SerialST4 or normal LX200 otherwise
   // SerialST4 always returns 0 "may block", Teensy and ESP32 always return > 0
   if (SERIAL_ONSTEP.availableForWrite() == 0) {
@@ -114,9 +113,6 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
     strcpy(ccQn, ":Qn#");
     strcpy(ccQs, ":Qs#");
   }
-
-  // display the splash screen
-  drawIntro();
 
   VF("MSG: UserInterface, start UI update task (rate 30ms priority 6)... ");
   if (tasks.add(30, 0, true, 6, updateWrapper, "UIupd")) { VLF("success"); } else { VLF("FAILED!"); }
@@ -628,6 +624,18 @@ void UI::connect() {
   int thisTry = 0;
 again1:
   VLF("MSG: Connect, looking for OnStep");
+
+  // wait for a bit then display a message that WiFi is connecting
+  #if SERIAL_IP_MODE == STATION
+    delay(3000);
+    message.show(L_WIFI_CONNECTION, ONSTEP_SSID, 500);
+  #endif
+
+  // establish comms and clear the channel
+  SERIAL_ONSTEP.begin(serialBaud);
+
+  delay(500);
+
   for (int i = 0; i < 3; i++) {
     SERIAL_ONSTEP.print(":#");
     delay(400);
