@@ -91,6 +91,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
 
   // display the splash screen
   drawIntro();
+  delay(2000);
 
   // get guide commands ready, use single byte for SerialST4 or normal LX200 otherwise
   // SerialST4 always returns 0 "may block", Teensy and ESP32 always return > 0
