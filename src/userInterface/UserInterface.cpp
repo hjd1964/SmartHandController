@@ -633,19 +633,56 @@ bool UI::SelectStarAlign() {
 void UI::connect() {
   char s[20] = "";
   int thisTry = 0;
-again1:
-  VLF("MSG: Connect, looking for OnStep");
+  bool initSuccess, connectSuccess, querySuccess;
 
-  // wait for a bit then display a message that WiFi is connecting
   #if SERIAL_IP_MODE == STATION
-    delay(3000);
-    message.show(L_WIFI_CONNECTION, ONSTEP_SSID, 500);
+    if (firstConnect) menuWifi();
   #endif
 
-  // establish comms and clear the channel
-  SERIAL_ONSTEP.begin(serialBaud);
+initAgain:
+  initSuccess = true;
+  #if SERIAL_IP_MODE == STATION
+    if (!wifiManager.active) {
+      if (firstConnect) {
+        VLF("MSG: Connect, WiFi starting");
+        message.show(L_WIFI_CONNECTION1, wifiManager.sta->ssid, 100);
+      } else {
+        VLF("MSG: Connect, WiFi restarting");
+        message.show(L_WIFI_CONNECTION2, wifiManager.sta->ssid, 100);
+      }
+      if (!wifiManager.init()) initSuccess = false;
 
-  delay(500);
+      if (!initSuccess) {
+        VLF("MSG: Connect, WiFi failed");
+        message.show(L_WIFI_CONNECTION2, L_FAILED, 2000);
+        delay(5000);
+        goto initAgain;
+      }
+    }
+  #endif
+
+connectAgain:
+  connectSuccess = true;
+  #if SERIAL_IP_MODE == STATION
+    message.show(L_CONNECTING, IPAddress(wifiManager.sta->target).toString().c_str(), 1000);
+    if (!SERIAL_ONSTEP.begin(serialBaud)) connectSuccess = false;
+  #else
+    SERIAL_ONSTEP.begin(serialBaud);
+  #endif
+
+  if (!connectSuccess) {
+    SERIAL_ONSTEP.end();
+    VLF("MSG: Connect, to target failed");
+    message.show(L_CONNECTING, L_FAILED, 2000);
+    goto initAgain;
+  }
+
+  VLF("MSG: Connect, looking for OnStep...");
+
+queryAgain:
+  querySuccess = false;
+
+  if (thisTry % 1 == 0) message.show(L_LOOKING, wifiManager.sta->ssid, 1000); else message.show(L_LOOKING, ".....", 1000);
 
   for (int i = 0; i < 3; i++) {
     SERIAL_ONSTEP.print(":#");
@@ -654,17 +691,23 @@ again1:
     delay(100);
   }
 
-  message.show(L_ESTABLISHING, L_CONNECTION, (thisTry++ % 2) ? "." : "", 500);
-
-  delay(500);
-
   CMD_RESULT r = onStep.Get(":GVP#", s);
-  if (r != CR_VALUE_GET || !strstr(s, "On-Step")) goto again1;
+  if (r != CR_VALUE_GET || !strstr(s, "On-Step")) {
+    if (++thisTry % 5 != 0) {
+      goto queryAgain;
+    } else {
+      SERIAL_ONSTEP.end();
+      wifiManager.disconnect();
+      delay(7000);
+      thisTry = 0;
+      goto initAgain;
+    }
+  }
 
   VLF("MSG: Connect, found OnStep");
 
 again2:
-  delay(2000);
+  delay(1000);
 
   // OnStep coordinate mode for getting and setting RA/Dec
   // 0 = OBSERVED_PLACE (same as not supported)
