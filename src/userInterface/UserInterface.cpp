@@ -672,8 +672,10 @@ connectAgain:
   #endif
 
   if (!connectSuccess) {
-    SERIAL_ONSTEP.end();
     VLF("MSG: Connect, to target failed");
+    SERIAL_ONSTEP.end();
+    wifiManager.disconnect();
+    delay(7000);
     message.show(L_CONNECTING, L_FAILED, 2000);
     goto initAgain;
   }
