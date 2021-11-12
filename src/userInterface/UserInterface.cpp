@@ -123,8 +123,9 @@ void UI::poll() {
   // connect/reconnect
   static unsigned long lastConnectedTime = 0;
   if (!status.connected && (long)(millis() - lastConnectedTime) > 2000) {
-    if (!firstConnect) { message.show(L_DISCONNECT_MSG, L_CONNECTION, 2000); firstConnect = false; }
+    if (!firstConnect) { message.show(L_LOST_MSG, L_CONNECTION, 1000); }
     connect();
+    firstConnect = false;
   } else lastConnectedTime = millis();
 
   unsigned long time_now = millis();
