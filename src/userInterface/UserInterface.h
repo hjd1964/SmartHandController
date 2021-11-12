@@ -61,6 +61,9 @@ private:
 
   void menuMain();
   void menuFeatureKey();
+  #if SERIAL_IP_MODE == STATION
+    void menuWifi();
+  #endif
   
   MENU_RESULT menuSyncGoto(bool sync);
   MENU_RESULT subMenuSyncGoto(char sync, int subMenuNum);

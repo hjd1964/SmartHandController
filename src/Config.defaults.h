@@ -22,19 +22,19 @@
   // set station mode
   #define STA_ENABLED            true
 
-  // optional alternate fallback
-  #if ONSTEP_ALT_FALLBACK == ON
-  #define STA_ALT_FALLBACK       true
-  #endif
-
   // use friendly names for OnStep IP address, SSID, password
-  #define STA_DHCP_ENABLED       true
-  #define STA_SSID               ONSTEP_SSID
-  #define STA_PASSWORD           ONSTEP_PASSWORD
-  #define STA_TARGET_IP_ADDR     ONSTEP_IP_ADDR
+  #define STA1_DHCP_ENABLED      true
+  #define STA1_SSID              ONSTEP1_SSID
+  #define STA1_PASSWORD          ONSTEP1_PASSWORD
+  #define STA1_TARGET_IP_ADDR    ONSTEP1_IP_ADDR
 
-  #define STA_DHCP_ENABLED_ALT   true
-  #define STA_SSID_ALT           ONSTEP_SSID_ALT
-  #define STA_PASSWORD_ALT       ONSTEP_PASSWORD_ALT
-  #define STA_TARGET_IP_ADDR_ALT ONSTEP_IP_ADDR_ALT
+  #define STA2_DHCP_ENABLED      true
+  #define STA2_SSID              ONSTEP2_SSID
+  #define STA2_PASSWORD          ONSTEP2_PASSWORD
+  #define STA2_TARGET_IP_ADDR    ONSTEP2_IP_ADDR
+
+  #define STA3_DHCP_ENABLED      true
+  #define STA3_SSID              ONSTEP3_SSID
+  #define STA3_PASSWORD          ONSTEP3_PASSWORD
+  #define STA3_TARGET_IP_ADDR    ONSTEP3_IP_ADDR
 #endif

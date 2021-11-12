@@ -2,6 +2,36 @@
 // MenuMain, for UserInterface
 #include "../UserInterface.h"
 
+#if SERIAL_IP_MODE == STATION
+  void UI::menuWifi() {
+    static unsigned short current_selection_wifi = 1;
+
+    int wifiCount = 0;
+    char string_ssids[120];
+    if (strlen(STA1_SSID) != 0) {
+      wifiCount++;
+      strcat(string_ssids, STA1_SSID);
+      if (strlen(STA2_SSID) != 0) {
+        wifiCount++;
+        strcat(string_ssids, "\n" STA2_SSID);
+        if (strlen(STA3_SSID) != 0) {
+          wifiCount++;
+          strcat(string_ssids, "\n" STA3_SSID);
+        }
+      }
+    }
+
+    if (wifiCount > 1) {
+      do {
+        current_selection_wifi = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_wifi, string_ssids);
+        VL(current_selection_wifi);
+      } while (current_selection_wifi == 0); 
+    }
+
+    wifiManager.setStation(current_selection_wifi);
+  }
+#endif
+
 void UI::menuFeatureKey() {
   static unsigned short current_selection_feature_mode = 1;
   unsigned short last_selection_feature_mode = current_selection_feature_mode;
