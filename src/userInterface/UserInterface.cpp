@@ -683,7 +683,7 @@ connectAgain:
 queryAgain:
   querySuccess = false;
 
-  if (thisTry % 1 == 0) message.show(L_LOOKING, wifiManager.sta->ssid, 1000); else message.show(L_LOOKING, ".....", 1000);
+  if (thisTry % 1 == 0) message.show(L_LOOKING, wifiManager.sta->host, 1000); else message.show(L_LOOKING, "...", 1000);
 
   for (int i = 0; i < 3; i++) {
     SERIAL_ONSTEP.print(":#");

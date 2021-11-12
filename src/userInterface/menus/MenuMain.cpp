@@ -8,15 +8,15 @@
 
     int wifiCount = 0;
     char string_ssids[120];
-    if (strlen(STA1_SSID) != 0) {
+    if (strlen(STA1_HOST_NAME) != 0) {
       wifiCount++;
-      strcat(string_ssids, STA1_SSID);
-      if (strlen(STA2_SSID) != 0) {
+      strcat(string_ssids, STA1_HOST_NAME);
+      if (strlen(STA2_HOST_NAME) != 0) {
         wifiCount++;
-        strcat(string_ssids, "\n" STA2_SSID);
-        if (strlen(STA3_SSID) != 0) {
+        strcat(string_ssids, "\n" STA2_HOST_NAME);
+        if (strlen(STA3_HOST_NAME) != 0) {
           wifiCount++;
-          strcat(string_ssids, "\n" STA3_SSID);
+          strcat(string_ssids, "\n" STA3_HOST_NAME);
         }
       }
     }

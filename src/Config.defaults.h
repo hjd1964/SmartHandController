@@ -24,16 +24,19 @@
 
   // use friendly names for OnStep IP address, SSID, password
   #define STA1_DHCP_ENABLED      true
+  #define STA1_HOST_NAME         ONSTEP1_HOST_NAME
   #define STA1_SSID              ONSTEP1_SSID
   #define STA1_PASSWORD          ONSTEP1_PASSWORD
   #define STA1_TARGET_IP_ADDR    ONSTEP1_IP_ADDR
 
   #define STA2_DHCP_ENABLED      true
+  #define STA2_HOST_NAME         ONSTEP2_HOST_NAME
   #define STA2_SSID              ONSTEP2_SSID
   #define STA2_PASSWORD          ONSTEP2_PASSWORD
   #define STA2_TARGET_IP_ADDR    ONSTEP2_IP_ADDR
 
   #define STA3_DHCP_ENABLED      true
+  #define STA3_HOST_NAME         ONSTEP3_HOST_NAME
   #define STA3_SSID              ONSTEP3_SSID
   #define STA3_PASSWORD          ONSTEP3_PASSWORD
   #define STA3_TARGET_IP_ADDR    ONSTEP3_IP_ADDR
