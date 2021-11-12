@@ -672,8 +672,10 @@ connectAgain:
   #endif
 
   if (!connectSuccess) {
-    SERIAL_ONSTEP.end();
     VLF("MSG: Connect, to target failed");
+    SERIAL_ONSTEP.end();
+    wifiManager.disconnect();
+    delay(7000);
     message.show(L_CONNECTING, L_FAILED, 2000);
     goto initAgain;
   }
@@ -683,7 +685,7 @@ connectAgain:
 queryAgain:
   querySuccess = false;
 
-  if (thisTry % 1 == 0) message.show(L_LOOKING, wifiManager.sta->ssid, 1000); else message.show(L_LOOKING, ".....", 1000);
+  if (thisTry % 1 == 0) message.show(L_LOOKING, wifiManager.sta->host, 1000); else message.show(L_LOOKING, "...", 1000);
 
   for (int i = 0; i < 3; i++) {
     SERIAL_ONSTEP.print(":#");
