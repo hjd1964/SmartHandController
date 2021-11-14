@@ -15,7 +15,7 @@
 
 #define TIMEOUT_CMD                 2000  // Default 2000 ms, 2 seconds
 #define FOREGROUND_CMD_RATE         300   // Default 300 ms, regulates the forground command rate
-#define BACKGROUND_CMD_RATE         2000  // Default 300 ms, regulates the background (dimmed display) command rate
+#define BACKGROUND_CMD_RATE         1500  // Default 1500 ms, regulates the background (dimmed display) command rate
 
 // NV -------------------------------------------------------------------------------------------------------------------
 #define INIT_NV_KEY                 159301352UL
