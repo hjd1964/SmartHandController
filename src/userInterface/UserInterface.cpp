@@ -139,17 +139,19 @@ void UI::poll() {
       display->sleepOff();
       sleepDisplay = false;
       lowContrast = false;
+      status.backgroundCommandRate = FOREGROUND_CMD_RATE;
       keyPad.clearAllPressed();
       time_last_action = millis();
     }
     if (lowContrast) {
       display->setContrast(displaySettings.maxContrast);
       lowContrast = false;
+      status.backgroundCommandRate = FOREGROUND_CMD_RATE;
       time_last_action = time_now;
     }
   } else
   if (sleepDisplay) {
-    if ((long)time_now - time_keep_alive > 5000) {
+    if ((long)time_now - time_keep_alive > 10000) {
       SERIAL_ONSTEP.print(":#");
       time_keep_alive = millis();
     }
@@ -166,6 +168,7 @@ void UI::poll() {
   if (displaySettings.dimTimeout && !lowContrast && (long)(time_now - time_last_action) > displaySettings.dimTimeout) {
     display->setContrast(0);
     lowContrast = true;
+    status.backgroundCommandRate = BACKGROUND_CMD_RATE;
     return;
   }
 
@@ -194,7 +197,7 @@ void UI::poll() {
   } else
 
   // otherwise update the main display
-  if ((long)(time_now - lastpageupdate) > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
+  if ((long)(time_now - lastpageupdate) > status.backgroundCommandRate/2) updateMainDisplay(page);
 
   // -----------------------------------------------------------------------------------------------------
   // keypad
@@ -674,7 +677,9 @@ connectAgain:
   if (!connectSuccess) {
     VLF("MSG: Connect, to target failed");
     SERIAL_ONSTEP.end();
-    wifiManager.disconnect();
+    #if SERIAL_IP_MODE == STATION
+      wifiManager.disconnect();
+    #endif
     delay(7000);
     message.show(L_CONNECTING, L_FAILED, 2000);
     goto initAgain;
@@ -685,7 +690,7 @@ connectAgain:
 queryAgain:
   querySuccess = false;
 
-  if (thisTry % 1 == 0) message.show(L_LOOKING, wifiManager.sta->host, 1000); else message.show(L_LOOKING, "...", 1000);
+  if (thisTry % 1 == 0) message.show(L_LOOKING, "OnStep", 1000); else message.show(L_LOOKING, "...", 1000);
 
   for (int i = 0; i < 3; i++) {
     SERIAL_ONSTEP.print(":#");
@@ -700,7 +705,9 @@ queryAgain:
       goto queryAgain;
     } else {
       SERIAL_ONSTEP.end();
-      wifiManager.disconnect();
+      #if SERIAL_IP_MODE == STATION
+        wifiManager.disconnect();
+      #endif
       delay(7000);
       thisTry = 0;
       goto initAgain;

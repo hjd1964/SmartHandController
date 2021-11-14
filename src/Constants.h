@@ -13,8 +13,9 @@
 #define FWU                         -205
 #define JS1                         -206
 
-#define TIMEOUT_CMD                 1000  // Default 1000 ms, 1 second
-#define BACKGROUND_CMD_RATE         300   // Default 300 ms, regulates the background command rate
+#define TIMEOUT_CMD                 2000  // Default 2000 ms, 2 seconds
+#define FOREGROUND_CMD_RATE         300   // Default 300 ms, regulates the forground command rate
+#define BACKGROUND_CMD_RATE         1500  // Default 1500 ms, regulates the background (dimmed display) command rate
 
 // NV -------------------------------------------------------------------------------------------------------------------
 #define INIT_NV_KEY                 159301352UL
