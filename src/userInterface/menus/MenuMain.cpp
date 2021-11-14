@@ -7,23 +7,26 @@
     static unsigned short current_selection_wifi = 1;
 
     int wifiCount = 0;
-    char string_ssids[120];
+    char host_list[40];
+    strcpy(host_list, "");
     if (strlen(STA1_HOST_NAME) != 0) {
       wifiCount++;
-      strcat(string_ssids, STA1_HOST_NAME);
+      strncat(host_list, STA1_HOST_NAME, 16);
       if (strlen(STA2_HOST_NAME) != 0) {
         wifiCount++;
-        strcat(string_ssids, "\n" STA2_HOST_NAME);
+        strcat(host_list, "\n");
+        strncat(host_list, STA2_HOST_NAME, 16);
         if (strlen(STA3_HOST_NAME) != 0) {
           wifiCount++;
-          strcat(string_ssids, "\n" STA3_HOST_NAME);
+          strcat(host_list, "\n");
+          strncat(host_list, STA3_HOST_NAME, 16);
         }
       }
     }
 
     if (wifiCount > 1) {
       do {
-        current_selection_wifi = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_wifi, string_ssids);
+        current_selection_wifi = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_wifi, host_list);
         VL(current_selection_wifi);
       } while (current_selection_wifi == 0); 
     }
