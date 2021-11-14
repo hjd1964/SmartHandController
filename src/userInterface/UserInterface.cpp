@@ -139,12 +139,14 @@ void UI::poll() {
       display->sleepOff();
       sleepDisplay = false;
       lowContrast = false;
+      status.backgroundCommandRate = FOREGROUND_CMD_RATE;
       keyPad.clearAllPressed();
       time_last_action = millis();
     }
     if (lowContrast) {
       display->setContrast(displaySettings.maxContrast);
       lowContrast = false;
+      status.backgroundCommandRate = FOREGROUND_CMD_RATE;
       time_last_action = time_now;
     }
   } else
@@ -166,6 +168,7 @@ void UI::poll() {
   if (displaySettings.dimTimeout && !lowContrast && (long)(time_now - time_last_action) > displaySettings.dimTimeout) {
     display->setContrast(0);
     lowContrast = true;
+    status.backgroundCommandRate = BACKGROUND_CMD_RATE;
     return;
   }
 
@@ -194,7 +197,7 @@ void UI::poll() {
   } else
 
   // otherwise update the main display
-  if ((long)(time_now - lastpageupdate) > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
+  if ((long)(time_now - lastpageupdate) > status.backgroundCommandRate/2) updateMainDisplay(page);
 
   // -----------------------------------------------------------------------------------------------------
   // keypad

@@ -2,7 +2,7 @@
 // Status, from OnStep
 #pragma once
 
-#include <Arduino.h>
+#include "..\..\Common.h"
 
 class Status {
 public:
@@ -104,6 +104,8 @@ public:
   bool hasInfoSidereal = false;
   bool hasTelStatus = false;
   unsigned long lastState;
+
+  int backgroundCommandRate = FOREGROUND_CMD_RATE;
 
 private:
   int focuserCount = 0;

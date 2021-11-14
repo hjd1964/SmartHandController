@@ -6,7 +6,7 @@
 #include "../../lib/convert/Convert.h"
 
 void Status::updateRaDec(boolean immediate) {
-  if (((millis() - lastStateRaDec > BACKGROUND_CMD_RATE) && connected) || immediate) {
+  if (((millis() - lastStateRaDec > backgroundCommandRate) && connected) || immediate) {
     if (updateSeq%3 == 1 || immediate) {
       hasInfoRa = onStep.Get(":GR#", TempRa) == CR_VALUE_GET;
       if (!hasInfoRa) connected = false;
@@ -20,7 +20,7 @@ void Status::updateRaDec(boolean immediate) {
 };
 
 void Status::updateAzAlt(boolean immediate) {
-  if (((millis() - lastStateAzAlt > BACKGROUND_CMD_RATE) && connected) || immediate) {
+  if (((millis() - lastStateAzAlt > backgroundCommandRate) && connected) || immediate) {
     if (updateSeq%3 == 1 || immediate) {
       hasInfoAz = onStep.Get(":GZ#", TempAz) == CR_VALUE_GET;
       if (!hasInfoAz) connected = false;
@@ -34,7 +34,7 @@ void Status::updateAzAlt(boolean immediate) {
 }
 
 void Status::updateTime(boolean immediate) {
-  if (((millis() - lastStateTime > BACKGROUND_CMD_RATE) && connected) || immediate) {
+  if (((millis() - lastStateTime > backgroundCommandRate) && connected) || immediate) {
     if (updateSeq%3 == 1 || immediate) {
       hasInfoUTC = onStep.Get(":GX80#", TempUniversalTime) == CR_VALUE_GET;
       if (!hasInfoUTC) connected = false;
@@ -48,7 +48,7 @@ void Status::updateTime(boolean immediate) {
 };
 
 void Status::updateTel(boolean immediate) {
-  if (((millis() - lastStateTel > BACKGROUND_CMD_RATE) && connected) || immediate) {
+  if (((millis() - lastStateTel > backgroundCommandRate) && connected) || immediate) {
     if (updateSeq%3 == 0 || immediate) {
       hasTelStatus = onStep.Get(":Gu#", TelStatus) == CR_VALUE_GET;
       if (!hasTelStatus) connected = false;
