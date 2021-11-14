@@ -149,7 +149,7 @@ void UI::poll() {
     }
   } else
   if (sleepDisplay) {
-    if ((long)time_now - time_keep_alive > 5000) {
+    if ((long)time_now - time_keep_alive > 10000) {
       SERIAL_ONSTEP.print(":#");
       time_keep_alive = millis();
     }
