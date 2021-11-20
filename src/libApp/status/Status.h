@@ -2,7 +2,7 @@
 // Status, from OnStep
 #pragma once
 
-#include "..\..\Common.h"
+#include "../../Common.h"
 
 class Status {
 public:
