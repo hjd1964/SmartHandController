@@ -85,6 +85,7 @@
 #define L_FKEY_RETICLE "Reticle"
 #define L_FKEY_FOCUSER "Focuser"
 #define L_FKEY_ROTATOR "Rotator"
+#define L_FKEY_SWITCH "Switch"
 #define L_FKEY_FEATURE_KEYS "Feature Keys"
 
 // main menu root
@@ -248,6 +249,7 @@
 #define L_SG_HOME "Home"
 #define L_SG_SYNC "Sync"
 #define L_SG_GOTO "Goto"
+#define L_SG_SPIRAL "Spiral Search"
 
 // return home or reset at home
 #define L_SG_HOME1 "Goto Home will"
