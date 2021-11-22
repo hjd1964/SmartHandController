@@ -34,7 +34,7 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
     }
     // add the normal filtering, solarsys, etc. items
     strcat(string_list_gotoL1,L_SG_SOLSYS ">" "\n");
-    if (sync) strcat(string_list_gotoL1,L_SG_HERE ">"); else strcat(string_list_gotoL1,L_SG_USER ">" "\n" L_SG_FILTERS "\n" L_SG_COORDS "\n" L_SG_HOME);
+    if (sync) strcat(string_list_gotoL1,L_SG_HERE ">"); else strcat(string_list_gotoL1,L_SG_USER ">" "\n" L_SG_FILTERS "\n" L_SG_COORDS "\n" L_SG_SPIRAL "\n" L_SG_HOME);
 
     int selection = display->UserInterfaceSelectionList(&keyPad, sync ? L_SG_SYNC : L_SG_GOTO, current_selection, string_list_gotoL1);
     if (selection == 0) return MR_CANCEL;
@@ -63,6 +63,15 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
         if (menuRADec(sync) == MR_QUIT) return MR_QUIT;
       break;
       case 5:
+	  {
+		message.show(L_SG_SPIRAL, "", 2000);
+        onStep.Set(":Mp#");
+        message.show(L_SG_SPIRAL, "...", -1);
+        onStep.Set(":Q#");
+		return MR_QUIT;
+	  }
+      break;
+      case 6:
       {
         bool GotoHome = false;
         message.show(L_SG_HOME1, L_SG_HOME2, 2000);
