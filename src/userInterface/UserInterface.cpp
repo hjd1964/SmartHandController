@@ -314,6 +314,15 @@ void UI::poll() {
         else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState = FS_IN_FAST;  SERIAL_ONSTEP.print(":FF#:F-#"); message.brief(L_FKEY_FOCF_UP); }
       #endif
     break;
+
+    // switches
+    case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19:
+	  char cmd[] = ":SXX_,V_#";
+	  cmd[4] = '1' + featureKeyMode - 12;
+	  const char current_switch[] = { cmd[4], '\n' };
+      if (keyPad.F->wasPressed()) { cmd[7] = '0'; SERIAL_ONSTEP.print(cmd); message.show(L_FKEY_SWITCH, L_OFF, current_switch, 1000); } else
+      if (keyPad.f->wasPressed()) { cmd[7] = '1'; SERIAL_ONSTEP.print(cmd); message.show(L_FKEY_SWITCH, L_ON, current_switch, 1000); }
+    break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
 

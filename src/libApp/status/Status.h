@@ -65,6 +65,8 @@ public:
   int getOnStepVersion();
   bool hasFocuser(int n);
   int getFocuserCount();
+  bool hasSwitch(int n);
+  int getSwitchCount();
   bool hasRotator();
   bool hasDeRotator();
   bool hasReticle();
@@ -109,4 +111,5 @@ public:
 
 private:
   int focuserCount = 0;
+  int switchCount = 0;
 };

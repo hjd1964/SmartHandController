@@ -42,7 +42,7 @@ void UI::menuFeatureKey() {
   char string_feature_Modes[120] = L_FKEY_GUIDE_RATE "\n" L_FKEY_PULSE_GUIDE_RATE;
 
   int i = 2;
-  int j[9] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
+  int j[17] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
   #if UTILITY_LIGHT != OFF
     { i++; j[0]=i; strcat(string_feature_Modes,"\n" L_FKEY_UTILITY_LIGHT); }
   #endif
@@ -56,6 +56,17 @@ void UI::menuFeatureKey() {
       strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER);
       nums[0] = '1' + n;
       if (status.getFocuserCount() > 1) { strcat(string_feature_Modes, " "); strcat(string_feature_Modes, nums); }
+    }
+  }
+
+  for (int n = 0; n < 8; n++) {
+    char nums[] = "0";
+    if (status.hasSwitch(n)) {
+      i++;
+      j[n + 9] = i;
+	  nums[0] = '1' + n;
+      strcat(string_feature_Modes,"\n" L_FKEY_SWITCH " ");
+	  strcat(string_feature_Modes, nums);
     }
   }
 
@@ -73,6 +84,14 @@ void UI::menuFeatureKey() {
     if (current_selection_feature_mode == j[6]) { featureKeyMode = 9; onStep.Set(":FA4#"); } else // focuser 4
     if (current_selection_feature_mode == j[7]) { featureKeyMode = 10; onStep.Set(":FA5#"); } else // focuser 5
     if (current_selection_feature_mode == j[8]) { featureKeyMode = 11; onStep.Set(":FA6#"); } else // focuser 6
+	if (current_selection_feature_mode == j[9]) featureKeyMode = 12; else // switch 1
+	if (current_selection_feature_mode == j[10]) featureKeyMode = 13; else // switch 2
+	if (current_selection_feature_mode == j[11]) featureKeyMode = 14; else // switch 3
+	if (current_selection_feature_mode == j[9]) featureKeyMode = 15; else // switch 4
+	if (current_selection_feature_mode == j[10]) featureKeyMode = 16; else // switch 5
+	if (current_selection_feature_mode == j[11]) featureKeyMode = 17; else // switch 6
+	if (current_selection_feature_mode == j[9]) featureKeyMode = 18; else // switch 7
+	if (current_selection_feature_mode == j[10]) featureKeyMode = 19; else // switch 8
     { featureKeyMode = 1; current_selection_feature_mode = 1; } // default to guide rate
   } else current_selection_feature_mode = last_selection_feature_mode;
 }
