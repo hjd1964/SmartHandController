@@ -314,6 +314,47 @@ void UI::poll() {
         else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState = FS_IN_FAST;  SERIAL_ONSTEP.print(":FF#:F-#"); message.brief(L_FKEY_FOCF_UP); }
       #endif
     break;
+
+    // auxiliary features
+    case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19:
+	    char cmd[20];
+      char line2[20];
+      if (status.featureSelectByOrder(featureKeyMode - 11)) {
+        if (keyPad.F->wasPressed()) {
+          if (status.featurePurpose() == ANALOG_OUT) {
+            status.featureUpdate(featureKeyMode - 11);
+            // ANALOG_OUT but in units of 5%
+            int v = lround(status.featureValue1()/12.75F) - 2;
+            if (v < 0) v = 0;
+            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
+            SERIAL_ONSTEP.print(cmd);
+            sprintf(line2, "Feature%i: %i%%", status.featureNumber(), v*5);
+            message.show(status.featureName(), line2, 1000);
+          } else {
+            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 0);
+            SERIAL_ONSTEP.print(cmd);
+            sprintf(line2, "Feature%i: %s", status.featureNumber(), L_OFF);
+            message.show(status.featureName(), line2, 1000);
+          }
+        } else
+        if (keyPad.f->wasPressed()) {
+          if (status.featurePurpose() == ANALOG_OUT) {
+            status.featureUpdate(featureKeyMode - 11);
+            int v = lround(status.featureValue1()/12.75F) + 2;
+            if (v > 20) v = 20;
+            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
+            SERIAL_ONSTEP.print(cmd);
+            sprintf(line2, "Feature%i: %i%%", status.featureNumber(), v*5);
+            message.show(status.featureName(), line2, 1000);
+          } else {
+            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 1);
+            SERIAL_ONSTEP.print(cmd);
+            sprintf(line2, "Feature%i: %s", status.featureNumber(), L_ON);
+            message.show(status.featureName(), line2, 1000);
+          }
+        }
+      } else DL("WRN: aux feature not found");
+    break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
 
@@ -637,7 +678,7 @@ bool UI::SelectStarAlign() {
 void UI::connect() {
   char s[20] = "";
   int thisTry = 0;
-  bool initSuccess, connectSuccess, querySuccess;
+  bool initSuccess, connectSuccess;
 
   #if SERIAL_IP_MODE == STATION
     if (firstConnect) menuWifi();
@@ -654,6 +695,7 @@ initAgain:
         VLF("MSG: Connect, WiFi restarting");
         message.show(L_WIFI_CONNECTION2, wifiManager.sta->ssid, 100);
       }
+      delay(1000);
       if (!wifiManager.init()) initSuccess = false;
 
       if (!initSuccess) {
@@ -665,7 +707,6 @@ initAgain:
     }
   #endif
 
-connectAgain:
   connectSuccess = true;
   #if SERIAL_IP_MODE == STATION
     message.show(L_CONNECTING, IPAddress(wifiManager.sta->target).toString().c_str(), 1000);
@@ -688,8 +729,6 @@ connectAgain:
   VLF("MSG: Connect, looking for OnStep...");
 
 queryAgain:
-  querySuccess = false;
-
   if (thisTry % 1 == 0) message.show(L_LOOKING, "OnStep", 1000); else message.show(L_LOOKING, "...", 1000);
 
   for (int i = 0; i < 3; i++) {
@@ -751,6 +790,10 @@ again2:
     message.show(L_CONNECTION, L_WARNING "!", 1000);
     message.show(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
   }
+
+  // check to see if we have auxiliary features
+  hasAuxFeatures = status.featureScan();
+
   status.connected = true;
 }
 
