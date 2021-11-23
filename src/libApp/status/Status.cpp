@@ -254,26 +254,6 @@ int Status::getFocuserCount() {
   return focuserCount;
 }
 
-bool Status::hasSwitch(int n) {
-  if (n < 0 || n > 2) return false;
-  static bool processed = false;
-  static bool switches[3] = {false, false, false};
-  if (!processed) {
-    char out[40];
-      if ((onStep.Get(":GXX1#", out) == CR_VALUE_GET)) switches[0] = (out[1] == '#');
-      if ((onStep.Get(":GXX2#", out) == CR_VALUE_GET)) switches[1] = (out[1] == '#');
-      if ((onStep.Get(":GXX3#", out) == CR_VALUE_GET)) switches[2] = (out[1] == '#');
-
-    for (int i = 0; i < 3; i++) { if (switches[i]) switchCount++; }
-    processed = true;
-  }
-  return switches[n];
-}
-
-int Status::getSwitchCount() {
-  return switchCount;
-}
-
 static int _rotator  = -1;
 static int _derotator  = -1;
 bool Status::hasRotator() {

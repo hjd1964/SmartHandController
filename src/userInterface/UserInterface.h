@@ -129,6 +129,7 @@ private:
   RotState rotState = RS_STOPPED;
 
   bool firstConnect = true;
+  bool hasAuxFeatures = false;
   bool sleepDisplay = false;
   bool lowContrast = false;
   int Contrast[4] = {1, 66, 192, 255};

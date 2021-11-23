@@ -65,8 +65,6 @@ public:
   int getOnStepVersion();
   bool hasFocuser(int n);
   int getFocuserCount();
-  bool hasSwitch(int n);
-  int getSwitchCount();
   bool hasRotator();
   bool hasDeRotator();
   bool hasReticle();
@@ -82,6 +80,32 @@ public:
   unsigned short  alignSelectedStar = 1;
   int             alignMaxNumStars = -1;
 
+  bool featureScan();
+  bool featureUpdate(int index = 0);
+  inline bool featureFound() { return _featureFound; }
+  inline void featureSelect(int index) { featureSelected = index; }
+  bool featureSelectByOrder(int order);
+  inline int featureNumber() { return featureSelected + 1; }
+  inline char* featureName() { return feature[featureSelected].name; }
+  inline int featurePurpose() { return feature[featureSelected].purpose; }
+  inline int featureValue1() { return feature[featureSelected].value1; }
+  inline float featureValue2() { return feature[featureSelected].value2; }
+  inline float featureValue3() { return feature[featureSelected].value3; }
+  inline float featureValue4() { return feature[featureSelected].value4; }
+
+  bool _featureFound = false;
+  bool _featureValid = false;
+  int featureSelected = 0;
+  typedef struct Features {
+    char name[11];
+    int purpose;
+    int value1;
+    float value2;
+    float value3;
+    float value4;
+  } features;
+  features feature[8];
+
   Errors lastError = Status::ERR_NONE;
 
   char TempRa[20];
@@ -93,6 +117,7 @@ public:
   char TempUniversalTime[20];
   char TempSidereal[20];
   unsigned long lastStateTime;
+
   char TelStatus[20];
   unsigned long lastStateTel;
   unsigned long updateSeq=0;

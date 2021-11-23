@@ -85,7 +85,6 @@
 #define L_FKEY_RETICLE "Reticle"
 #define L_FKEY_FOCUSER "Focuser"
 #define L_FKEY_ROTATOR "Rotator"
-#define L_FKEY_SWITCH "Switch"
 #define L_FKEY_FEATURE_KEYS "Feature Keys"
 
 // main menu root

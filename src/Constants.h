@@ -17,6 +17,15 @@
 #define FOREGROUND_CMD_RATE         300   // Default 300 ms, regulates the forground command rate
 #define BACKGROUND_CMD_RATE         1500  // Default 1500 ms, regulates the background (dimmed display) command rate
 
+// AUXILIARY FEATURE purpose
+#define AUX_FEATURE_PURPOSE_FIRST   1
+#define SWITCH                      1      // control an simple on/off switch
+#define ANALOG_OUTPUT               2      // control an analog (pwm) output, depends on MCU support
+#define ANALOG_OUT                  2
+#define DEW_HEATER                  3      // control an dew heater
+#define INTERVALOMETER              4      // control an camera shutter
+#define AUX_FEATURE_PURPOSE_LAST    4
+
 // NV -------------------------------------------------------------------------------------------------------------------
 #define INIT_NV_KEY                 159301352UL
 
