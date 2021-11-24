@@ -42,11 +42,11 @@
   #define celsiusToNative(t) (t*(9.0F/5.0F) + 32.0F)
   #define nativeToCelsiusRelative(t) (t*(5.0F/9.0F))
   #define celsiusToNativeRelative(t) (t*(9.0F/5.0F))
-  #define TEMPERATURE_UNITS_ABV "C"
+  #define TEMPERATURE_UNITS_ABV "F"
 #else
   #define nativeToCelsius(t) (t)
   #define celsiusToNative(t) (t)
   #define nativeToCelsiusRelative(t) (t)
   #define celsiusToNativeRelative(t) (t)
-  #define TEMPERATURE_UNITS_ABV "F"
+  #define TEMPERATURE_UNITS_ABV "C"
 #endif
