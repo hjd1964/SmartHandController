@@ -3,6 +3,8 @@
 #include "../UserInterface.h"
 extern NVS nv;
 
+#include "../../lib/convert/Convert.h"
+
 void UI::menuSettings() {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0) {
@@ -32,7 +34,7 @@ void UI::menuSettings() {
 
     if (status.featureFound()) {
       for (int n = 0; n < 8; n++) {
-        status.featureSelect(n);
+        status.featureSelect(n + 1);
         if (status.featurePurpose() == DEW_HEATER || status.featurePurpose() == INTERVALOMETER) {
           index[15 + n] = i++;
           strcat(string_list_SettingsL1, "\n");
@@ -419,10 +421,10 @@ void UI::menuFeature(uint8_t feature) {
   // get the feature
   bool found = false;
   for (int n = 0; n < 8; n++) {
-    status.featureSelect(n);
+    status.featureSelect(n + 1);
     if (status.featurePurpose() == DEW_HEATER || status.featurePurpose() == INTERVALOMETER) {
       if (feature == n + 1) {
-        found = status.featureUpdate(n);
+        found = status.featureUpdate(n + 1);
         break;
       }
     }
@@ -440,47 +442,26 @@ void UI::menuFeature(uint8_t feature) {
 
       bool isOk = false;
       char cmd[40];
+      char cmdParam[40];
       int low = -5;
       int high = 20;
       float value;
       switch (current_selection_L2) {
         case 1:
-          #if UNITS == IMPERIAL
-            low = lround(low*9.0F/5.0F);
-            high = lround(high*9.0F/5.0F);
-            value = (status.featureValue2()*9.0F)/5.0F;
-            if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_ZERO, "", &value, low, high, 4, 1, " F")) {
-              sprintf(cmd, ":SXX%i,Z%1.1f#", status.featureNumber(), (value/9.0F)*5.0F);
-              if (isOk) { message.show(onStep.Set(cmd), false); }
-
-              return message.show(onStep.writeFocTCCoef(foc, tccoef), false);
-            }
-          #else
-            value = status.featureValue2();
-            if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_ZERO, "", &value, low, high, 4, 1, " C")) {
-              sprintf(cmd, ":SXX%i,Z%1.1f#", status.featureNumber(), value);
-              if (isOk) { message.show(onStep.Set(cmd), false); }
-            }
-          #endif
+          value = celsiusToNativeRelative(status.featureValue2());
+          if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_ZERO, "", &value, celsiusToNativeRelative(low), celsiusToNativeRelative(high), 4, 1, " " TEMPERATURE_UNITS_ABV)) {
+            sprintF(cmdParam, "%1.1f", nativeToCelsiusRelative(value));
+            sprintf(cmd, ":SXX%i,Z%s#", status.featureNumber(), cmdParam);
+            if (isOk) { message.show(onStep.Set(cmd), false); }
+          }
         break;
         case 2:
-          #if UNITS == IMPERIAL
-            low = lround(low*9.0F/5.0F);
-            high = lround(high*9.0F/5.0F);
-            value = (status.featureValue2()*9.0F)/5.0F;
-            if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_SPAN, "", &value, low, high, 4, 1, " F")) {
-              sprintf(cmd, ":SXX%i,S%1.1f#", status.featureNumber(), (value/9.0F)*5.0F);
-              if (isOk) { message.show(onStep.Set(cmd), false); }
-
-              return message.show(onStep.writeFocTCCoef(foc, tccoef), false);
-            }
-          #else
-            value = status.featureValue2();
-            if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_SPAN, "", &value, low, high, 4, 1, " C")) {
-              sprintf(cmd, ":SXX%i,S%1.1f#", status.featureNumber(), value);
-              if (isOk) { message.show(onStep.Set(cmd), false); }
-            }
-          #endif
+          value = celsiusToNativeRelative(status.featureValue3());
+          if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_SPAN, "", &value, celsiusToNativeRelative(low), celsiusToNativeRelative(high), 4, 1, " " TEMPERATURE_UNITS_ABV)) {
+            sprintF(cmdParam, "%1.1f", nativeToCelsiusRelative(value));
+            sprintf(cmd, ":SXX%i,S%s#", status.featureNumber(), cmdParam);
+            if (isOk) { message.show(onStep.Set(cmd), false); }
+          }
         break;
       }
     }

@@ -61,7 +61,7 @@ void UI::menuFeatureKey() {
 
   if (status.featureFound()) {
     for (int n = 0; n < 8; n++) {
-      status.featureSelect(n);
+      status.featureSelect(n + 1);
       if (status.featurePurpose() > 0) {
         i++;
         j[n + 9] = i;

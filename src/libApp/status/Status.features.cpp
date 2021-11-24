@@ -4,7 +4,7 @@
 bool Status::featureSelectByOrder(int order) {
   int found = 0;
   for (int n = 0; n < 8; n++) {
-    featureSelect(n);
+    featureSelect(n + 1);
     if (featurePurpose() > 0) found++;
     if (order == found) return true;
   }
@@ -60,6 +60,8 @@ bool Status::featureScan() {
   return true;
 }
 
+// update auxiliary feature state
+// \param index aux feature# 1 to 8, or 0 for all
 bool Status::featureUpdate(int index) {
   for (uint8_t i = 0; i < 8; i++) {
     char *value1_str = NULL;

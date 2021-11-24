@@ -83,7 +83,9 @@ public:
   bool featureScan();
   bool featureUpdate(int index = 0);
   inline bool featureFound() { return _featureFound; }
-  inline void featureSelect(int index) { featureSelected = index; }
+  // select auxiliary feature
+  // \param index aux feature# 1 to 8
+  inline void featureSelect(int index) { featureSelected = index - 1; }
   bool featureSelectByOrder(int order);
   inline int featureNumber() { return featureSelected + 1; }
   inline char* featureName() { return feature[featureSelected].name; }
