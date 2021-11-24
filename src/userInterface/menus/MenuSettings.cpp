@@ -9,7 +9,7 @@ void UI::menuSettings() {
     char string_list_SettingsL1[150] = "";
 
     int i = 1;
-    int index[15] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    int index[23] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
     index[1] = i++; strcat(string_list_SettingsL1,L_SET_DATE_TIME);
     index[2] = i++; strcat(string_list_SettingsL1,"\n" L_SET_SITE);
     index[3] = i++; strcat(string_list_SettingsL1,"\n" L_SET_DISPLAY);
@@ -17,7 +17,9 @@ void UI::menuSettings() {
     if (status.isMountGEM()) { index[5] = i++; strcat(string_list_SettingsL1,"\n" L_SET_MERIDIAN_FLIP); }
     index[6] = i++; strcat(string_list_SettingsL1,"\n" L_SET_CONFIG);
     index[7] = i++; strcat(string_list_SettingsL1,"\n" L_SET_VERSION);
+
     if (status.hasRotator())  { index[8] = i++; strcat(string_list_SettingsL1,"\n" L_SET_ROTATOR); }
+
     char nums[] = "0";
     for (int n = 0; n < 6; n++) {
       if (status.hasFocuser(n)) {
@@ -25,6 +27,17 @@ void UI::menuSettings() {
         strcat(string_list_SettingsL1,"\n" L_SET_FOCUSER);
         nums[0] = '1' + n;
         if (status.getFocuserCount() > 1) strcat(string_list_SettingsL1, nums);
+      }
+    }
+
+    if (status.featureFound()) {
+      for (int n = 0; n < 8; n++) {
+        status.featureSelect(n);
+        if (status.featurePurpose() == DEW_HEATER || status.featurePurpose() == INTERVALOMETER) {
+          index[15 + n] = i++;
+          strcat(string_list_SettingsL1, "\n");
+          strcat(string_list_SettingsL1, status.featureName());
+        }
       }
     }
 
@@ -43,6 +56,14 @@ void UI::menuSettings() {
     if (current_selection_L1 == index[12]) menuFocuser(4);
     if (current_selection_L1 == index[13]) menuFocuser(5);
     if (current_selection_L1 == index[14]) menuFocuser(6);
+    if (current_selection_L1 == index[15]) menuFeature(1);
+    if (current_selection_L1 == index[16]) menuFeature(2);
+    if (current_selection_L1 == index[17]) menuFeature(3);
+    if (current_selection_L1 == index[18]) menuFeature(4);
+    if (current_selection_L1 == index[19]) menuFeature(5);
+    if (current_selection_L1 == index[20]) menuFeature(6);
+    if (current_selection_L1 == index[21]) menuFeature(7);
+    if (current_selection_L1 == index[22]) menuFeature(8);
   }
 }
 
@@ -390,6 +411,116 @@ void UI::menuRotator() {
           if (isOk) { onStep.Set(":rR#"); message.show(L_VALUE, L_SETV "!", 1500); }
         }
       break;
+    }
+  }
+}
+
+void UI::menuFeature(uint8_t feature) {
+  // get the feature
+  bool found = false;
+  for (int n = 0; n < 8; n++) {
+    status.featureSelect(n);
+    if (status.featurePurpose() == DEW_HEATER || status.featurePurpose() == INTERVALOMETER) {
+      if (feature == n + 1) {
+        found = status.featureUpdate(n);
+        break;
+      }
+    }
+  }
+  if (!found) return;
+
+  if (status.featurePurpose() == DEW_HEATER) {
+    current_selection_L2 = 1;
+    while (current_selection_L2 != 0) {
+      const char *string_list_SiteL2 = L_AF_DEW_HEATER_ZERO "\n" L_AF_DEW_HEATER_SPAN;
+      
+      char title[40];
+      sprintf(title, "%s", status.featureName());
+      current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, title, current_selection_L2, string_list_SiteL2);
+
+      bool isOk = false;
+      char cmd[40];
+      int low = -5;
+      int high = 20;
+      float value;
+      switch (current_selection_L2) {
+        case 1:
+          #if UNITS == IMPERIAL
+            low = lround(low*9.0F/5.0F);
+            high = lround(high*9.0F/5.0F);
+            value = (status.featureValue2()*9.0F)/5.0F;
+            if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_ZERO, "", &value, low, high, 4, 1, " F")) {
+              sprintf(cmd, ":SXX%i,Z%1.1f#", status.featureNumber(), (value/9.0F)*5.0F);
+              if (isOk) { message.show(onStep.Set(cmd), false); }
+
+              return message.show(onStep.writeFocTCCoef(foc, tccoef), false);
+            }
+          #else
+            value = status.featureValue2();
+            if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_ZERO, "", &value, low, high, 4, 1, " C")) {
+              sprintf(cmd, ":SXX%i,Z%1.1f#", status.featureNumber(), value);
+              if (isOk) { message.show(onStep.Set(cmd), false); }
+            }
+          #endif
+        break;
+        case 2:
+          #if UNITS == IMPERIAL
+            low = lround(low*9.0F/5.0F);
+            high = lround(high*9.0F/5.0F);
+            value = (status.featureValue2()*9.0F)/5.0F;
+            if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_SPAN, "", &value, low, high, 4, 1, " F")) {
+              sprintf(cmd, ":SXX%i,S%1.1f#", status.featureNumber(), (value/9.0F)*5.0F);
+              if (isOk) { message.show(onStep.Set(cmd), false); }
+
+              return message.show(onStep.writeFocTCCoef(foc, tccoef), false);
+            }
+          #else
+            value = status.featureValue2();
+            if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_SPAN, "", &value, low, high, 4, 1, " C")) {
+              sprintf(cmd, ":SXX%i,S%1.1f#", status.featureNumber(), value);
+              if (isOk) { message.show(onStep.Set(cmd), false); }
+            }
+          #endif
+        break;
+      }
+    }
+  }
+
+  if (status.featurePurpose() == INTERVALOMETER) {
+    current_selection_L2 = 1;
+    while (current_selection_L2 != 0) {
+      const char *string_list_SiteL2 = L_AF_IV_COUNT "\n" L_AF_IV_DELAY "\n" L_AF_IV_EXPOS;
+      
+      char title[40];
+      sprintf(title, "%s", status.featureName());
+      current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, title, current_selection_L2, string_list_SiteL2);
+
+      bool isOk = false;
+      char cmd[40];
+      float value;
+      switch (current_selection_L2) {
+        case 1:
+          value = status.featureValue2();
+          if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_COUNT, "", &value, 0, 255, 3, 0, "")) {
+            sprintf(cmd, ":SXX%i,C%i#", status.featureNumber(), (int)lround(value));
+            if (isOk) { message.show(onStep.Set(cmd), false); }
+          }
+        break;
+        case 2:
+          value = status.featureValue3();
+          if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_DELAY, "", &value, 0, 3600, 4, 0, " secs")) {
+            sprintf(cmd, ":SXX%i,D%i#", status.featureNumber(), (int)lround(value));
+            if (isOk) { message.show(onStep.Set(cmd), false); }
+          }
+        break;
+        case 3:
+          value = status.featureValue4();
+          if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_EXPOS, "", &value, 0, 3600, 4, 0, " secs")) {
+            sprintf(cmd, ":SXX%i,E%i#", status.featureNumber(), (int)lround(value));
+            if (isOk) { message.show(onStep.Set(cmd), false); }
+          }
+        break;
+      }
     }
   }
 }

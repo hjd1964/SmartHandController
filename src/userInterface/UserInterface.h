@@ -106,6 +106,7 @@ private:
   bool menuSetFocBacklash(uint8_t &foc);
   bool menuSetFocTCDeadband(uint8_t &foc);
   void menuRotator();
+  void menuFeature(uint8_t feature);
   void menuLatitude();
   void menuLongitude();
   void menuZone();
