@@ -418,29 +418,19 @@ void UI::menuRotator() {
 }
 
 void UI::menuFeature(uint8_t feature) {
-  // get the feature
-  bool found = false;
-  for (int n = 0; n < 8; n++) {
-    status.featureSelect(n + 1);
-    if (status.featurePurpose() == DEW_HEATER || status.featurePurpose() == INTERVALOMETER) {
-      if (feature == n + 1) {
-        found = status.featureUpdate(n + 1);
-        break;
-      }
-    }
-  }
-  if (!found) return;
+  status.featureSelect(feature);
 
   if (status.featurePurpose() == DEW_HEATER) {
     current_selection_L2 = 1;
     while (current_selection_L2 != 0) {
+      status.featureUpdate(feature);
+
       const char *string_list_SiteL2 = L_AF_DEW_HEATER_ZERO "\n" L_AF_DEW_HEATER_SPAN;
       
       char title[40];
       sprintf(title, "%s", status.featureName());
       current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, title, current_selection_L2, string_list_SiteL2);
 
-      bool isOk = false;
       char cmd[40];
       char cmdParam[40];
       int low = -5;
@@ -450,17 +440,17 @@ void UI::menuFeature(uint8_t feature) {
         case 1:
           value = celsiusToNativeRelative(status.featureValue2());
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_ZERO, "", &value, celsiusToNativeRelative(low), celsiusToNativeRelative(high), 4, 1, " " TEMPERATURE_UNITS_ABV)) {
-            sprintF(cmdParam, "%1.1f", nativeToCelsiusRelative(value));
+            sprintF(cmdParam, "%0.1f", nativeToCelsiusRelative(value));
             sprintf(cmd, ":SXX%i,Z%s#", status.featureNumber(), cmdParam);
-            if (isOk) { message.show(onStep.Set(cmd), false); }
+            message.show(onStep.Set(cmd), false);
           }
         break;
         case 2:
           value = celsiusToNativeRelative(status.featureValue3());
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_SPAN, "", &value, celsiusToNativeRelative(low), celsiusToNativeRelative(high), 4, 1, " " TEMPERATURE_UNITS_ABV)) {
-            sprintF(cmdParam, "%1.1f", nativeToCelsiusRelative(value));
+            sprintF(cmdParam, "%0.1f", nativeToCelsiusRelative(value));
             sprintf(cmd, ":SXX%i,S%s#", status.featureNumber(), cmdParam);
-            if (isOk) { message.show(onStep.Set(cmd), false); }
+            message.show(onStep.Set(cmd), false);
           }
         break;
       }
@@ -470,35 +460,36 @@ void UI::menuFeature(uint8_t feature) {
   if (status.featurePurpose() == INTERVALOMETER) {
     current_selection_L2 = 1;
     while (current_selection_L2 != 0) {
+      status.featureUpdate(feature);
+
       const char *string_list_SiteL2 = L_AF_IV_COUNT "\n" L_AF_IV_DELAY "\n" L_AF_IV_EXPOS;
-      
+
       char title[40];
       sprintf(title, "%s", status.featureName());
       current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, title, current_selection_L2, string_list_SiteL2);
 
-      bool isOk = false;
       char cmd[40];
       float value;
       switch (current_selection_L2) {
         case 1:
-          value = status.featureValue2();
+          value = status.featureValue4();
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_COUNT, "", &value, 0, 255, 3, 0, "")) {
             sprintf(cmd, ":SXX%i,C%i#", status.featureNumber(), (int)lround(value));
-            if (isOk) { message.show(onStep.Set(cmd), false); }
+            message.show(onStep.Set(cmd), false);
           }
         break;
         case 2:
           value = status.featureValue3();
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_DELAY, "", &value, 0, 3600, 4, 0, " secs")) {
             sprintf(cmd, ":SXX%i,D%i#", status.featureNumber(), (int)lround(value));
-            if (isOk) { message.show(onStep.Set(cmd), false); }
+            message.show(onStep.Set(cmd), false);
           }
         break;
         case 3:
-          value = status.featureValue4();
+          value = status.featureValue2();
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_EXPOS, "", &value, 0, 3600, 4, 0, " secs")) {
             sprintf(cmd, ":SXX%i,E%i#", status.featureNumber(), (int)lround(value));
-            if (isOk) { message.show(onStep.Set(cmd), false); }
+            message.show(onStep.Set(cmd), false);
           }
         break;
       }

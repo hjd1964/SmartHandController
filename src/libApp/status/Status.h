@@ -82,6 +82,7 @@ public:
 
   bool featureScan();
   bool featureUpdate(int index = 0);
+  void featureClearAll();
   inline bool featureFound() { return _featureFound; }
   // select auxiliary feature
   // \param index aux feature# 1 to 8

@@ -328,12 +328,12 @@ void UI::poll() {
             if (v < 0) v = 0;
             sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
             SERIAL_ONSTEP.print(cmd);
-            sprintf(line2, "Feature%i: %i%%", status.featureNumber(), v*5);
+            sprintf(line2, "%i%%", v*5);
             message.show(status.featureName(), line2, 1000);
           } else {
             sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 0);
             SERIAL_ONSTEP.print(cmd);
-            sprintf(line2, "Feature%i: %s", status.featureNumber(), L_OFF);
+            sprintf(line2, "%s", L_OFF);
             message.show(status.featureName(), line2, 1000);
           }
         } else
@@ -344,12 +344,12 @@ void UI::poll() {
             if (v > 20) v = 20;
             sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
             SERIAL_ONSTEP.print(cmd);
-            sprintf(line2, "Feature%i: %i%%", status.featureNumber(), v*5);
+            sprintf(line2, "%i%%", v*5);
             message.show(status.featureName(), line2, 1000);
           } else {
             sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 1);
             SERIAL_ONSTEP.print(cmd);
-            sprintf(line2, "Feature%i: %s", status.featureNumber(), L_ON);
+            sprintf(line2, "%s",  L_ON);
             message.show(status.featureName(), line2, 1000);
           }
         }
