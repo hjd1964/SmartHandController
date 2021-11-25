@@ -10,8 +10,8 @@
 
 // General
 #define L_OK "OK"
-#define L_ON "ON"
-#define L_OFF "OFF"
+#define L_ON "On"
+#define L_OFF "Off"
 #define L_YES "Yes"
 #define L_NO "No"
 #define L_NOW "Now"
@@ -239,8 +239,8 @@
 #define L_FOC_BL_UNITS "micron(s)"
 
 // dew heater
-#define L_AF_DEW_HEATER_ZERO "DP Zero, full pwr"
-#define L_AF_DEW_HEATER_SPAN "DP Span, zero pwr"
+#define L_AF_DEW_HEATER_ZERO "DP Zero, max pwr"
+#define L_AF_DEW_HEATER_SPAN "DP Span, 0% pwr"
 
 // intervalometer
 #define L_AF_IV_COUNT "Exp Count"
