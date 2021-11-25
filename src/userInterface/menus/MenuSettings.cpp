@@ -472,7 +472,7 @@ void UI::menuFeature(uint8_t feature) {
       float value;
       switch (current_selection_L2) {
         case 1:
-          value = status.featureValue2();
+          value = status.featureValue4();
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_COUNT, "", &value, 0, 255, 3, 0, "")) {
             sprintf(cmd, ":SXX%i,C%i#", status.featureNumber(), (int)lround(value));
             message.show(onStep.Set(cmd), false);
@@ -486,7 +486,7 @@ void UI::menuFeature(uint8_t feature) {
           }
         break;
         case 3:
-          value = status.featureValue4();
+          value = status.featureValue2();
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_EXPOS, "", &value, 0, 3600, 4, 0, " secs")) {
             sprintf(cmd, ":SXX%i,E%i#", status.featureNumber(), (int)lround(value));
             message.show(onStep.Set(cmd), false);
