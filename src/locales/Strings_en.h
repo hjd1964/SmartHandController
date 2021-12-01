@@ -259,6 +259,9 @@
 #define L_SG_SYNC "Sync"
 #define L_SG_GOTO "Goto"
 #define L_SG_SPIRAL "Spiral Search"
+#define L_SG_LAST "Last"
+#define L_SG_GOTO_LAST "Goto Last"
+#define L_SG_TARGET "Target"
 
 // return home or reset at home
 #define L_SG_HOME1 "Goto Home will"
