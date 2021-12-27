@@ -20,7 +20,7 @@
 
 // IP ADDRESS SETTINGS -------------------------------------------------------------------------------------------------------------
 
-#define SERIAL_IP_MODE            STATION //         OFF, Use STATION to enable the interface (ESP32 only.)                   Option
+#define SERIAL_IP_MODE                OFF //         OFF, Use STATION to enable the interface (ESP32 only.)                   Option
                                           //              then specify SERIAL_IP as the serial port in Config.h
 
 #define ONSTEP1_HOST_NAME        "OnStep" //    "OnStep", Wifi Host Name to connnect to, leave blank to disable.              Adjust
