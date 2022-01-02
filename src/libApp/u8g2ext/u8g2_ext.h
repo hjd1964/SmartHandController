@@ -37,6 +37,20 @@ public: U8G2_EXT_SH1106_128X64_NONAME_1_HW_I2C(const u8g2_cb_t *rotation, uint8_
 };
 };
 
+class U8G2_EXT_SH1106_128X64_NONAME_1_4W_SW_SPI : public U8G2_EXT {
+  public: U8G2_EXT_SH1106_128X64_NONAME_1_4W_SW_SPI(const u8g2_cb_t *rotation, uint8_t clock = DISPLAY_SCK_PIN, uint8_t data = DISPLAY_MOSI_PIN, uint8_t cs = DISPLAY_SS_PIN, uint8_t dc = DISPLAY_DC_PIN, uint8_t reset = U8X8_PIN_NONE) : U8G2_EXT() {
+    u8g2_Setup_sh1106_128x64_noname_1(&u8g2, rotation, u8x8_byte_arduino_4wire_sw_spi, u8x8_gpio_and_delay_arduino);
+    u8x8_SetPin_4Wire_SW_SPI(getU8x8(), clock, data, cs, dc, reset);
+  }
+};
+
+class U8G2_EXT_SH1106_128X64_NONAME_1_4W_HW_SPI : public U8G2_EXT {
+  public: U8G2_EXT_SH1106_128X64_NONAME_1_4W_HW_SPI(const u8g2_cb_t *rotation, uint8_t cs = DISPLAY_SS_PIN, uint8_t dc = DISPLAY_DC_PIN, uint8_t reset = U8X8_PIN_NONE) : U8G2_EXT() {
+    u8g2_Setup_sh1106_128x64_noname_1(&u8g2, rotation, u8x8_byte_arduino_hw_spi, u8x8_gpio_and_delay_arduino);
+    u8x8_SetPin_4Wire_HW_SPI(getU8x8(), cs, dc, reset);
+  }
+};
+
 class U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C : public U8G2_EXT {
 public: U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(const u8g2_cb_t *rotation, uint8_t reset = U8X8_PIN_NONE, uint8_t clock = U8X8_PIN_NONE, uint8_t data = U8X8_PIN_NONE) : U8G2_EXT() {
   u8g2_Setup_ssd1306_i2c_128x64_noname_f(&u8g2, rotation, u8x8_byte_arduino_hw_i2c, u8x8_gpio_and_delay_arduino);
@@ -44,12 +58,24 @@ public: U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(const u8g2_cb_t *rotation, uint8
 }
 };
 
-//U8G2_SSD1306_128X64_NONAME_F_SW_I2C display(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);
-
 // Initializes big 2,3" display from diymore.cc
 class U8G2_EXT_SSD1309_128X64_NONAME_F_HW_I2C : public U8G2_EXT {
 public: U8G2_EXT_SSD1309_128X64_NONAME_F_HW_I2C(const u8g2_cb_t *rotation, uint8_t reset = DISPLAY_RESET_PIN, uint8_t clock = SCL, uint8_t data = SDA) : U8G2_EXT() { 
   u8g2_Setup_ssd1309_i2c_128x64_noname0_f(&u8g2, rotation, u8x8_byte_arduino_hw_i2c, u8x8_gpio_and_delay_arduino); 
   u8x8_SetPin_HW_I2C(getU8x8(), reset, clock, data);
 }
+};
+
+class U8G2_EXT_SSD1309_128X64_NONAME_F_4W_SW_SPI : public U8G2_EXT {
+  public: U8G2_EXT_SSD1309_128X64_NONAME_F_4W_SW_SPI(const u8g2_cb_t *rotation, uint8_t clock = DISPLAY_SCK_PIN, uint8_t data = DISPLAY_MOSI_PIN, uint8_t cs = DISPLAY_SS_PIN, uint8_t dc = DISPLAY_DC_PIN, uint8_t reset = U8X8_PIN_NONE) : U8G2_EXT() {
+    u8g2_Setup_ssd1309_128x64_noname0_f(&u8g2, rotation, u8x8_byte_arduino_4wire_sw_spi, u8x8_gpio_and_delay_arduino);
+    u8x8_SetPin_4Wire_SW_SPI(getU8x8(), clock, data, cs, dc, reset);
+  }
+};
+
+class U8G2_EXT_SSD1309_128X64_NONAME_F_4W_HW_SPI : public U8G2_EXT {
+  public: U8G2_EXT_SSD1309_128X64_NONAME_F_4W_HW_SPI(const u8g2_cb_t *rotation, uint8_t cs = DISPLAY_SS_PIN, uint8_t dc = DISPLAY_DC_PIN, uint8_t reset = U8X8_PIN_NONE) : U8G2_EXT() {
+    u8g2_Setup_ssd1309_128x64_noname0_f(&u8g2, rotation, u8x8_byte_arduino_hw_spi, u8x8_gpio_and_delay_arduino);
+    u8x8_SetPin_4Wire_HW_SPI(getU8x8(), cs, dc, reset);
+  }
 };

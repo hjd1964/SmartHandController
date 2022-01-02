@@ -9,10 +9,6 @@
 #include "../libApp/cmd/Cmd.h"
 #include "message/Message.h"
 
-#define SH1106 0
-#define SSD1306 1
-#define SSD1309 2
-
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE 1
 #define TOPOCENTRIC 2
@@ -25,7 +21,15 @@
 #define onstep_logo_width 128
 #define onstep_logo_height 68
 
-enum OLED { OLED_SH1106, OLED_SSD1306, OLED_SSD1309 };
+enum OLED { OLED_SH1106, OLED_SH1106_4W_SW_SPI, OLED_SH1106_4W_HW_SPI, OLED_SSD1306, OLED_SSD1309, OLED_SSD1309_4W_SW_SPI, OLED_SSD1309_4W_HW_SPI };
+#define SH1106 OLED_SH1106
+#define SH1106_SW_SPI OLED_SH1106_4W_SW_SPI
+#define SH1106_HW_SPI OLED_SH1106_4W_HW_SPI
+#define SSD1306 OLED_SSD1306
+#define SSD1309 OLED_SSD1309
+#define SSD1309_SW_SPI OLED_SSD1309_4W_SW_SPI
+#define SSD1309_HW_SPI OLED_SSD1309_4W_HW_SPI
+
 enum MENU_RESULT { MR_OK, MR_CANCEL, MR_QUIT };
 enum FocusState {FS_STOPPED, FS_IN_FAST, FS_IN_SLOW, FS_OUT_SLOW, FS_OUT_FAST};
 enum RotState {RS_STOPPED, RS_CW_FAST, RS_CW_SLOW, RS_CCW_SLOW, RS_CCW_FAST};
