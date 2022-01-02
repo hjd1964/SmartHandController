@@ -682,16 +682,16 @@ bool UI::SelectStarAlign() {
 void UI::connect() {
   char s[20] = "";
   int thisTry = 0;
-  bool initSuccess, connectSuccess;
+  bool connectSuccess;
 
   #if SERIAL_IP_MODE == STATION
     if (firstConnect) menuWifi();
   #endif
 
 initAgain:
-  initSuccess = true;
   #if SERIAL_IP_MODE == STATION
     if (!wifiManager.active) {
+      bool initSuccess = true;
       if (firstConnect) {
         VLF("MSG: Connect, WiFi starting");
         message.show(L_WIFI_CONNECTION1, wifiManager.sta->ssid, 100);
