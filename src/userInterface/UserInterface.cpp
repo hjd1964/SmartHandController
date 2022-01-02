@@ -28,7 +28,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   } else { VLF("MSG: NV, correct key found"); }
 
   // confirm the data structure size
-  if (DisplaySettingsSize < sizeof(DisplaySettings)) { nv.readOnly(true); DL("ERR: UserInterface::setup(); DisplaySettingsSize error NV subsystem writes disabled"); }
+  if (DisplaySettingsSize < sizeof(DisplaySettings)) { nv.protectData(true); DL("ERR: UserInterface::setup(); DisplaySettingsSize error NV subsystem writes disabled"); }
 
   // write the default settings to NV
   if (!nv.isKeyValid()) {
