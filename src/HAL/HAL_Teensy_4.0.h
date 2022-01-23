@@ -9,13 +9,14 @@
 #define HAL_WIRE_CLOCK 100000
 
 // Non-volatile storage ------------------------------------------------------------------------------
-#ifdef NV_DEFAULT
+#if NV_DRIVER == NV_DEFAULT
   #include "../lib/nv/NV_EEPROM.h"
+  #define HAL_NV_INIT() { nv.init(E2END + 1, true, 0, false); }
 #endif
 
 //----------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
-#define HAL_INIT() { analogReadResolution(10); nv.init(E2END + 1, true, 0, false); }
+#define HAL_INIT() { analogReadResolution(10); }
 
 //-----------------------------------------------------------------------------------------------------
 // Misc. includes and defines to support this processor's operation
