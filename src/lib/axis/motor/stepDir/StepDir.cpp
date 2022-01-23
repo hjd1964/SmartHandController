@@ -28,7 +28,7 @@ bool StepDirMotor::init(void (*volatile move)(), void (*volatile moveFF)(), void
   if (mtrHandle == 0) { D(axisPrefix); DLF("no axis monitor, exiting!"); return false; }
 
   #if DEBUG == VERBOSE
-    V(axisPrefix); V("init step="); if (Pins->step == OFF) V("OFF"); else V(Pins->step);
+    V(axisPrefix); V("pins step="); if (Pins->step == OFF) V("OFF"); else V(Pins->step);
     V(", dir="); if (Pins->dir == OFF) VF("OFF"); else V(Pins->dir);
     V(", en="); if (Pins->enable == OFF) VLF("OFF"); else if (Pins->enable == SHARED) VLF("SHARED"); else VL(Pins->enable);
   #endif
@@ -144,11 +144,17 @@ void StepDirMotor::setFrequencySteps(float frequency) {
 
     // change the motor rate/direction
     if (step != dir) step = 0;
-    tasks.setPeriodSubMicros(taskHandle, lastPeriod);
+    if (lastPeriodSet != lastPeriod) {
+      tasks.setPeriodSubMicros(taskHandle, lastPeriod);
+      lastPeriodSet = lastPeriod;
+    }
     step = dir;
 
     if (microstepModeControl == MMC_TRACKING_READY) microstepModeControl = MMC_TRACKING;
-    if (microstepModeControl == MMC_SLEWING_READY) microstepModeControl = MMC_SLEWING;
+    if (microstepModeControl == MMC_SLEWING_READY) {
+      V(axisPrefix); VF("high speed swap in took "); V(millis() - switchStartTimeMs); VLF(" ms");
+      microstepModeControl = MMC_SLEWING;
+    }
 
   } else {
     noInterrupts();
@@ -179,6 +185,7 @@ void StepDirMotor::modeSwitch() {
 
     if (microstepModeControl == MMC_TRACKING) {
       microstepModeControl = MMC_SLEWING_REQUEST;
+      switchStartTimeMs = millis();
     } else
     if (microstepModeControl == MMC_SLEWING_PAUSE) {
 

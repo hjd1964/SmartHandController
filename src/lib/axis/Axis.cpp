@@ -41,7 +41,7 @@ void Axis::init(Motor *motor, void (*callback)()) {
 
   // write axis settings to NV
   // NV_AXIS_SETTINGS_REVERT bit 0 = settings at compile (0) or run time (1), bits 1 to 9 = reset axis n on next boot
-  if (AxisSettingsSize < sizeof(AxisSettings)) { nv.initError = true; DL("ERR: Axis::init(); AxisSettingsSize error NV subsystem writes disabled"); }
+  if (AxisSettingsSize < sizeof(AxisSettings)) { nv.initError = true; DLF("ERR: Axis::init(); AxisSettingsSize error"); }
   uint16_t axesToRevert = nv.readUI(NV_AXIS_SETTINGS_REVERT);
   if (!(axesToRevert & 1)) bitSet(axesToRevert, axisNumber);
   if (bitRead(axesToRevert, axisNumber)) {
@@ -52,9 +52,14 @@ void Axis::init(Motor *motor, void (*callback)()) {
   nv.write(NV_AXIS_SETTINGS_REVERT, axesToRevert);
 
   // read axis settings from NV
+  AxisSettings backupSettings = settings;
   nv.readBytes(NV_AXIS_SETTINGS_BASE + (axisNumber - 1)*AxisSettingsSize, &settings, sizeof(AxisSettings));
-  if (!validateAxisSettings(axisNumber, settings)) nv.initError = true;
-
+  if (!validateAxisSettings(axisNumber, settings)) {
+    V(axisPrefix); VLF("NV settings validation failed using Config.h defaults");
+    settings = backupSettings;
+    nv.initError = true;
+  }
+  
   #if DEBUG == VERBOSE
     V(axisPrefix); VF("stepsPerMeasure="); V(settings.stepsPerMeasure);
     V(", reverse="); if (settings.reverse == OFF) VLF("OFF"); else if (settings.reverse == ON) VLF("ON"); else VLF("?");
@@ -254,12 +259,22 @@ CommandError Axis::autoSlewRateByDistance(float distance, float frequency) {
 
   if (!isnan(frequency)) setFrequencySlew(frequency);
 
+  V(axisPrefix);
+  VF("autoSlewRateByDistance start ");
+
   motor->markOriginCoordinateSteps();
   slewAccelerationDistance = distance;
   motor->setSynchronized(false);
   motor->setSlewing(true);
   autoRate = AR_RATE_BY_DISTANCE;
   rampFreq = 0.0F;
+
+  #if DEBUG == VERBOSE
+    if (axisNumber <= 2) { V(radToDeg(slewFreq)); V("°/s, accel "); SERIAL_DEBUG.print(radToDeg(slewMpspfs)*FRACTIONAL_SEC, 3); VLF("°/s/s"); }
+    if (axisNumber == 3) { V(slewFreq); V("°/s, accel "); SERIAL_DEBUG.print(slewMpspfs*FRACTIONAL_SEC, 3); VLF("°/s/s"); }
+    if (axisNumber > 3) { V(slewFreq); V("um/s, accel "); SERIAL_DEBUG.print(slewMpspfs*FRACTIONAL_SEC, 3); VLF("um/s/s"); }
+  #endif
+
   return CE_NONE;
 }
 
@@ -566,7 +581,7 @@ void Axis::setMotionLimitsCheck(bool state) {
 
 // checks for an error that would disallow motion in a given direction or DIR_BOTH for any motion
 bool Axis::motionError(Direction direction) {
-  if (motor->getDriverStatus().fault) { V(axisPrefix); VLF("motion error driver fault"); return true; }
+  if (fault()) return true;
 
   bool result = false;
 
