@@ -41,3 +41,8 @@
   #define STA3_PASSWORD          ONSTEP3_PASSWORD
   #define STA3_TARGET_IP_ADDR    ONSTEP3_IP_ADDR
 #endif
+
+// use the HAL specified default NV driver
+#ifndef NV_DRIVER
+  #define NV_DRIVER              NV_DEFAULT
+#endif
