@@ -37,6 +37,10 @@ NVS nv;
 #include "src/lib/tasks/OnTask.h"
 #include "src/userInterface/UserInterface.h"
 
+#if DEBUG == PROFILER
+  extern void profiler();
+#endif
+
 const char Version[] = "Version " FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch;
 const int pin[7] = {B_PIN0, B_PIN1, B_PIN2, B_PIN3, B_PIN4, B_PIN5, B_PIN6};
 const int active[7] = {B_PIN0_ACTIVE_STATE, B_PIN1_ACTIVE_STATE, B_PIN2_ACTIVE_STATE, B_PIN3_ACTIVE_STATE, B_PIN4_ACTIVE_STATE, B_PIN5_ACTIVE_STATE, B_PIN6_ACTIVE_STATE};
@@ -63,6 +67,11 @@ void setup(void) {
   if (tasks.add(10, 0, true, 7, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
   userInterface.init(Version, pin, active, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<OLED>(DISPLAY_OLED));
+
+  // start task manager debug events
+  #if DEBUG == PROFILER
+    tasks.add(142, 0, true, 7, profiler, "Profilr");
+  #endif
 
   VLF("MSG: Starting UI loop");
 }
