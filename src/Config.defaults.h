@@ -1,5 +1,15 @@
 #pragma once
 
+// use the HAL specified default NV driver
+#ifndef NV_DRIVER
+#define NV_DRIVER                     NV_DEFAULT
+#endif
+
+// option to clear NV
+#ifndef NV_WIPE
+#define NV_WIPE                       OFF
+#endif
+
 // activate ST4 port serial interface
 #define SERIAL_ST4
 #define SERIAL_ST4_SLAVE ON
@@ -9,7 +19,7 @@
 // for other settings see the WiFiManager class
 
 #ifndef SERIAL_IP_MODE
-  #define SERIAL_IP_MODE OFF
+#define SERIAL_IP_MODE OFF
 #endif
 
 #if SERIAL_IP_MODE == STATION
@@ -40,9 +50,4 @@
   #define STA3_SSID              ONSTEP3_SSID
   #define STA3_PASSWORD          ONSTEP3_PASSWORD
   #define STA3_TARGET_IP_ADDR    ONSTEP3_IP_ADDR
-#endif
-
-// use the HAL specified default NV driver
-#ifndef NV_DRIVER
-  #define NV_DRIVER              NV_DEFAULT
 #endif

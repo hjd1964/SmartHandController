@@ -19,12 +19,13 @@ void keyPadWrapper() { keyPad.poll(); }
 void UI::init(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model) {
   serialBaud = SerialBaud;
 
+  // if requested, cause defaults to be written back into NV
+  if (NV_WIPE == ON) { nv.writeKey(0); }
+
+  // get nv ready
   if (!nv.isKeyValid(INIT_NV_KEY)) {
     VF("MSG: NV, invalid key wipe "); V(nv.size); VLF(" bytes");
-    nv.wipe();
-    VLF("MSG: NV, waiting for commit");
-    nv.wait();
-    VLF("MSG: NV, resetting to defaults");
+    if (nv.verify()) { VLF("MSG: NV, ready for reset to defaults"); }
   } else { VLF("MSG: NV, correct key found"); }
 
   // confirm the data structure size
@@ -41,8 +42,11 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
 
   // init is done, write the NV key if necessary
   if (!nv.isKeyValid()) {
-    nv.writeKey((uint32_t)INIT_NV_KEY);
-    if (!nv.isKeyValid(INIT_NV_KEY)) { DLF("ERR: NV, failed to read back key!"); } else { VLF("MSG: NV, reset complete"); }
+    if (!nv.initError) {
+      nv.writeKey((uint32_t)INIT_NV_KEY);
+      nv.wait();
+      if (!nv.isKeyValid(INIT_NV_KEY)) { DLF("ERR: NV, failed to read back key!"); } else { VLF("MSG: NV, reset complete"); }
+    }
   }
 
   if (strlen(version) <= 19) strcpy(_version, version);
