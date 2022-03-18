@@ -5,11 +5,6 @@
 #define NV_DRIVER                     NV_DEFAULT
 #endif
 
-// option to clear NV
-#ifndef NV_WIPE
-#define NV_WIPE                       OFF
-#endif
-
 // activate ST4 port serial interface
 #define SERIAL_ST4
 #define SERIAL_ST4_SLAVE ON

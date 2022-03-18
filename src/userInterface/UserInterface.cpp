@@ -19,9 +19,6 @@ void keyPadWrapper() { keyPad.poll(); }
 void UI::init(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model) {
   serialBaud = SerialBaud;
 
-  // if requested, cause defaults to be written back into NV
-  if (NV_WIPE == ON) { nv.writeKey(0); }
-
   // get nv ready
   if (!nv.isKeyValid(INIT_NV_KEY)) {
     VF("MSG: NV, invalid key wipe "); V(nv.size); VLF(" bytes");
@@ -32,7 +29,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   if (DisplaySettingsSize < sizeof(DisplaySettings)) { nv.initError = true; DL("ERR: UserInterface::setup(); DisplaySettingsSize error NV subsystem writes disabled"); }
 
   // write the default settings to NV
-  if (!nv.isKeyValid()) {
+  if (!nv.hasValidKey()) {
     VLF("MSG: UserInterface, writing defaults to NV");
     nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
   }
@@ -41,7 +38,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   nv.readBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
 
   // init is done, write the NV key if necessary
-  if (!nv.isKeyValid()) {
+  if (!nv.hasValidKey()) {
     if (!nv.initError) {
       nv.writeKey((uint32_t)INIT_NV_KEY);
       nv.wait();
