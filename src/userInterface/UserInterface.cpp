@@ -715,7 +715,11 @@ initAgain:
     message.show(L_CONNECTING, IPAddress(wifiManager.sta->target).toString().c_str(), 1000);
     if (!SERIAL_ONSTEP.begin(serialBaud)) connectSuccess = false;
   #else
-    SERIAL_ONSTEP.begin(serialBaud);
+    #if defined(SERIAL_ONSTEP_RX) && defined(SERIAL_ONSTEP_TX)
+      SERIAL_ONSTEP.begin(serialBaud, SERIAL_8N1, SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
+    #else
+      SERIAL_ONSTEP.begin(serialBaud);
+    #endif
   #endif
 
   if (!connectSuccess) {
