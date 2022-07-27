@@ -33,10 +33,10 @@ public:
   enum PierState { PIER_NONE, PIER_E, PIER_W, PIER_UNKNOW };
 
 public:
-  void updateRaDec(boolean immediate=false);
-  void updateAzAlt(boolean immediate=false);
-  void updateTime(boolean immediate=false);
-  void updateTel(boolean immediate=false);
+  void updateRaDec(bool immediate = false);
+  void updateAzAlt(bool immediate = false);
+  void updateTime(bool immediate = false);
+  void updateTel(bool immediate = false);
   bool getRA(double &RA);
   bool getDec(double &Dec);
   double getLstT0();
