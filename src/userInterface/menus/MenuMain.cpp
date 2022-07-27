@@ -39,7 +39,7 @@ void UI::menuFeatureKey() {
   static unsigned short current_selection_feature_mode = 1;
   unsigned short last_selection_feature_mode = current_selection_feature_mode;
 
-  char string_feature_Modes[120] = L_FKEY_GUIDE_RATE "\n" L_FKEY_PULSE_GUIDE_RATE;
+  char string_feature_Modes[240] = L_FKEY_GUIDE_RATE "\n" L_FKEY_PULSE_GUIDE_RATE;
 
   int i = 2;
   int j[17] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
