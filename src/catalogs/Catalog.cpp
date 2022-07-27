@@ -700,14 +700,14 @@ int CatMgr::bayerFlam() {
 // For Bayer designated Stars return greek letter or Flamsteed designated stars return number
 const char* CatMgr::bayerFlamStr() {
   if (_selected<0) return "";
-  static char bfStr[3]="";
-  int bfNum=bayerFlam();
-  if ((bfNum>=0) && (bfNum<24)) {
-    sprintf(bfStr,"%d",bfNum);
+  static char bfStr[11] = "";
+  int bfNum = bayerFlam();
+  if ((bfNum >= 0) && (bfNum < 24)) {
+    sprintf(bfStr, "%d", bfNum);
     return bfStr;
   } else
-  if (bfNum>24) {
-    sprintf(bfStr,"%d",bfNum-24);
+  if (bfNum > 24) {
+    sprintf(bfStr, "%d", bfNum - 24);
     return bfStr;
   } else
   return "";

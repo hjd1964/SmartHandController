@@ -282,13 +282,13 @@ void UI::menuZone() {
 }
 
 void UI::menuFirmware() {
-  char out[20];
+  char out[64];
   
-  sprintf(out,"SHC %s", _version);
+  sprintf(out, "SHC %s", _version);
   message.show(out, __DATE__, 3000);
 
-  char temp1[20];
-  char temp2[20];
+  char temp1[32];
+  char temp2[32];
   if ( (message.show(onStep.Get(":GVN#", temp1)))&&(message.show(onStep.Get(":GVD#", temp2))) )
   { for (char* p = temp1; (p = strchr(p, '#')); ++p) { *p = 0;} 
     for (char* p = temp2; (p = strchr(p, '#')); ++p) { *p = 0;} 
@@ -431,7 +431,7 @@ void UI::menuFeature(uint8_t feature) {
       sprintf(title, "%s", status.featureName());
       current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, title, current_selection_L2, string_list_SiteL2);
 
-      char cmd[40];
+      char cmd[64];
       char cmdParam[40];
       int low = -5;
       int high = 20;

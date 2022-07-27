@@ -356,7 +356,7 @@ void UI::poll() {
             message.show(status.featureName(), line2, 1000);
           }
         }
-      } else DL("WRN: aux feature not found");
+      } else { DL("WRN: aux feature not found"); }
     break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
@@ -608,7 +608,7 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
 
       double T, P, H, DP;
       if (status.getT(T) && status.getP(P) && status.getH(H) && status.getDP(DP)) {
-        char temp[20], line[20];
+        char temp[32], line[64];
         u8g2_uint_t y = 36;
         u8g2_uint_t dx = display->getDisplayWidth();
 
