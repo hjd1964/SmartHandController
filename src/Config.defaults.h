@@ -1,8 +1,5 @@
 #pragma once
 
-// disable the analog support so newer ESP32 libraries work
-#define ESP32_HAS_ANALOG
-
 // use the HAL specified default NV driver
 #ifndef NV_DRIVER
 #define NV_DRIVER                     NV_DEFAULT
