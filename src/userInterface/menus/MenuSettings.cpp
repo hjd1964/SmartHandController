@@ -226,16 +226,16 @@ void UI::menuLatitude() {
   char out[20];
   if (message.show(onStep.Get(":Gt#", out))) {
     char* pEnd;
-    int degree = (int)strtol(&out[0], &pEnd, 10);
+    int degree = (int)strtol(&out[1], &pEnd, 10);
     int minute = (int)strtol(&out[4], &pEnd, 10);
-    long angle = degree * 60;
-    degree > 0 ? angle += minute : angle -= minute;
+    long angle = degree * 60 + minute;
+    if (out[0] == '-') angle = -angle;
     angle *= 60;
     if (display->UserInterfaceInputValueLatitude(&keyPad, &angle)) {
-      angle /= 60;
-      minute = abs(angle % 60);
-      degree = angle / 60;
-      sprintf(out, ":St%+03d*%02d#", degree, minute);
+      angle = angle / 60;
+      minute = abs(angle) % 60;
+      degree = abs(angle) / 60;
+      sprintf(out, ":St%c%02d*%02d#", angle < 0 ? '-' : '+', degree, minute);
       message.show(onStep.Set(out),false);
     }
   }
@@ -245,16 +245,16 @@ void UI::menuLongitude() {
   char out[20];
   if (message.show(onStep.Get(":Gg#", out))) {
     char* pEnd;
-    int degree = (int)strtol(&out[0], &pEnd, 10);
+    int degree = (int)strtol(&out[1], &pEnd, 10);
     int minute = (int)strtol(&out[5], &pEnd, 10);
-    long angle = degree * 60;
-    degree > 0 ? angle += minute : angle -= minute;
-    angle *= 60;
+    long angle = degree * 60 + minute;
+    if (out[0] == '-') angle = -angle;
+    angle *= 60;    
     if (display->UserInterfaceInputValueLongitude(&keyPad, &angle)) {
-      angle /= 60;
+      angle = angle / 60;
       minute = abs(angle) % 60;
-      degree = angle / 60;
-      sprintf(out, ":Sg%+04d*%02d#", degree, minute);
+      degree = abs(angle) / 60;
+      sprintf(out, ":Sg%c%03d*%02d#", angle < 0 ? '-' : '+', degree, minute);
       message.show(onStep.Set(out), false);
     }
   }
