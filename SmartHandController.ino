@@ -1,7 +1,7 @@
 /*
 * Title       Smart Hand Controller (based on TeenAstro)
 *
-* Copyright (C) 2018 to 2021 Charles Lemaire, Howard Dutton, and Others
+* Copyright (C) 2018 to 2022 Charles Lemaire, Howard Dutton, and Others
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 * Description
 *
 * Smart Hand controller addon for OnStep
-* for the actual hardware see: https://easyeda.com/hdutton/HC-20e242d665db4c85bb565a0cd0b52233
+* for the actual hardware see: https://oshwlab.com/hdutton/smart-hand-controller2-plus
 */
 
 #define Product               "SHC"
