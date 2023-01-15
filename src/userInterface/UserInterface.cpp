@@ -222,142 +222,302 @@ void UI::poll() {
   // guiding
   {
     buttonCommand = false;
-    #if ST4_AUX_INTERFACE == ON
-      if (!moveEast  && (keyPad.e->isDown() || auxST4.e->isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
-      if ( moveEast  && (keyPad.e->isUp()   && auxST4.e->isUp()))   { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; keyPad.e->clearPress(); auxST4.e->clearPress(); }
-      if (!moveWest  && (keyPad.w->isDown() || auxST4.w->isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
-      if ( moveWest  && (keyPad.w->isUp()   && auxST4.w->isUp()))   { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; keyPad.w->clearPress(); auxST4.w->clearPress(); }
-      if (!moveNorth && (keyPad.n->isDown() || auxST4.n->isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
-      if ( moveNorth && (keyPad.n->isUp()   && auxST4.n->isUp()))   { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; keyPad.n->clearPress(); auxST4.n->clearPress(); }
-      if (!moveSouth && (keyPad.s->isDown() || auxST4.s->isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
-      if ( moveSouth && (keyPad.s->isUp()   && auxST4.s->isUp()))   { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; keyPad.s->clearPress(); auxST4.s->clearPress(); }
-    #else
-      if (!moveEast  && (keyPad.e->isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
-      if ( moveEast  && (keyPad.e->isUp()  )) { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; keyPad.e->clearPress(); }
-      if (!moveWest  && (keyPad.w->isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
-      if ( moveWest  && (keyPad.w->isUp()  )) { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; keyPad.w->clearPress(); }
-      if (!moveNorth && (keyPad.n->isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
-      if ( moveNorth && (keyPad.n->isUp()  )) { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; keyPad.n->clearPress(); }
-      if (!moveSouth && (keyPad.s->isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
-      if ( moveSouth && (keyPad.s->isUp()  )) { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; keyPad.s->clearPress(); }
-    #endif
+    if (keyPad.f->timeDown()>1000 && keyPad.F->timeDown()>1000) {
+      enableSlewMultiMode = !enableSlewMultiMode;
+      message.show("Continuous Slew", enableSlewMultiMode ? L_ON : L_OFF, 1000);
+      slewRatioW = 3;
+      slewRatioN = 3;
+      magicCoef = 3;
+      Wspeed = 10*sidereal;
+      Nspeed = 10*sidereal;
+      buttonCommand = true;
+    } else
+    if (enableSlewMultiMode) {
+      char speed[10];
+      char buf[30];
+
+      if (keyPad.F->wasClicked()) {
+        if (lastDirButton == NS) {
+          slewRatioN /= magicCoef;
+        }
+        if (lastDirButton == WE) {
+          slewRatioW /= magicCoef;
+        }
+        buttonCommand = true;
+      }
+      if (keyPad.f->wasClicked()) {
+        if (lastDirButton == NS) {
+          slewRatioN *= magicCoef;
+        }
+        if (lastDirButton == WE) {
+          slewRatioW *= magicCoef;
+        }
+        buttonCommand = true;
+      }
+
+      if (keyPad.shift->wasPressed()) {
+        lastDirButton = NONE;
+        SERIAL_ONSTEP.write(":Q#");
+        buttonCommand = true;
+      } else
+      if (keyPad.e->wasClicked()) {
+        lastDirButton = WE;
+        if (Wspeed >= sidereal) {
+            Wspeed /= slewRatioW+1;
+        } else {
+          if (Wspeed <= -sidereal)
+            Wspeed *= slewRatioW+1;
+        }
+
+        if (-sidereal < Wspeed && Wspeed < sidereal) {
+           Wspeed = -sidereal;
+        }
+
+        dtostrf(abs(Wspeed), 2, 3, speed);
+        sprintf(buf, ":RA%s#", speed);
+        SERIAL_ONSTEP.write(buf);
+        delay(80);
+
+        if (Wspeed <= -sidereal) {
+          SERIAL_ONSTEP.write(ccMe);
+        } else {
+          SERIAL_ONSTEP.write(ccMw);
+        }
+        delay(30);
+        keyPad.e->clearPress();
+        buttonCommand = true;
+      } else
+      if (keyPad.w->wasClicked()) {
+        lastDirButton = WE;
+        if (Wspeed >= sidereal) {
+            Wspeed *= slewRatioW+1;
+        } else {
+          if (Wspeed <= -sidereal)
+            Wspeed /= slewRatioW+1;
+        }
+
+        if (-sidereal < Wspeed && Wspeed < sidereal) {
+           Wspeed = sidereal;
+        }
+
+        dtostrf(abs(Wspeed), 2, 3, speed);
+        sprintf(buf, ":RA%s#", speed);
+        SERIAL_ONSTEP.write(buf);
+        delay(80);
+
+        if (Wspeed >= sidereal) {
+          SERIAL_ONSTEP.write(ccMw);
+        } else {
+          SERIAL_ONSTEP.write(ccMe);
+        }
+        delay(30);
+        keyPad.w->clearPress();
+        buttonCommand = true;
+      } else
+      if (keyPad.n->wasClicked()) {
+        lastDirButton = NS;
+        if (Nspeed >= sidereal) {
+            Nspeed *= slewRatioN+1;
+        } else {
+          if (Nspeed <= -sidereal)
+            Nspeed /= slewRatioN+1;
+        }
+
+        if (-sidereal < Nspeed && Nspeed < sidereal) {
+           Nspeed = sidereal;
+        }
+
+        dtostrf(abs(Nspeed), 2, 3, speed);
+        sprintf(buf, ":RE%s#", speed);
+        SERIAL_ONSTEP.write(buf);
+        delay(80);
+
+        if (Nspeed >= sidereal) {
+          SERIAL_ONSTEP.write(ccMn);
+        } else {
+          SERIAL_ONSTEP.write(ccMs);
+        }
+        delay(30);
+        keyPad.n->clearPress();
+        buttonCommand = true;
+      } else
+      if (keyPad.s->wasClicked()) {
+        lastDirButton = NS;
+        if (Nspeed <= -sidereal) {
+            Nspeed *= slewRatioN+1;
+        } else {
+          if (Nspeed >= sidereal)
+            Nspeed /= slewRatioN+1;
+        }
+
+        if (-sidereal < Nspeed && Nspeed < sidereal) {
+           Nspeed = -sidereal;
+        }
+
+        dtostrf(abs(Nspeed), 2, 3, speed);
+        sprintf(buf, ":RE%s#", speed);
+        SERIAL_ONSTEP.write(buf);
+        delay(80);
+
+        if (Nspeed <= -sidereal) {
+          SERIAL_ONSTEP.write(ccMs);
+        } else {
+          SERIAL_ONSTEP.write(ccMn);
+        }
+        delay(30);
+        keyPad.s->clearPress();
+        buttonCommand = true;
+      }
+      if (buttonCommand) {
+        if (lastDirButton == NS)
+          sprintf(buf, "NS %.0f%% %.4f", 100*slewRatioN, Nspeed);
+        if (lastDirButton == WE)
+          sprintf(buf, "WE %.0f%% %.4f", 100*slewRatioW, Wspeed);
+        if (lastDirButton == NONE)
+          sprintf(buf, "Stopped");
+        message.brief(buf, 2000);
+      }
+    }
+    else {
+      #if ST4_AUX_INTERFACE == ON
+        if (!moveEast  && (keyPad.e->isDown() || auxST4.e->isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
+        if ( moveEast  && (keyPad.e->isUp()   && auxST4.e->isUp()))   { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; keyPad.e->clearPress(); auxST4.e->clearPress(); }
+        if (!moveWest  && (keyPad.w->isDown() || auxST4.w->isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
+        if ( moveWest  && (keyPad.w->isUp()   && auxST4.w->isUp()))   { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; keyPad.w->clearPress(); auxST4.w->clearPress(); }
+        if (!moveNorth && (keyPad.n->isDown() || auxST4.n->isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
+        if ( moveNorth && (keyPad.n->isUp()   && auxST4.n->isUp()))   { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; keyPad.n->clearPress(); auxST4.n->clearPress(); }
+        if (!moveSouth && (keyPad.s->isDown() || auxST4.s->isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
+        if ( moveSouth && (keyPad.s->isUp()   && auxST4.s->isUp()))   { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; keyPad.s->clearPress(); auxST4.s->clearPress(); }
+      #else
+        if (!moveEast  && (keyPad.e->isDown())) { moveEast = true;   SERIAL_ONSTEP.write(ccMe); buttonCommand = true; } else
+        if ( moveEast  && (keyPad.e->isUp()  )) { moveEast = false;  SERIAL_ONSTEP.write(ccQe); buttonCommand = true; keyPad.e->clearPress(); }
+        if (!moveWest  && (keyPad.w->isDown())) { moveWest = true;   SERIAL_ONSTEP.write(ccMw); buttonCommand = true; } else
+        if ( moveWest  && (keyPad.w->isUp()  )) { moveWest = false;  SERIAL_ONSTEP.write(ccQw); buttonCommand = true; keyPad.w->clearPress(); }
+        if (!moveNorth && (keyPad.n->isDown())) { moveNorth = true;  SERIAL_ONSTEP.write(ccMn); buttonCommand = true; } else
+        if ( moveNorth && (keyPad.n->isUp()  )) { moveNorth = false; SERIAL_ONSTEP.write(ccQn); buttonCommand = true; keyPad.n->clearPress(); }
+        if (!moveSouth && (keyPad.s->isDown())) { moveSouth = true;  SERIAL_ONSTEP.write(ccMs); buttonCommand = true; } else
+        if ( moveSouth && (keyPad.s->isUp()  )) { moveSouth = false; SERIAL_ONSTEP.write(ccQs); buttonCommand = true; keyPad.s->clearPress(); }
+      #endif
+    }
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
   // feature keys
-  buttonCommand = false;
-  if (status.align != Status::ALI_OFF) featureKeyMode = 1;
-  switch (featureKeyMode) {
-    // adjust guide rate
-    case 1:
-      if (keyPad.F->wasPressed()) { activeGuideRate--; message.brief(L_FKEY_GUIDE_DN); buttonCommand = true; } else
-      if (keyPad.f->wasPressed()) { activeGuideRate++; message.brief(L_FKEY_GUIDE_UP); buttonCommand = true; }
-      if (buttonCommand) {
-        if (activeGuideRate < 4)  activeGuideRate = 4;
-        if (activeGuideRate > 10) activeGuideRate = 10;
-        char cmd[5] = ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
-        message.show(onStep.Set(cmd));
-      }
-    break;
-
-    // adjust pulse guide rate
-    case 2:
-      if (keyPad.F->wasPressed()) { activeGuideRate--; message.brief(L_FKEY_PGUIDE_DN); buttonCommand = true; } else
-      if (keyPad.f->wasPressed()) { activeGuideRate++; message.brief(L_FKEY_PGUIDE_UP); buttonCommand = true; }
-      if (buttonCommand) {
-        if (activeGuideRate < 1) activeGuideRate = 1;
-        if (activeGuideRate > 3) activeGuideRate = 3;
-        char cmd[5] =  ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
-        message.show(onStep.Set(cmd));
-      }
-    break;
-
-    // util. light
-    case 3:
-      #if UTILITY_LIGHT != OFF
-        if (keyPad.F->wasPressed()) { current_selection_utility_light--; message.brief(L_FKEY_LAMP_DN); buttonCommand = true; } else
-        if (keyPad.f->wasPressed()) { current_selection_utility_light++; message.brief(L_FKEY_LAMP_UP); buttonCommand = true; }
+  if (!enableSlewMultiMode) {
+    buttonCommand = false;
+    if (status.align != Status::ALI_OFF) featureKeyMode = 1;
+    switch (featureKeyMode) {
+      // adjust guide rate
+      case 1:
+        if (keyPad.F->wasPressed()) { activeGuideRate--; message.brief(L_FKEY_GUIDE_DN); buttonCommand = true; } else
+        if (keyPad.f->wasPressed()) { activeGuideRate++; message.brief(L_FKEY_GUIDE_UP); buttonCommand = true; }
         if (buttonCommand) {
-          if (current_selection_utility_light < 1) current_selection_utility_light = 1;
-          if (current_selection_utility_light > 6) current_selection_utility_light = 6;
-          int i; switch(current_selection_utility_light) { case 1: i = 0; break; case 2: i = 15; break; case 3: i = 31; break; case 4: i = 63; break; case 5: i = 127; break; case 6: i = 255; break; default: i = 127; break; }
-          #ifdef ESP32
-            ledcWrite(0, i);
-          #else
-            analogWrite(UTILITY_LIGHT_PIN, i);
-          #endif
+          if (activeGuideRate < 4)  activeGuideRate = 4;
+          if (activeGuideRate > 10) activeGuideRate = 10;
+          char cmd[5] = ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
+          message.show(onStep.Set(cmd));
         }
-      #endif
-    break;
+      break;
 
-    // reticle
-    case 4:
-      if (keyPad.F->wasPressed()) { SERIAL_ONSTEP.print(":B-#"); message.brief(L_FKEY_RETI_DN); } else
-      if (keyPad.f->wasPressed()) { SERIAL_ONSTEP.print(":B+#"); message.brief(L_FKEY_RETI_UP); }
-    break;
-
-    // rotator
-    case 5:
-      if (rotState == RS_STOPPED && keyPad.F->isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); message.brief(L_FKEY_ROT_DN); buttonCommand = true; }
-      else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && keyPad.F->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.F->clearPress(); }
-      else if (rotState == RS_STOPPED && keyPad.f->isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); message.brief(L_FKEY_ROT_UP); buttonCommand = true; }
-      else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && keyPad.f->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.f->clearPress(); }
-      else if (rotState == RS_CCW_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); message.brief(L_FKEY_ROTF_DN); }
-      else if (rotState == RS_CW_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); message.brief(L_FKEY_ROTF_UP); }
-    break;
-
-    // focusers
-    case 6: case 7: case 8: case 9: case 10: case 11:
-      if (focusState == FS_STOPPED && keyPad.F->isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":F2#:F+#"); message.brief(L_FKEY_FOC_DN); buttonCommand = true; }
-      else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && keyPad.F->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.F->clearPress(); }
-      else if (focusState == FS_STOPPED && keyPad.f->isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":F2#:F-#"); message.brief(L_FKEY_FOC_UP); buttonCommand = true; }
-      else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && keyPad.f->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.f->clearPress(); }
-      #ifndef FOCUSER_ACCELERATE_DISABLE_ON
-        else if (focusState == FS_OUT_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { focusState = FS_OUT_FAST; SERIAL_ONSTEP.print(":F4#:F+#"); message.brief(L_FKEY_FOCF_DN); }
-        else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState = FS_IN_FAST;  SERIAL_ONSTEP.print(":F4#:F-#"); message.brief(L_FKEY_FOCF_UP); }
-      #endif
-    break;
-
-    // auxiliary features
-    case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19:
-	    char cmd[20];
-      char line2[20];
-      if (status.featureSelectByOrder(featureKeyMode - 11)) {
-        if (keyPad.F->wasPressed()) {
-          if (status.featurePurpose() == ANALOG_OUT) {
-            status.featureUpdate(featureKeyMode - 11);
-            // ANALOG_OUT but in units of 5%
-            int v = lround(status.featureValue1()/12.75F) - 2;
-            if (v < 0) v = 0;
-            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
-            SERIAL_ONSTEP.print(cmd);
-            sprintf(line2, "%i%%", v*5);
-            message.show(status.featureName(), line2, 1000);
-          } else {
-            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 0);
-            SERIAL_ONSTEP.print(cmd);
-            sprintf(line2, "%s", L_OFF);
-            message.show(status.featureName(), line2, 1000);
-          }
-        } else
-        if (keyPad.f->wasPressed()) {
-          if (status.featurePurpose() == ANALOG_OUT) {
-            status.featureUpdate(featureKeyMode - 11);
-            int v = lround(status.featureValue1()/12.75F) + 2;
-            if (v > 20) v = 20;
-            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
-            SERIAL_ONSTEP.print(cmd);
-            sprintf(line2, "%i%%", v*5);
-            message.show(status.featureName(), line2, 1000);
-          } else {
-            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 1);
-            SERIAL_ONSTEP.print(cmd);
-            sprintf(line2, "%s",  L_ON);
-            message.show(status.featureName(), line2, 1000);
-          }
+      // adjust pulse guide rate
+      case 2:
+        if (keyPad.F->wasPressed()) { activeGuideRate--; message.brief(L_FKEY_PGUIDE_DN); buttonCommand = true; } else
+        if (keyPad.f->wasPressed()) { activeGuideRate++; message.brief(L_FKEY_PGUIDE_UP); buttonCommand = true; }
+        if (buttonCommand) {
+          if (activeGuideRate < 1) activeGuideRate = 1;
+          if (activeGuideRate > 3) activeGuideRate = 3;
+          char cmd[5] =  ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
+          message.show(onStep.Set(cmd));
         }
-      } else { DL("WRN: aux feature not found"); }
-    break;
+      break;
+
+      // util. light
+      case 3:
+        #if UTILITY_LIGHT != OFF
+          if (keyPad.F->wasPressed()) { current_selection_utility_light--; message.brief(L_FKEY_LAMP_DN); buttonCommand = true; } else
+          if (keyPad.f->wasPressed()) { current_selection_utility_light++; message.brief(L_FKEY_LAMP_UP); buttonCommand = true; }
+          if (buttonCommand) {
+            if (current_selection_utility_light < 1) current_selection_utility_light = 1;
+            if (current_selection_utility_light > 6) current_selection_utility_light = 6;
+            int i; switch(current_selection_utility_light) { case 1: i = 0; break; case 2: i = 15; break; case 3: i = 31; break; case 4: i = 63; break; case 5: i = 127; break; case 6: i = 255; break; default: i = 127; break; }
+            #ifdef ESP32
+              ledcWrite(0, i);
+            #else
+              analogWrite(UTILITY_LIGHT_PIN, i);
+            #endif
+          }
+        #endif
+      break;
+
+      // reticle
+      case 4:
+        if (keyPad.F->wasPressed()) { SERIAL_ONSTEP.print(":B-#"); message.brief(L_FKEY_RETI_DN); } else
+        if (keyPad.f->wasPressed()) { SERIAL_ONSTEP.print(":B+#"); message.brief(L_FKEY_RETI_UP); }
+      break;
+
+      // rotator
+      case 5:
+        if (rotState == RS_STOPPED && keyPad.F->isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); message.brief(L_FKEY_ROT_DN); buttonCommand = true; }
+        else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && keyPad.F->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.F->clearPress(); }
+        else if (rotState == RS_STOPPED && keyPad.f->isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); message.brief(L_FKEY_ROT_UP); buttonCommand = true; }
+        else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && keyPad.f->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.f->clearPress(); }
+        else if (rotState == RS_CCW_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); message.brief(L_FKEY_ROTF_DN); }
+        else if (rotState == RS_CW_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); message.brief(L_FKEY_ROTF_UP); }
+      break;
+
+      // focusers
+      case 6: case 7: case 8: case 9: case 10: case 11:
+        if (focusState == FS_STOPPED && keyPad.F->isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":F2#:F+#"); message.brief(L_FKEY_FOC_DN); buttonCommand = true; }
+        else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && keyPad.F->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.F->clearPress(); }
+        else if (focusState == FS_STOPPED && keyPad.f->isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":F2#:F-#"); message.brief(L_FKEY_FOC_UP); buttonCommand = true; }
+        else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && keyPad.f->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.f->clearPress(); }
+        #ifndef FOCUSER_ACCELERATE_DISABLE_ON
+          else if (focusState == FS_OUT_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { focusState = FS_OUT_FAST; SERIAL_ONSTEP.print(":F4#:F+#"); message.brief(L_FKEY_FOCF_DN); }
+          else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState = FS_IN_FAST;  SERIAL_ONSTEP.print(":F4#:F-#"); message.brief(L_FKEY_FOCF_UP); }
+        #endif
+      break;
+
+      // auxiliary features
+      case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19:
+	      char cmd[20];
+        char line2[20];
+        if (status.featureSelectByOrder(featureKeyMode - 11)) {
+          if (keyPad.F->wasPressed()) {
+            if (status.featurePurpose() == ANALOG_OUT) {
+              status.featureUpdate(featureKeyMode - 11);
+              // ANALOG_OUT but in units of 5%
+              int v = lround(status.featureValue1()/12.75F) - 2;
+              if (v < 0) v = 0;
+              sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
+              SERIAL_ONSTEP.print(cmd);
+              sprintf(line2, "%i%%", v*5);
+              message.show(status.featureName(), line2, 1000);
+            } else {
+              sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 0);
+              SERIAL_ONSTEP.print(cmd);
+              sprintf(line2, "%s", L_OFF);
+              message.show(status.featureName(), line2, 1000);
+            }
+          } else
+          if (keyPad.f->wasPressed()) {
+            if (status.featurePurpose() == ANALOG_OUT) {
+              status.featureUpdate(featureKeyMode - 11);
+              int v = lround(status.featureValue1()/12.75F) + 2;
+              if (v > 20) v = 20;
+              sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
+              SERIAL_ONSTEP.print(cmd);
+              sprintf(line2, "%i%%", v*5);
+              message.show(status.featureName(), line2, 1000);
+            } else {
+              sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 1);
+              SERIAL_ONSTEP.print(cmd);
+              sprintf(line2, "%s",  L_ON);
+              message.show(status.featureName(), line2, 1000);
+            }
+          }
+        } else { DL("WRN: aux feature not found"); }
+      break;
+    }
   }
   if (buttonCommand) { time_last_action = millis(); return; }
 

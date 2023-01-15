@@ -144,6 +144,16 @@ private:
   bool moveEast = false;
   bool moveWest = false;
 
+  bool enableSlewMultiMode = false;
+  float slewRatioN = 3;
+  enum LastDirButton{NONE, NS, WE};
+  LastDirButton lastDirButton = NONE;
+  float slewRatioW = 3;
+  float magicCoef = 3;
+  const float sidereal = 0.0042;
+  float Wspeed = 10*sidereal;
+  float Nspeed = 10*sidereal;
+
   // Guide commands
   char ccMe[5];
   char ccMw[5];
