@@ -21,13 +21,13 @@
 
 // polling frequency for monitoring axis motion (default 100X/second) 
 #ifndef FRACTIONAL_SEC
-  #define FRACTIONAL_SEC            100.0F
+#define FRACTIONAL_SEC              100.0F
 #endif
 #define FRACTIONAL_SEC_US           (lround(1000000.0F/FRACTIONAL_SEC))
 
 // time limit in seconds for slew home refine phases
 #ifndef SLEW_HOME_REFINE_TIME_LIMIT
-#define SLEW_HOME_REFINE_TIME_LIMIT 60
+#define SLEW_HOME_REFINE_TIME_LIMIT 120
 #endif
 
 // ON blocks all motion when min/max are on the same pin, applies to all axes (mount/rotator/focusers)
@@ -217,6 +217,15 @@ class Axis {
 
     // gets backlash frequency in "measures" (degrees, microns, etc.) per second
     float getBacklashFrequency();
+
+    // reverse direction of motion
+    void setReverse(bool reverse) {
+      if (reverse) {
+        if (settings.reverse == ON) motor->setReverse(OFF); else motor->setReverse(ON);
+      } else {
+        motor->setReverse(settings.reverse);
+      }
+    }
 
     // set base movement frequency in "measures" (radians, microns, etc.) per second
     void setFrequencyBase(float frequency);
