@@ -26,6 +26,18 @@
 #define INTERVALOMETER              4      // control an camera shutter
 #define AUX_FEATURE_PURPOSE_LAST    4
 
+// WEATHER sensors (temperature, pressure, and humidity)
+#define WEATHER_FIRST               1
+#define BME280                      1      // BME280 on I2C (at default address 0x77)
+#define BME280_0x77                 1      // BME280 on I2C (at address 0x77)
+#define BME280_0x76                 2      // BME280 on I2C (at address 0x76)
+#define BME280_SPI                  3      // BME280 on SPI (default CS)
+#define BMP280                      4      // BMP280 on I2C (at default address 0x77)
+#define BMP280_0x77                 4      // BMP280 on I2C (at address 0x77)
+#define BMP280_0x76                 5      // BMP280 on I2C (at address 0x76)
+#define BMP280_SPI                  6      // BMP280 on SPI (default CS)
+#define WEATHER_LAST                6
+
 // NV -------------------------------------------------------------------------------------------------------------------
 #define INIT_NV_KEY                 159301352UL
 

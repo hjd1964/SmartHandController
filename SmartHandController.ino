@@ -35,7 +35,9 @@
 #include "src/Common.h"
 NVS nv;
 #include "src/lib/tasks/OnTask.h"
+#include "src/lib/convert/Convert.h"
 #include "src/userInterface/UserInterface.h"
+#include "src/libApp/weather/Weather.h"
 
 #if DEBUG == PROFILER
   extern void profiler();
@@ -48,6 +50,19 @@ const int active[7] = {B_PIN0_ACTIVE_STATE, B_PIN1_ACTIVE_STATE, B_PIN2_ACTIVE_S
 void systemServices() {
   nv.poll();
 }
+
+#if WEATHER != OFF
+  void weatherServices() {
+    static int i = 0;
+    char command[80];
+
+    switch (i++ % 3) {
+      case 0: sprintF(command, ":SX9A,%0.1f#", weather.getTemperature()); SERIAL_ONSTEP.print(command); break;
+      case 1: sprintF(command, ":SX9B,%0.1f#", weather.getPressure()); SERIAL_ONSTEP.print(command); break;
+      case 2: sprintF(command, ":SX9C,%0.1f#", weather.getHumidity()); SERIAL_ONSTEP.print(command); break;
+    }
+  }
+#endif
 
 void setup(void) {
   
@@ -67,6 +82,15 @@ void setup(void) {
   if (tasks.add(10, 0, true, 7, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
   userInterface.init(Version, pin, active, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<OLED>(DISPLAY_OLED));
+
+  #if WEATHER != OFF
+    // get any BME280 or BMP280 ready
+    weather.init();
+
+    // add task to forward readings to OnStep
+    VF("MSG: Setup, starting weather services task (rate 3333ms priority 7)... ");
+    if (tasks.add(3333, 0, true, 7, weatherServices, "WeaFwd")) { VL("success"); } else { VL("FAILED!"); }
+  #endif
 
   // start task manager debug events
   #if DEBUG == PROFILER

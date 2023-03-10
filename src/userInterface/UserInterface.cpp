@@ -10,6 +10,8 @@ extern NVS nv;
 #include "../catalogs/Catalog.h"
 #include "bitmaps/Bitmaps.h"
 
+bool xBusy = false;
+
 void updateWrapper() { userInterface.poll(); }
 void keyPadWrapper() { keyPad.poll(); }
 #if ST4_AUX_INTERFACE == ON
