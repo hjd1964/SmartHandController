@@ -264,10 +264,12 @@
 #define L_SG_TARGET "Target"
 
 // return home or reset at home
-#define L_SG_HOME1 "Goto Home"
-#define L_SG_HOME2 "Reset at"
-#define L_SG_HOME3 "Goto"
-#define L_SG_HOME4 "Home Position"
+#define L_SG_HOME1 "Goto Home will"
+#define L_SG_HOME2 "clear the Model"
+#define L_SG_HOME3 "Goto Home"
+#define L_SG_HOME4 "Reset at"
+#define L_SG_HOME5 "Goto"
+#define L_SG_HOME6 "Home Position"
 #define L_SG_NO_OBJECT "No Object"
 #define L_SG_NO_INIT "Not Init'd"
 
