@@ -75,13 +75,12 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
       case 7:
       {
         bool GotoHome = false;
-        message.show(L_SG_HOME1, L_SG_HOME2, 2000);
-        if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HOME3 "?", &GotoHome)) {
+        if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HOME1 "?", &GotoHome)) {
           if (GotoHome) {
             char cmd[5];
             sprintf(cmd, ":hX#");
             cmd[2] = sync ? 'F' : 'C';
-            if (onStep.Set(cmd) == CR_VALUE_SET) message.show(sync ? L_SG_HOME4 : L_SG_HOME5, " " L_SG_HOME6, -1);
+            if (onStep.Set(cmd) == CR_VALUE_SET) message.show(sync ? L_SG_HOME2 : L_SG_HOME3, " " L_SG_HOME4, -1);
             return MR_QUIT;
           }
         }
