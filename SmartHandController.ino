@@ -57,9 +57,9 @@ void systemServices() {
     char command[80];
 
     switch (i++ % 3) {
-      case 0: sprintF(command, ":SX9A,%0.1f#", weather.getTemperature()); SERIAL_ONSTEP.print(command); break;
-      case 1: sprintF(command, ":SX9B,%0.1f#", weather.getPressure()); SERIAL_ONSTEP.print(command); break;
-      case 2: sprintF(command, ":SX9C,%0.1f#", weather.getHumidity()); SERIAL_ONSTEP.print(command); break;
+      case 0: sprintF(command, ":SX9A,%0.1f#", weather.getTemperature()); onStep.Set(command); break;
+      case 1: sprintF(command, ":SX9B,%0.1f#", weather.getPressure()); onStep.Set(command); break;
+      case 2: sprintF(command, ":SX9C,%0.1f#", weather.getHumidity()); onStep.Set(command); break;
     }
   }
 #endif
@@ -88,8 +88,8 @@ void setup(void) {
     weather.init();
 
     // add task to forward readings to OnStep
-    VF("MSG: Setup, starting weather services task (rate 3333ms priority 7)... ");
-    if (tasks.add(3333, 0, true, 7, weatherServices, "WeaFwd")) { VL("success"); } else { VL("FAILED!"); }
+    VF("MSG: Setup, starting weather services task (rate 5000ms priority 7)... ");
+    if (tasks.add(5000, 0, true, 7, weatherServices, "WeaFwd")) { VL("success"); } else { VL("FAILED!"); }
   #endif
 
   // start task manager debug events

@@ -387,7 +387,7 @@ bool OnStepCmd::processCommand(char* command, char* response, unsigned long time
       if (strchr("AEGCMS0123456789", command[2])) noResponse = true;
     }
     if (command[1] == 'S') {
-      if (strchr("CLSGtgMNOPrdhoTB", command[2])) shortResponse = true;
+      if (strchr("CLSGtgMNOPrdhoTBX", command[2])) shortResponse = true;
     }
     if (command[1] == 'L') {
       if (strchr("BNCDL!", command[2])) noResponse = true;
