@@ -88,8 +88,8 @@ void setup(void) {
     weather.init();
 
     // add task to forward readings to OnStep
-    VF("MSG: Setup, starting weather services task (rate 5000ms priority 7)... ");
-    if (tasks.add(5000, 0, true, 7, weatherServices, "WeaFwd")) { VL("success"); } else { VL("FAILED!"); }
+    VF("MSG: Setup, starting weather services task (rate 3333ms priority 7)... ");
+    if (tasks.add(3333, 0, true, 7, weatherServices, "WeaFwd")) { VL("success"); } else { VL("FAILED!"); }
   #endif
 
   // start task manager debug events
