@@ -30,7 +30,7 @@
 #define Product               "SHC"
 #define FirmwareVersionMajor  "4"
 #define FirmwareVersionMinor  "00"
-#define FirmwareVersionPatch  "c"
+#define FirmwareVersionPatch  "d"
 
 #include "src/Common.h"
 NVS nv;
