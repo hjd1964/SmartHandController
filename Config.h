@@ -39,6 +39,7 @@
 
 // KEYPAD --------------------------------------------------------------------------------------------------------------------------
 #define KEYPAD_JOYSTICK_ANALOG        OFF //    OFF, JS1 for Jerry's analog joystick                                          Option
+#define KEYPAD_JOYSTICK_HYSTERESIS    200 //    200, Sensitivity of joystick in ADC counts (larger is less sensitive)         Adjust
 
 // ST4 AUXILIARY INTERFACE ---------------------------------------------------------------------------------------------------------
 // *** It is up to you to verify the interface meets the electrical specifications of any connected device, use at your own risk ***

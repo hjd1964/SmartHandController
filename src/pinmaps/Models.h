@@ -38,6 +38,11 @@
   #define BUTTON_DEBOUNCE_MS 30
 #endif
 
+// Default hysteresis for any joystick (in ADC counts) that may be present
+#ifndef KEYPAD_JOYSTICK_HYSTERESIS
+  #define KEYPAD_JOYSTICK_HYSTERESIS 200
+#endif
+
 #include "Pins.Esp32.h"
 #include "Pins.Esp8266.h"
 #include "Pins.M0.h"
