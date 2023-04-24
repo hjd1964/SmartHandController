@@ -2,8 +2,6 @@
 // Button pad
 #include "KeyPad.h"
 
-#include "../../Common.h"
-
 void KeyPad::init(const int pin[7], const int active[7], int thresholdNS, int thresholdEW) {
   if (ready) return;
 
@@ -18,8 +16,8 @@ void KeyPad::init(const int pin[7], const int active[7], int thresholdNS, int th
   } else {
     int active1 = active[1];
     int active3 = active[3];
-    if (active1 == LOW) active1 = HIGH;
-    if (active3 == LOW) active3 = HIGH;
+    if (active1 == LOW) active1 = HIGH; else if (active1 == HIGH) active1 = LOW;
+    if (active3 == LOW) active3 = HIGH; else if (active3 == HIGH) active3 = LOW;
     shift = new Button(pin[0], INPUT_PULLUP, active[0] | HYST(debounceMs));
     n     = new Button(pin[1], INPUT_PULLUP, active1   | THLD(thresholdNS) | HYST(200));
     s     = new Button(pin[2], INPUT_PULLUP, active[2] | THLD(thresholdNS) | HYST(200));
