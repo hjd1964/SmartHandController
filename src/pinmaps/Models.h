@@ -33,6 +33,11 @@
   #define B_PIN6_ACTIVE_STATE LOW
 #endif
 
+// Default button debounce in milliseconds
+#ifndef BUTTON_DEBOUNCE_MS
+  #define BUTTON_DEBOUNCE_MS 30
+#endif
+
 #include "Pins.Esp32.h"
 #include "Pins.Esp8266.h"
 #include "Pins.M0.h"

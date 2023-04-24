@@ -2,6 +2,7 @@
 // Button pad
 #pragma once
 
+#include "../../Common.h"
 #include "../../lib/pushButton/PushButton.h"
 
 class KeyPad {
@@ -17,7 +18,7 @@ public:
   Button *shift, *n, *s, *e, *w, *F, *f;
 
 private:
-  int debounceMs = 30;
+  int debounceMs = BUTTON_DEBOUNCE_MS;
   bool ready = false;
 };
 
