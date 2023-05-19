@@ -29,8 +29,8 @@
 #define UTILITY_LIGHT                 OFF //    OFF, n. Where n=0..255 (0..100%) activates feature sets default brightness.   Adjust
 
 // WEATHER SENSOR ------------------------------------------------------------------------------------------------------------------
-#define WEATHER                      OFF //    OFF, BME280 (I2C 0x77,) BME280_0x76, BMP280 (I2C 0x77,) BMP280_0x76            Option
-                                         //         BME280 or BMP280 for temperature, pressure.  BME280 for humidity also.
+#define WEATHER                       OFF //    OFF, BME280 (I2C 0x77,) BME280_0x76, BMP280 (I2C 0x77,) BMP280_0x76           Option
+                                          //         BME280 or BMP280 for temperature, pressure.  BME280 for humidity also.
 
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
 #define DISPLAY_AMBIENT_CONDITIONS    OFF //    OFF, ON to show ambient conditions in the display rotation                    Option
