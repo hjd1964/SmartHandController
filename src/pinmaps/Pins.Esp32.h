@@ -6,21 +6,49 @@
   #define PINMAP_STR "ESP32"
 
   #if KEYPAD_JOYSTICK_ANALOG == JS1
+    #ifndef B_PIN0
     #define B_PIN0             25  // Shift
+    #endif
+    #ifndef B_PIN1
     #define B_PIN1             33  // N
+    #endif
+    #ifndef B_PIN2
     #define B_PIN2             33  // S
+    #endif
+    #ifndef B_PIN3
     #define B_PIN3             32  // E
+    #endif
+    #ifndef B_PIN4
     #define B_PIN4             32  // W
+    #endif
+    #ifndef B_PIN5
     #define B_PIN5             34  // F
+    #endif
+    #ifndef B_PIN6
     #define B_PIN6             35  // f
+    #endif
   #else
+    #ifndef B_PIN0
     #define B_PIN0             33  // Shift
+    #endif
+    #ifndef B_PIN1
     #define B_PIN1             25  // N
+    #endif
+    #ifndef B_PIN2
     #define B_PIN2             32  // S
+    #endif
+    #ifndef B_PIN3
     #define B_PIN3             36  // E
+    #endif
+    #ifndef B_PIN4
     #define B_PIN4             34  // W
+    #endif
+    #ifndef B_PIN5
     #define B_PIN5             39  // F
+    #endif
+    #ifndef B_PIN6
     #define B_PIN6             35  // f
+    #endif
   #endif
 
   #define ST4_W_PIN            23  // ST4 (OnStep) RA- West,  send data to OnStep

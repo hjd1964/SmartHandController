@@ -6,21 +6,49 @@
   #define PINMAP_STR "TEENSY"
 
   #if KEYPAD_JOYSTICK_ANALOG == JS1
+    #ifndef B_PIN0
     #define B_PIN0             21  // Shift
+    #endif
+    #ifndef B_PIN1
     #define B_PIN1             15  // N
+    #endif
+    #ifndef B_PIN2
     #define B_PIN2             15  // S
+    #endif
+    #ifndef B_PIN3
     #define B_PIN3             17  // E
+    #endif
+    #ifndef B_PIN4
     #define B_PIN4             17  // W
+    #endif
+    #ifndef B_PIN5
     #define B_PIN5             22  // F
+    #endif
+    #ifndef B_PIN6
     #define B_PIN6             23  // f
+    #endif
   #else
+    #ifndef B_PIN0
     #define B_PIN0             21  // Shift
+    #endif
+    #ifndef B_PIN1
     #define B_PIN1             15  // N
+    #endif
+    #ifndef B_PIN2
     #define B_PIN2             16  // S
+    #endif
+    #ifndef B_PIN3
     #define B_PIN3             17  // E
+    #endif
+    #ifndef B_PIN4
     #define B_PIN4             20  // W
+    #endif
+    #ifndef B_PIN5
     #define B_PIN5             22  // F
+    #endif
+    #ifndef B_PIN6
     #define B_PIN6             23  // f
+    #endif
   #endif
 
   #define ST4_W_PIN             2  // ST4 (OnStep) RA- West,  send data to OnStep
