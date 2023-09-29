@@ -17,5 +17,5 @@ The Smart Hand Controller is open source free software, licensed under the GPL.
 
 See [LICENSE.txt](./LICENSE.txt) file.
 
-# Author
+# Primary Author
 [Howard Dutton](http://www.stellarjourney.com), Charles Lemaire, and [Khalid Baheyeldin](https://baheyeldin.com)
