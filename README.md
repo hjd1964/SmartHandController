@@ -7,7 +7,7 @@ The SHC hardware provides physical buttons that are easy to work by feel in the 
 The SHC software was initially based on [Charles Lemaire](https://pixelstelescopes.wordpress.com/)'s [TeenAstro fork](https://groups.io/g/TeenAstro/wiki/home).
 
 # Features
-You can review the [SHC capabilities](https://onstep.groups.io/g/main/wiki/28605) in its user manual Wiki.
+You can review the SHC capabilities in its [User Manual](https://onstep.groups.io/g/main/wiki/28605) Wiki.
 
 # Documentation
 You can review recommended hardware and flashing instructions in the [Smart Hand Controller](https://groups.io/g/onstep/wiki/Smart-Hand-Controller) Wiki.
