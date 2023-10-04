@@ -36,6 +36,7 @@
 #define DISPLAY_AMBIENT_CONDITIONS    OFF //    OFF, ON to show ambient conditions in the display rotation                    Option
 #define DISPLAY_WRAP_MENUS            OFF //    OFF, ON allows menus to wrap so moving past bottom returns to top, etc.       Option
 #define DISPLAY_24HR_TIME              ON //     ON, OFF to use 12 hour format for entering time.                             Option
+#define DISPLAY_CONTRAST_DEFAULT        1 //      1, Use 0 to 3 for Min, Low, High, Max respectively.                         Option
 
 // KEYPAD --------------------------------------------------------------------------------------------------------------------------
 #define KEYPAD_JOYSTICK_ANALOG        OFF //    OFF, JS1 for Jerry's analog joystick                                          Option

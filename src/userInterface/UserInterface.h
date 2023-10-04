@@ -128,7 +128,7 @@ private:
   unsigned long maxT = 0;
   char _version[20] = "Version ?";
 
-  DisplaySettings displaySettings = {1, 2, 3, 255, 0, 0};
+  DisplaySettings displaySettings = {DISPLAY_CONTRAST_DEFAULT, 2, 3, 255, 0, 0};
 
   FocusState focusState = FS_STOPPED;
   RotState rotState = RS_STOPPED;
