@@ -133,8 +133,7 @@ void UI::menuContrast() {
   current_selection_L3 = display->UserInterfaceSelectionList(&keyPad, L_SET_DISP_CONTRAST, current_selection_L3, string_list_Display);
   if (current_selection_L3 > 0) {
     displaySettings.maxContrastSelection = current_selection_L3 - 1;
-    displaySettings.maxContrast = UI::Contrast[displaySettings.maxContrastSelection];
-    display->setContrast(displaySettings.maxContrast);
+    display->setContrast(UI::Contrast[displaySettings.maxContrastSelection]);
     nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
   }
 }

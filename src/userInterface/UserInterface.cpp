@@ -90,7 +90,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   if (model == OLED_SSD1309_4W_HW_SPI) display = new U8G2_EXT_SSD1309_128X64_NONAME_F_4W_HW_SPI(U8G2_R0);
 
   display->begin();
-  display->setContrast(displaySettings.maxContrast);
+  display->setContrast(UI::Contrast[displaySettings.maxContrastSelection]);
   display->setFont(LF_STANDARD);
   message.init(display);
 
@@ -140,7 +140,7 @@ void UI::poll() {
   // sleep and wake up display
   if (keyPad.anyPressed()) {
     if (sleepDisplay) {
-      display->setContrast(displaySettings.maxContrast);
+      display->setContrast(UI::Contrast[displaySettings.maxContrastSelection]);
       display->sleepOff();
       sleepDisplay = false;
       lowContrast = false;
@@ -149,7 +149,7 @@ void UI::poll() {
       time_last_action = millis();
     }
     if (lowContrast) {
-      display->setContrast(displaySettings.maxContrast);
+      display->setContrast(UI::Contrast[displaySettings.maxContrastSelection]);
       lowContrast = false;
       status.backgroundCommandRate = FOREGROUND_CMD_RATE;
       time_last_action = time_now;

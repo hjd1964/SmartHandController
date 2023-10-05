@@ -39,7 +39,7 @@ typedef struct DisplaySettings {
   int32_t maxContrastSelection;
   int32_t dimTimeoutSelection;
   int32_t blankTimeoutSelection;
-  uint8_t maxContrast;
+  uint8_t unused;
   long blankTimeout;
   long dimTimeout;
 } DisplaySettings;
