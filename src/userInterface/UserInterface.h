@@ -131,7 +131,9 @@ private:
   DisplaySettings displaySettings = {DISPLAY_CONTRAST_DEFAULT, 2, 3, 255, 0, 0};
 
   FocusState focusState = FS_STOPPED;
+  int nextFocuserMessageUpdateCycles = 0;
   RotState rotState = RS_STOPPED;
+  int nextRotMessageUpdateCycles = 0;
 
   bool firstConnect = true;
   bool hasAuxFeatures = false;

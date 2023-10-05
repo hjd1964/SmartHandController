@@ -300,24 +300,48 @@ void UI::poll() {
 
     // rotator
     case 5:
-      if (rotState == RS_STOPPED && keyPad.F->isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); message.brief(L_FKEY_ROT_DN); buttonCommand = true; }
+      if (rotState == RS_STOPPED && keyPad.F->isDown()) { rotState = RS_CCW_SLOW; SERIAL_ONSTEP.print(":r2#:rc#:r<#"); buttonCommand = true; }
       else if ((rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) && keyPad.F->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.F->clearPress(); }
-      else if (rotState == RS_STOPPED && keyPad.f->isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); message.brief(L_FKEY_ROT_UP); buttonCommand = true; }
+      else if (rotState == RS_STOPPED && keyPad.f->isDown()) { rotState = RS_CW_SLOW;  SERIAL_ONSTEP.print(":r2#:rc#:r>#"); buttonCommand = true; }
       else if ((rotState == RS_CW_SLOW || rotState == RS_CW_FAST) && keyPad.f->isUp()) { rotState = RS_STOPPED; SERIAL_ONSTEP.print(":rQ#"); buttonCommand = true; keyPad.f->clearPress(); }
-      else if (rotState == RS_CCW_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); message.brief(L_FKEY_ROTF_DN); }
-      else if (rotState == RS_CW_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); message.brief(L_FKEY_ROTF_UP); }
+      else if (rotState == RS_CCW_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { rotState = RS_CCW_FAST; SERIAL_ONSTEP.print(":r4#:rc#:r<#"); }
+      else if (rotState == RS_CW_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { rotState = RS_CW_FAST;  SERIAL_ONSTEP.print(":r4#:rc#:r>#"); }
+      if (rotState > RS_STOPPED) nextRotMessageUpdateCycles = 120;
+      if (nextRotMessageUpdateCycles > 0) {
+        nextRotMessageUpdateCycles--;
+        float rpos = status.getRotatorPosition();
+        if (!isnan(rpos)) {
+          char temp[24];
+          if (rotState == RS_CCW_SLOW || rotState == RS_CCW_FAST) sprintf(temp, L_ROTATE " < %d°", (int)round(rpos)); else
+          if (rotState == RS_CW_SLOW || rotState == RS_CW_FAST) sprintf(temp, L_ROTATE " > %d°", (int)round(rpos)); else
+          sprintf(temp, L_ROTATE "    %d°", (int)round(rpos));
+          message.brief(temp);
+        } else message.brief("?");
+      }
     break;
 
     // focusers
     case 6: case 7: case 8: case 9: case 10: case 11:
-      if (focusState == FS_STOPPED && keyPad.F->isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":F2#:F+#"); message.brief(L_FKEY_FOC_DN); buttonCommand = true; }
+      if (focusState == FS_STOPPED && keyPad.F->isDown()) { focusState = FS_OUT_SLOW; SERIAL_ONSTEP.print(":F2#:F+#"); buttonCommand = true; }
       else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && keyPad.F->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.F->clearPress(); }
-      else if (focusState == FS_STOPPED && keyPad.f->isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":F2#:F-#"); message.brief(L_FKEY_FOC_UP); buttonCommand = true; }
+      else if (focusState == FS_STOPPED && keyPad.f->isDown()) { focusState = FS_IN_SLOW;  SERIAL_ONSTEP.print(":F2#:F-#"); buttonCommand = true; }
       else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && keyPad.f->isUp()) { focusState = FS_STOPPED; SERIAL_ONSTEP.print(":FQ#"); buttonCommand = true; keyPad.f->clearPress(); }
       #ifndef FOCUSER_ACCELERATE_DISABLE_ON
-        else if (focusState == FS_OUT_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { focusState = FS_OUT_FAST; SERIAL_ONSTEP.print(":F4#:F+#"); message.brief(L_FKEY_FOCF_DN); }
-        else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState = FS_IN_FAST;  SERIAL_ONSTEP.print(":F4#:F-#"); message.brief(L_FKEY_FOCF_UP); }
+        else if (focusState == FS_OUT_SLOW && keyPad.F->isDown() && keyPad.F->timeDown() > 5000) { focusState = FS_OUT_FAST; SERIAL_ONSTEP.print(":F4#:F+#"); }
+        else if (focusState == FS_IN_SLOW  && keyPad.f->isDown() && keyPad.f->timeDown() > 5000) { focusState = FS_IN_FAST;  SERIAL_ONSTEP.print(":F4#:F-#"); }
       #endif
+      if (focusState > FS_STOPPED) nextFocuserMessageUpdateCycles = 120;
+      if (nextFocuserMessageUpdateCycles > 0) {
+        nextFocuserMessageUpdateCycles--;
+        float fpos = status.getFocuserPosition();
+        if (!isnan(fpos)) {
+          char temp[24];
+          if (focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) sprintf(temp, L_FOCUS " < %dum", (int)round(fpos)); else
+          if (focusState == FS_IN_SLOW || focusState == FS_IN_FAST) sprintf(temp, L_FOCUS " > %dum", (int)round(fpos)); else
+          sprintf(temp, L_FOCUS "    %dum", (int)round(fpos));
+          message.brief(temp);
+        } else message.brief("?");
+      }
     break;
 
     // auxiliary features

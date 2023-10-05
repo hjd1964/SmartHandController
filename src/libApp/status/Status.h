@@ -65,8 +65,10 @@ public:
   int getOnStepVersion();
   bool hasFocuser(int n);
   int getFocuserCount();
+  float getFocuserPosition();
   bool hasRotator();
   bool hasDeRotator();
+  float getRotatorPosition();
   bool hasReticle();
   bool hasDateTime();
 

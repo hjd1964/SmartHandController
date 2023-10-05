@@ -254,6 +254,20 @@ int Status::getFocuserCount() {
   return focuserCount;
 }
 
+float Status::getFocuserPosition() {
+  static float position = NAN;
+  static bool hasValue = false;
+  static unsigned long last = 0;
+  if ((millis() - last > 500) || !hasValue) {
+    char out[20];
+    if (onStep.Get(":FG#", out) == CR_VALUE_GET) {
+      position = atoi(out);
+      if (position >= -500000.0F && position <= 1000000.0F) { last = millis(); hasValue = true; } else position = NAN;
+    }
+  }
+  return position;
+}
+
 static int _rotator  = -1;
 static int _derotator  = -1;
 bool Status::hasRotator() {
@@ -276,6 +290,20 @@ bool Status::hasDeRotator() {
     }
   }
   return (_derotator > 0);
+}
+
+float Status::getRotatorPosition() {
+  static float position = NAN;
+  static bool hasValue = false;
+  static unsigned long last = 0;
+  if ((millis() - last > 500) || !hasValue) {
+    char out[20];
+    if (onStep.Get(":rG#", out) == CR_VALUE_GET) {
+      position = atoi(out);
+      if (position >= -360.0F && position <= 720.0F) { last = millis(); hasValue = true; } else position = NAN;
+    }
+  }
+  return position;
 }
 
 bool Status::hasReticle() {
