@@ -21,7 +21,7 @@
 
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
-#define HAL_INIT() { analogSetWidth(10); analogReadResolution(10); }
+#define HAL_INIT() { analogReadResolution(10); }
 
 //-----------------------------------------------------------------------------------------------------
 // Misc. includes and defines to support this processor's operation
