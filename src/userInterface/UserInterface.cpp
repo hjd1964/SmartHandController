@@ -647,23 +647,39 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
         u8g2_uint_t y = 36;
         u8g2_uint_t dx = display->getDisplayWidth();
 
+        if (UNITS == IMPERIAL) {
+        dtostrf((T*(9.0/5.0) + 32.0), 2, 0, temp);
+        sprintf(line, "T%s\xb0%s", temp, "F");
+        display->DrawFwNumeric(0, y, line);
+
+        dtostrf((P/33.864), 3, 1, temp); //drew
+        sprintf(line, "P%s\x22%s", temp, "Hg");
+        }
+        else {
         dtostrf(T, 3, 1, temp);
         sprintf(line, "T%s\xb0%s", temp, "C");
         display->DrawFwNumeric(0, y, line);
 
-        sprintf(line, "P%dmb",(int)round(P));
+        sprintf(line, "P%dmb",(int)round(P));          
+        }
         display->DrawFwNumeric(dx - display->GetFwNumericWidth(line), y, line);
 
         y += line_height + 4;
         sprintf(line, "H%d%%", (int)round(H));
         display->DrawFwNumeric(0, y, line);
 
+        if (UNITS == IMPERIAL) {
+        dtostrf((DP*(9.0/5.0) + 32.0), 3, 1, temp);
+        sprintf(line, "DP%s\xb0%s", temp, "F");
+        }
+        else {
         dtostrf(DP, 3, 1, temp);
-        sprintf(line, "DP%s\xb0%s", temp, "C");
+        sprintf(line, "DP%s\xb0%s", temp, "C"); 
+        }
         display->DrawFwNumeric(dx-display->GetFwNumericWidth(line), y, line);
-      }
-      
+      }      
       display->setFont(LF_LARGE);
+	    
     } else
 
     // show align status
