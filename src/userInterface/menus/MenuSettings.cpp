@@ -78,18 +78,22 @@ void UI::menuLocalDateTime() {
     uint8_t day = strtol(&out[3], &pEnd, 10);
     uint8_t year = strtol(&out[6], &pEnd, 10);
     if (display->UserInterfaceInputValueDate(&keyPad, L_SET_LOCAL_DATE, year, month, day)) {
-      sprintf(out, ":SC%02d/%02d/%02d#", month, day, year); message.show(onStep.Set(out),false);
+      sprintf(out, ":SC%02d/%02d/%02d#", month, day, year);
+      message.show(onStep.Set(out), false);
       // Time
       long value;
-      boolean pmf=false;
-      boolean dst=false;
+      boolean pmf = false;
+      boolean dst = false;
       if (message.show(onStep.GetTime(value))) {
-        if ((!hrs24) && (value>=43200)) { value-=43200; pmf=true; }
+        if ((!hrs24) && (value >= 43200)) {
+          value -= 43200;
+          pmf = true;
+        }
         if (display->UserInterfaceInputValueTime(&keyPad, &value, hrs24)) {
           if (hrs24 || (display->UserInterfaceInputValueBoolean(&keyPad, L_SET_LOCAL_PM "?", &pmf))) {
-            if (pmf) value+=43200; // AM or PM?
+            if (pmf) value += 43200; // AM or PM?
             if (display->UserInterfaceInputValueBoolean(&keyPad, L_SET_LOCAL_DST "?", &dst)) {
-              if (dst) value-=3600; // Dst?
+              if (dst) value -= 3600; // Dst?
               message.show(onStep.SetTime(value),false);
             }
           }
