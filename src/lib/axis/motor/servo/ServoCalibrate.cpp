@@ -7,9 +7,14 @@
 #ifdef ABSOLUTE_ENCODER_CALIBRATION
 
 #include "../../../tasks/OnTask.h"
+#include "../../../convert/Convert.h"
+#include <curveFitting.h> // https://github.com/Rotario/arduinoCurveFitting
 
-#ifndef AXIS1_SERVO_TRACKING_VELOCITY
-#define AXIS1_SERVO_TRACKING_VELOCITY 0
+#ifndef AXIS1_SERVO_VELOCITY_TRACKING
+#define AXIS1_SERVO_VELOCITY_TRACKING 0
+#endif
+#ifndef AXIS1_SERVO_VELOCITY_CALIBRATION
+#define AXIS1_SERVO_VELOCITY_CALIBRATION 1
 #endif
 
 volatile long _calibrateStepPosition = 0;
@@ -42,16 +47,30 @@ void ServoMotor::calibrate(float value)
     calibrateMode = CM_NONE;
     velocityOverride = 0.0F;
     endCount = encoder->count;
-    calibrationLinearRegression();
+//    calibrationLinearRegression();
     calibrationAveragingWrite();
+    calibrating = false;
+
+    // reset the motor position to agree with the encoder
+    {
+        enable(false);
+        long counts = encoderRead();
+        noInterrupts();
+        motorSteps = counts;
+        targetSteps = counts;
+        backlashSteps = 0;
+        interrupts();
+        feedback->reset();
+    }
   break;
 
   case 1: // start [R]ecording
+    calibrating = true;
     calibrationClear();
     V(axisPrefix);
     VLF("started recording encoder delta");
     calibrateMode = CM_RECORDING;
-    velocityOverride = -(AXIS1_SERVO_TRACKING_VELOCITY) * SIDEREAL_RATIO;
+    velocityOverride = -(AXIS1_SERVO_VELOCITY_TRACKING * AXIS1_SERVO_VELOCITY_CALIBRATION) * SIDEREAL_RATIO;
     startCount = encoder->count;
 
     // set stepper driver to step/dir mode
@@ -62,7 +81,7 @@ void ServoMotor::calibrate(float value)
     _calibrateStepPosition = motorSteps;
     interrupts();
     // m == -0586990, c == -0644885, f == 1.098
-     _calibrateStepPosition *= ((AXIS1_SERVO_TRACKING_VELOCITY)/(AXIS1_STEPS_PER_DEGREE/240.0));
+     _calibrateStepPosition *= ((AXIS1_SERVO_VELOCITY_TRACKING)/(AXIS1_STEPS_PER_DEGREE/240.0));
     _calibrateStepPin = AXIS1_STEP_PIN;
     if (velocityOverride >= 0) {
       _calStep = -1;
@@ -91,11 +110,13 @@ void ServoMotor::calibrate(float value)
     driver->alternateMode(false); // switch back to velocity control
     calibrateMode = CM_NONE;
     velocityOverride = 0.0F;
+    calibrating = false;
   break;
 
   case 3: // [F]ixed rate tracking (with encoder correction)
+    calibrating = true;
     calibrateMode = CM_FIXED_RATE;
-    velocityOverride = -(AXIS1_SERVO_TRACKING_VELOCITY) * SIDEREAL_RATIO;
+    velocityOverride = -(AXIS1_SERVO_VELOCITY_TRACKING) * SIDEREAL_RATIO;
 
     // set stepper driver to step/dir mode
     driver->alternateMode(true);
@@ -128,8 +149,14 @@ void ServoMotor::calibrate(float value)
     calibrationErase();
   break;
 
-  case 5: // [A]pply lowpass filter to buffer
+  case 5: // Apply [H]igh pass filter to buffer
+    calibrationHighPass();
+    //calibrationLowPass();
+  break;
+
+  case 12: // [A]pply Low pass filter to buffer
     calibrationLowPass();
+    //calibrationLowPass();
   break;
 
   case 6: // [C]lear buffer (only)
@@ -174,12 +201,9 @@ void ServoMotor::calibrateRecord(float &velocity, long &motorCounts, long &encod
   if (encoderIndex() != lastIndex)
   {
     encoderCorrection = correctionSum / correctionCount;
-    if (encoderCorrection < -32767)
-      encoderCorrection = -32767;
-    if (encoderCorrection > 32767)
-      encoderCorrection = 32767;
-    if (encoderCorrectionBuffer != NULL && lastIndex != 0)
-      encoderCorrectionBuffer[lastIndex] = encoderCorrection;
+    if (encoderCorrection < -32767) encoderCorrection = -32767;
+    if (encoderCorrection > 32767) encoderCorrection = 32767;
+    if (encoderCorrectionBuffer != NULL && lastIndex != 0) encoderCorrectionBuffer[lastIndex] = encoderCorrection;
     correctionSum = 0;
     correctionCount = 0;
     lastIndex = encoderIndex();
@@ -332,23 +356,14 @@ bool ServoMotor::calibrationAveragingWrite()
     {
       if (encoderCorrectionBuffer[i] != ECB_NO_DATA)
       {
-        encoderCorrectionBuffer[i] = round((ec * 2.0F + encoderCorrectionBuffer[i]) / 3.0F);
+        encoderCorrectionBuffer[i] = round((ec * 2.0F + encoderCorrectionBuffer[i])/3.0F);
       }
       else
       {
         encoderCorrectionBuffer[i] = ec;
       }
     }
-    if (encoderCorrectionBuffer[i] != ECB_NO_DATA)
-    {
-      D(i);
-      D(" (");
-      D(ec);
-      D("*2 + ");
-      D(now);
-      D(")/3 = ");
-      DL(encoderCorrectionBuffer[i]);
-    }
+    // if (encoderCorrectionBuffer[i] != ECB_NO_DATA) { V(i); V(" ("); V(ec); V("*2 + "); V(now); V(")/3 = "); VL(encoderCorrectionBuffer[i]); }
     UNUSED(now);
   }
 
@@ -411,6 +426,198 @@ void ServoMotor::calibrationErase()
   LittleFS.end();
 }
 
+bool ServoMotor::calibrationHighPass()
+{
+  int order = ENCODER_ECM_HIGH_PASS_ORDER;
+  int points = ENCODER_ECM_HIGH_PASS_POINTS;
+  char buf[100];
+  double t[points];
+  double x[points];
+
+  if (encoderCorrectionBuffer == NULL)
+  {
+    DL("WRN: ServoMotor::calibrationCurveFit(), buffer not allocated!");
+    return false;
+  }
+
+  int32_t startIndex = ENCODER_ECM_BUFFER_SIZE - 1;
+  for (int i = 0; i < ENCODER_ECM_BUFFER_SIZE; i++) {
+    if (encoderCorrectionBuffer[i] != ECB_NO_DATA) {
+      startIndex = i + 1;
+      break;
+    }
+  }
+  if (startIndex < 1) {
+    DL("WRN: ServoMotor::calibrationCurveFit(), fitCurve() startIndex range check failed!");
+    return false;
+  }
+
+  int32_t endIndex = 0;
+  for (int i = ENCODER_ECM_BUFFER_SIZE - 1; i > startIndex; i--) {
+    if (encoderCorrectionBuffer[i] != ECB_NO_DATA) {
+      endIndex = i - 1;
+      break;
+    }
+  }
+  if (endIndex > ENCODER_ECM_BUFFER_SIZE - 2) {
+    DL("WRN: ServoMotor::calibrationCurveFit(), fitCurve() endIndex range check failed!");
+    return false;
+  }
+
+  int32_t stepIndex = endIndex - startIndex;
+
+  if (stepIndex > 100) {
+    int32_t step = startIndex;
+    for (int i = 0; i < points; i++) {
+      if (step >= ENCODER_ECM_BUFFER_SIZE) {
+        DL("WRN: ServoMotor::calibrationCurveFit(), fitCurve() range check failed!");
+        return false;
+      }
+      if (i == points - 1) step = endIndex;
+      t[i] = step;
+      x[i] = encoderCorrectionBuffer[step];
+      step += stepIndex/points;
+      V("MSG: CurveFit, T="); V(t[i]); V(", X="); VL(x[i]);
+    }
+
+    double coeffs[order + 1];
+    int ret = fitCurve(order, points, t, x, order + 1, coeffs);
+
+    if (ret == 0) {
+      uint8_t c = 'a';
+      VLF("MSG: CurveFit, coefficients ");
+      for (int i = 0; i < order + 1; i++) {
+        snprintf(buf, 100, "%c=", c++);
+        V(buf);
+        sprintF(buf, "%0.8f ", coeffs[i]);
+        V(buf);
+      }
+      VL("");
+
+      VLF("MSG: CurveFit, applying correction to memory buffer");
+      for (int i = 0; i < ENCODER_ECM_BUFFER_SIZE - 1; i++) {
+        double value = 0;
+        if (i >= startIndex && i <= endIndex) {
+          for (int j = 0; j < order + 1; j++) {
+            value += coeffs[j]*pow((double)i, order - j);
+          }
+          encoderCorrectionBuffer[i] -= value;
+        }
+      }
+
+      // clear data at the edges of the recorded data in the buffer as these can be anomolous 
+      encoderCorrectionBuffer[startIndex - 1] = ECB_NO_DATA;
+    //  encoderCorrectionBuffer[startIndex] = ECB_NO_DATA;
+    //  encoderCorrectionBuffer[endIndex] = ECB_NO_DATA;
+      encoderCorrectionBuffer[endIndex + 1] = ECB_NO_DATA;
+
+    } else {
+      DL("WRN: ServoMotor::calibrationCurveFit(), fitCurve() failed!");
+      return false;
+    }
+  } else {
+    DL("WRN: ServoMotor::calibrationCurveFit(), not enough samples!");
+    return false;
+  }
+  return true;
+}
+
+bool ServoMotor::calibrationLowPass()
+{
+  int order = ENCODER_ECM_LOW_PASS_ORDER;
+  int points = ENCODER_ECM_LOW_PASS_POINTS;
+  char buf[100];
+  double t[points];
+  double x[points];
+
+  if (encoderCorrectionBuffer == NULL)
+  {
+    DL("WRN: ServoMotor::calibrationLowPass(), buffer not allocated!");
+    return false;
+  }
+
+  int32_t startIndex = ENCODER_ECM_BUFFER_SIZE - 1;
+  for (int i = 0; i < ENCODER_ECM_BUFFER_SIZE; i++) {
+    if (encoderCorrectionBuffer[i] != ECB_NO_DATA) {
+      startIndex = i + 1;
+      break;
+    }
+  }
+  if (startIndex < 1) {
+    DL("WRN: ServoMotor::calibrationLowPass(), fitCurve() startIndex range check failed!");
+    return false;
+  }
+
+  int32_t endIndex = 0;
+  for (int i = ENCODER_ECM_BUFFER_SIZE - 1; i > startIndex; i--) {
+    if (encoderCorrectionBuffer[i] != ECB_NO_DATA) {
+      endIndex = i - 1;
+      break;
+    }
+  }
+  if (endIndex > ENCODER_ECM_BUFFER_SIZE - 2) {
+    DL("WRN: ServoMotor::calibrationLowPass(), fitCurve() endIndex range check failed!");
+    return false;
+  }
+
+  int32_t stepIndex = endIndex - startIndex;
+
+  if (stepIndex > 100) {
+    int32_t step = startIndex;
+    for (int i = 0; i < points; i++) {
+      if (step >= ENCODER_ECM_BUFFER_SIZE) {
+        DL("WRN: ServoMotor::calibrationLowPass(), fitCurve() range check failed!");
+        return false;
+      }
+      if (i == points - 1) step = endIndex;
+      t[i] = step;
+      x[i] = encoderCorrectionBuffer[step];
+      step += stepIndex/points;
+      V("MSG: CurveFit, T="); V(t[i]); V(", X="); VL(x[i]);
+    }
+
+    double coeffs[order + 1];
+    int ret = fitCurve(order, points, t, x, order + 1, coeffs);
+
+    if (ret == 0) {
+      uint8_t c = 'a';
+      VLF("MSG: CurveFit, coefficients ");
+      for (int i = 0; i < order + 1; i++) {
+        snprintf(buf, 100, "%c=", c++);
+        V(buf);
+        sprintF(buf, "%0.8f ", coeffs[i]);
+        V(buf);
+      }
+      VL("");
+
+      VLF("MSG: CurveFit, applying correction to memory buffer");
+      for (int i = 0; i < ENCODER_ECM_BUFFER_SIZE - 1; i++) {
+        double value = 0;
+        if (i >= startIndex && i <= endIndex) {
+          for (int j = 0; j < order + 1; j++) {
+            value += coeffs[j]*pow((double)i, order - j);
+          }
+          encoderCorrectionBuffer[i] = value;
+        }
+      }
+
+      // clear data at the edges of the recorded data in the buffer as these can be anomolous 
+      encoderCorrectionBuffer[startIndex - 1] = ECB_NO_DATA;
+    //  encoderCorrectionBuffer[startIndex] = ECB_NO_DATA;
+    //  encoderCorrectionBuffer[endIndex] = ECB_NO_DATA;
+      encoderCorrectionBuffer[endIndex + 1] = ECB_NO_DATA;
+
+    } else {
+      DL("WRN: ServoMotor::calibrationCurveFit(), fitCurve() failed!");
+      return false;
+    }
+  } else {
+    DL("WRN: ServoMotor::calibrationCurveFit(), not enough samples!");
+    return false;
+  }
+  return true;
+}
+
 bool ServoMotor::calibrationLinearRegression()
 {
   if (encoderCorrectionBuffer == NULL)
@@ -419,19 +626,14 @@ bool ServoMotor::calibrationLinearRegression()
     return false;
   }
 
-  int32_t startIndex = startCount / ENCODER_ECM_BUFFER_RESOLUTION + ENCODER_ECM_BUFFER_SIZE / 2;
-  if (startIndex < 0)
-    startIndex = 0;
-  if (startIndex > ENCODER_ECM_BUFFER_SIZE - 1)
-    startIndex = ENCODER_ECM_BUFFER_SIZE - 1;
+  int32_t startIndex = startCount/ENCODER_ECM_BUFFER_RESOLUTION + ENCODER_ECM_BUFFER_SIZE/2;
+  if (startIndex < 0) startIndex = 0;
+  if (startIndex > ENCODER_ECM_BUFFER_SIZE - 1) startIndex = ENCODER_ECM_BUFFER_SIZE - 1;
 
-  int32_t endIndex = (endCount / ENCODER_ECM_BUFFER_RESOLUTION + ENCODER_ECM_BUFFER_SIZE / 2) - 1;
-  if (endIndex < 0)
-    endIndex = 0;
-  if (endIndex > ENCODER_ECM_BUFFER_SIZE - 1)
-    endIndex = ENCODER_ECM_BUFFER_SIZE - 1;
-  if (endIndex < startIndex)
-    return false;
+  int32_t endIndex = (endCount/ENCODER_ECM_BUFFER_RESOLUTION + ENCODER_ECM_BUFFER_SIZE/2) - 1;
+  if (endIndex < 0) endIndex = 0;
+  if (endIndex > ENCODER_ECM_BUFFER_SIZE - 1) endIndex = ENCODER_ECM_BUFFER_SIZE - 1;
+  if (endIndex < startIndex) return false;
 
   V(axisPrefix);
   VLF("buffer applying linear regression:");
@@ -469,6 +671,7 @@ bool ServoMotor::calibrationLinearRegression()
   return true;
 }
 
+/*
 bool ServoMotor::calibrationLowPass()
 {
   if (encoderCorrectionBuffer == NULL)
@@ -501,6 +704,7 @@ bool ServoMotor::calibrationLowPass()
 
   return true;
 }
+*/
 
 void ServoMotor::calibrationPrint()
 {

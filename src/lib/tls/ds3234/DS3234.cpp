@@ -4,7 +4,9 @@
 
 #include "DS3234.h"
 
-#if defined(TIME_LOCATION_SOURCE) && TIME_LOCATION_SOURCE == DS3234
+#if defined(TIME_LOCATION_SOURCE) && TIME_LOCATION_SOURCE == DS3234 || \
+    (defined(TIME_LOCATION_SOURCE_FALLBACK) && TIME_LOCATION_SOURCE_FALLBACK == DS3234)
+
 
 #ifdef TLS_TIMELIB
   #include <TimeLib.h> // https://github.com/PaulStoffregen/Time/archive/master.zip
@@ -71,12 +73,21 @@ bool TlsDs3234::get(JulianDate &ut1) {
   #ifdef SSPI_SHARED
     SPI.begin();
   #endif
+  GregorianDate greg;
   RtcDateTime now = rtcDS3234.GetDateTime();
   if (now.Year() >= 2018 && now.Year() <= 3000 && now.Month() >= 1 && now.Month() <= 12 && now.Day() >= 1 && now.Day() <= 31 &&
       now.Hour() <= 23 && now.Minute() <= 59 && now.Second() <= 59) {
-    GregorianDate greg; greg.year = now.Year(); greg.month = now.Month(); greg.day = now.Day();
+    greg.year = now.Year();
+    greg.month = now.Month();
+    greg.day = now.Day();
     ut1 = calendars.gregorianToJulianDay(greg);
     ut1.hour = now.Hour() + now.Minute()/60.0 + now.Second()/3600.0;
+  } else {
+    greg.year = 2000;
+    greg.month = 1;
+    greg.day = 1;
+    ut1 = calendars.gregorianToJulianDay(greg);
+    ut1.hour = 0.0;
   }
   #ifdef SSPI_SHARED
     SPI.end();
