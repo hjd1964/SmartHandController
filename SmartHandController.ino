@@ -33,11 +33,14 @@
 #define FirmwareVersionPatch  "c"
 
 #include "src/Common.h"
-NVS nv;
+
 #include "src/lib/tasks/OnTask.h"
+#include "src/lib/nv/Nv.h"
 #include "src/lib/convert/Convert.h"
-#include "src/userInterface/UserInterface.h"
+
 #include "src/libApp/weather/Weather.h"
+
+#include "src/userInterface/UserInterface.h"
 
 #if DEBUG == PROFILER
   extern void profiler();
@@ -74,7 +77,7 @@ void setup(void) {
   VF("MSG: MCU = "); VLF(MCU_STR);
   
   HAL_INIT();
-  HAL_NV_INIT();
+  nv.init();
   
   // System services
   // add task for system services, runs at 10ms intervals so commiting 1KB of NV takes about 10 seconds

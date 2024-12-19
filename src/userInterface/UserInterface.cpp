@@ -4,9 +4,10 @@
 #include "UserInterface.h"
 
 #include "../lib/tasks/OnTask.h"
-#include "../lib/nv/NV.h"
-extern NVS nv;
+#include "../lib/nv/Nv.h"
+
 #include "../libApp/st4Aux/St4Aux.h"
+
 #include "../catalogs/Catalog.h"
 #include "bitmaps/Bitmaps.h"
 

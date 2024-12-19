@@ -1,8 +1,8 @@
 // -----------------------------------------------------------------------------------
 // MenuSettings, for UserInterface
 #include "../UserInterface.h"
-extern NVS nv;
 
+#include "../../lib/nv/Nv.h"
 #include "../../lib/convert/Convert.h"
 
 void UI::menuSettings() {
