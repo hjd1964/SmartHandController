@@ -3,10 +3,12 @@
 
 #include <Ephemeris.h> // https://github.com/MarScaper/ephemeris
 
+#include "CmdLx200.h"
+
 #include "../../lib/tasks/OnTask.h"
+
 #include "../../catalogs/Catalog.h"
 #include "../../userInterface/UserInterface.h"
-#include "CmdLx200.h"
 
 bool CmdLx200::isOk(CMD_RESULT val) {
   return val >= CR_OK;

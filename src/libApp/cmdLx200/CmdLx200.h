@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// LX200 command processing
+// OnStep command processing
 #pragma once
 
 #include "../../Common.h"
