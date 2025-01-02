@@ -8,9 +8,8 @@
     static unsigned short current_selection_connect = 1;
 
     int selectionCount = 0;
-    char ssid_list[3][16] = {STA1_HOST_NAME, STA2_HOST_NAME, STA3_HOST_NAME};
     int ssid_cross_index[3];
-    char host_list[64] = "";
+    char selection_list[64] = "";
 
     int ssidCount = WiFi.scanNetworks();
     VF("MSG: Connect menu, found "); V(ssidCount); VLF(" WiFi networks");
@@ -18,11 +17,13 @@
     // see if any of our SSID's match what's present
     int matchCount = 0;
     for (int i = 0; i < 3; i++) {
-      strupr(ssid_list[i]);
+      strupr(wifiManager.settings.station[i].ssid);
       for (int ssid = 0; ssid < ssidCount; ssid++) {
-        if (WiFi.SSID(ssid).equals(ssid_list[i])) {
-          VF("MSG: Connect menu, matched SSID "); VL(ssid_list[i]);
-          ssid_cross_index[matchCount++] = i;
+        if ((strlen(wifiManager.settings.station[i].host) > 0) &&
+            (WiFi.SSID(ssid).equals(wifiManager.settings.station[i].ssid))) {
+          VF("MSG: Connect menu, matched SSID "); VL(wifiManager.settings.station[i].ssid);
+          ssid_cross_index[matchCount] = i;
+          matchCount++;
           break;
         }
       }
@@ -31,21 +32,23 @@
     // build the menu selections
     #if SERIAL_ONSTEP != OFF
       selectionCount++;
-      strncat(host_list, "Serial\n", 16);
+      strncat(selection_list, "Serial\n", 16);
     #endif
-    for (int i = 0; i++; i < matchCount) {
-      if (ssid_cross_index[i] > 0) {
-        VF("MSG: Connect menu, added SSID "); VL(ssid_list[ssid_cross_index[i]]);
-        strncat(host_list, ssid_list[ssid_cross_index[i]], 16);
-        strncat(host_list, " WiFi\n", 16);
+    for (int match = 0; match < matchCount; match++) {
+      if (ssid_cross_index[match] >= 0) {
+        VF("MSG: Connect menu, added ");
+        V(wifiManager.settings.station[ssid_cross_index[match]].host);
+        VF(" w/SSID "); VL(wifiManager.settings.station[ssid_cross_index[match]].ssid);
+        strncat(selection_list, wifiManager.settings.station[ssid_cross_index[match]].host, 16);
+        strncat(selection_list, " WiFi\n", 16);
       }
     }
-    host_list[strlen(host_list) - 1] = 0;
+    selection_list[strlen(selection_list) - 1] = 0;
 
     // show the menu
     if (selectionCount > 0) {
       do {
-        current_selection_connect = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_connect, host_list);
+        current_selection_connect = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_connect, selection_list);
       } while (current_selection_connect == 0); 
     }
     current_selection_connect--;
