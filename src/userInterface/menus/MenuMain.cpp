@@ -59,7 +59,7 @@
       VLF("Serial");
       onStep.useWiFiOnly = false;
     } else
-    if (current_selection_connect > 0 && current_selection_connect < 3) {
+    if (current_selection_connect > 0 && current_selection_connect <= 3) {
       VF("WiFi "); VL(ssid_cross_index[current_selection_connect]);
       wifiManager.setStation(ssid_cross_index[current_selection_connect]);
       onStep.useWiFiOnly = true;
