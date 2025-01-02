@@ -32,6 +32,7 @@
           VF("MSG: Connect menu, added ");
           V(wifiManager.settings.station[i].host);
           VF(" w/SSID "); VL(wifiManager.settings.station[i].ssid);
+          selectionCount++;
           strncat(selection_list, wifiManager.settings.station[i].host, 16);
           strncat(selection_list, " WiFi\n", 16);
           ssid_cross_index[matchCount++] = i;
