@@ -25,7 +25,6 @@
     // then any matching SSID's for active SHC WiFi stations
     int matchCount = 0;
     for (int i = 0; i < 3; i++) {
-      strupr(wifiManager.settings.station[i].ssid);
       for (int ssid = 0; ssid < ssidCount; ssid++) {
         if ((strlen(wifiManager.settings.station[i].host) > 0) &&
             (WiFi.SSID(ssid).equals(wifiManager.settings.station[i].ssid))) {
