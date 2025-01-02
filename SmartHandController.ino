@@ -29,8 +29,8 @@
 
 #define Product               "SHC"
 #define FirmwareVersionMajor  "4"
-#define FirmwareVersionMinor  "01"
-#define FirmwareVersionPatch  "e"
+#define FirmwareVersionMinor  "02"
+#define FirmwareVersionPatch  "a"
 
 #include "src/Common.h"
 
