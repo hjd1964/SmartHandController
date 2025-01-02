@@ -29,8 +29,7 @@
       for (int ssid = 0; ssid < ssidCount; ssid++) {
         if ((strlen(wifiManager.settings.station[i].host) > 0) &&
             (WiFi.SSID(ssid).equals(wifiManager.settings.station[i].ssid))) {
-          VF("MSG: Connect menu, added ");
-          V(wifiManager.settings.station[i].host);
+          VF("MSG: Connect menu, added "); V(wifiManager.settings.station[i].host);
           VF(" w/SSID "); VL(wifiManager.settings.station[i].ssid);
           selectionCount++;
           strncat(selection_list, wifiManager.settings.station[i].host, 16);
