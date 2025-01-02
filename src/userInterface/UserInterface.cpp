@@ -736,11 +736,7 @@ void UI::connect() {
   bool connectSuccess;
 
   #if SERIAL_IP_MODE != OFF
-    #if SERIAL_ONSTEP == OFF
-      onStep.useWiFiOnly = true;
-    #else
-      if (firstConnect) menuWifi();
-    #endif
+    if (firstConnect) menuWifi();
   #endif
 
 initAgain:
@@ -773,21 +769,33 @@ initAgain:
     if (onStep.useWiFiOnly) {
       message.show(L_CONNECTING, IPAddress(wifiManager.sta->target).toString().c_str(), 1000);
       if (!SERIAL_IP.begin(serialBaud)) connectSuccess = false;
-    } else
+    }
   #endif
-  #if defined(SERIAL_ONSTEP_RX) && defined(SERIAL_ONSTEP_TX)
-    SERIAL_ONSTEP.begin(serialBaud, SERIAL_8N1, SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
-  #else
-    SERIAL_ONSTEP.begin(serialBaud);
+  #if SERIAL_ONSTEP != OFF
+    if (!onStep.useWiFiOnly) {
+      #if defined(SERIAL_ONSTEP_RX) && defined(SERIAL_ONSTEP_TX)
+        SERIAL_ONSTEP.begin(serialBaud, SERIAL_8N1, SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
+      #else
+        SERIAL_ONSTEP.begin(serialBaud);
+      #endif
+    }
   #endif
 
   if (!connectSuccess) {
     VLF("MSG: Connect, to target failed");
-    SERIAL_ONSTEP.end();
+
+    #if SERIAL_IP_MODE != OFF
+      if (onStep.useWiFiOnly) SERIAL_IP.end();
+    #endif
+    #if SERIAL_ONSTEP != OFF
+      if (!onStep.useWiFiOnly) SERIAL_ONSTEP.end();
+    #endif
+
     #if SERIAL_IP_MODE != OFF
       if (onStep.useWiFiOnly) wifiManager.disconnect();
     #endif
     delay(7000);
+
     message.show(L_CONNECTING, L_FAILED, 2000);
     goto initAgain;
   }
@@ -798,10 +806,16 @@ queryAgain:
   if (thisTry % 1 == 0) message.show(L_LOOKING, "OnStep", 1000); else message.show(L_LOOKING, "...", 1000);
 
   for (int i = 0; i < 3; i++) {
-    onStepLx200.SetF(":#");
-    delay(400);
-    SERIAL_ONSTEP.flush();
     delay(100);
+    onStepLx200.SetF(":#");
+
+    delay(400);
+    #if SERIAL_IP_MODE != OFF
+      if (onStep.useWiFiOnly) SERIAL_IP.flush();
+    #endif
+    #if SERIAL_ONSTEP != OFF
+      if (!onStep.useWiFiOnly) SERIAL_ONSTEP.flush();
+    #endif
   }
 
   CMD_RESULT r = onStepLx200.Get(":GVP#", s);
@@ -809,11 +823,18 @@ queryAgain:
     if (++thisTry % 5 != 0) {
       goto queryAgain;
     } else {
-      SERIAL_ONSTEP.end();
+      #if SERIAL_IP_MODE != OFF
+        if (onStep.useWiFiOnly) SERIAL_IP.end();
+      #endif
+      #if SERIAL_ONSTEP != OFF
+        if (!onStep.useWiFiOnly) SERIAL_ONSTEP.end();
+      #endif
+
       #if SERIAL_IP_MODE != OFF
         if (onStep.useWiFiOnly) wifiManager.disconnect();
       #endif
       delay(7000);
+
       thisTry = 0;
       goto initAgain;
     }

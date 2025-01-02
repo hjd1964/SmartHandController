@@ -46,14 +46,18 @@
         current_selection_connect = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_connect, selection_list);
       } while (current_selection_connect == 0); 
     }
-    current_selection_connect--;
 
-    // flag serial mode or start WiFi
-    VF("MSG: Connect menu, user selected ");
-    if (current_selection_connect == 0) {
-      VLF("Serial");
-      onStep.useWiFiOnly = false;
-    } else
+    #if SERIAL_ONSTEP != OFF
+      current_selection_connect--;
+
+      // flag serial mode or start WiFi
+      VF("MSG: Connect menu, user selected ");
+      if (current_selection_connect == 0) {
+        VLF("Serial");
+        onStep.useWiFiOnly = false;
+      }
+    #endif
+
     if (current_selection_connect > 0 && current_selection_connect <= 3) {
       VF("WiFi "); VL(ssid_cross_index[current_selection_connect]);
       wifiManager.setStation(ssid_cross_index[current_selection_connect]);

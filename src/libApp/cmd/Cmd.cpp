@@ -15,10 +15,10 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
       SERIAL_IP.flush();
       while (SERIAL_IP.available() > 0) SERIAL_IP.read();
       SERIAL_IP.print(cmd);
-    } else
+    }
   #endif
   #if SERIAL_ONSTEP != OFF
-    {
+    if (!useWiFiOnly) {
       SERIAL_ONSTEP.setTimeout(timeOutMs);
       SERIAL_ONSTEP.flush();
       while (SERIAL_ONSTEP.available() > 0) SERIAL_ONSTEP.read();
@@ -113,19 +113,19 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
     while ((long)(timeout - millis()) > 0) {
       int available;
       #if SERIAL_IP_MODE != OFF
-        if (useWiFiOnly) available = SERIAL_IP.available(); else
+        if (useWiFiOnly) available = SERIAL_IP.available();
       #endif
       #if SERIAL_ONSTEP != OFF
-        available = SERIAL_ONSTEP.available();
+        if (!useWiFiOnly) available = SERIAL_ONSTEP.available();
       #endif
 
       if (available) {
         int length;
         #if SERIAL_IP_MODE != OFF
-          if (useWiFiOnly) length = SERIAL_IP.readBytes(response, 1); else
+          if (useWiFiOnly) length = SERIAL_IP.readBytes(response, 1);
         #endif
         #if SERIAL_ONSTEP != OFF
-          length = SERIAL_ONSTEP.readBytes(response, 1);
+          if (!useWiFiOnly) length = SERIAL_ONSTEP.readBytes(response, 1);
         #endif
 
         response[length] = 0;
@@ -142,18 +142,18 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
     while ((long)(timeout - millis()) > 0 && b != '#') {
       int available;
       #if SERIAL_IP_MODE != OFF
-        if (useWiFiOnly) available = SERIAL_IP.available(); else
+        if (useWiFiOnly) available = SERIAL_IP.available();
       #endif
       #if SERIAL_ONSTEP != OFF
-        available = SERIAL_ONSTEP.available();
+        if (!useWiFiOnly) available = SERIAL_ONSTEP.available();
       #endif
 
       if (available) {
         #if SERIAL_IP_MODE != OFF
-          if (useWiFiOnly) b = SERIAL_IP.read(); else
+          if (useWiFiOnly) b = SERIAL_IP.read();
         #endif
         #if SERIAL_ONSTEP != OFF
-          b = SERIAL_ONSTEP.read();
+          if (!useWiFiOnly) b = SERIAL_ONSTEP.read();
         #endif
 
         response[responsePos] = b;
@@ -171,10 +171,10 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
 
 void OnStepCmd::commandDirect(const char* command) {
   #if SERIAL_IP_MODE != OFF
-    if (useWiFiOnly) SERIAL_IP.write(command); else
+    if (useWiFiOnly) SERIAL_IP.write(command);
   #endif
   #if SERIAL_ONSTEP != OFF
-    SERIAL_ONSTEP.write(command);
+    if (!useWiFiOnly) SERIAL_ONSTEP.write(command);
   #endif
 }
 
