@@ -14,33 +14,29 @@
     int ssidCount = WiFi.scanNetworks();
     VF("MSG: Connect menu, found "); V(ssidCount); VLF(" WiFi networks");
 
-    // see if any of our SSID's match what's present
+    // build the menu selections
+
+    // first serial if it's available
+    #if SERIAL_ONSTEP != OFF
+      selectionCount++;
+      strncat(selection_list, "Serial\n", 16);
+    #endif
+
+    // then any matching SSID's for active SHC WiFi stations
     int matchCount = 0;
     for (int i = 0; i < 3; i++) {
       strupr(wifiManager.settings.station[i].ssid);
       for (int ssid = 0; ssid < ssidCount; ssid++) {
         if ((strlen(wifiManager.settings.station[i].host) > 0) &&
             (WiFi.SSID(ssid).equals(wifiManager.settings.station[i].ssid))) {
-          VF("MSG: Connect menu, matched SSID "); VL(wifiManager.settings.station[i].ssid);
-          ssid_cross_index[matchCount] = i;
-          matchCount++;
+          VF("MSG: Connect menu, added ");
+          V(wifiManager.settings.station[i].host);
+          VF(" w/SSID "); VL(wifiManager.settings.station[i].ssid);
+          strncat(selection_list, wifiManager.settings.station[i].host, 16);
+          strncat(selection_list, " WiFi\n", 16);
+          ssid_cross_index[matchCount++] = i;
           break;
         }
-      }
-    }
-
-    // build the menu selections
-    #if SERIAL_ONSTEP != OFF
-      selectionCount++;
-      strncat(selection_list, "Serial\n", 16);
-    #endif
-    for (int match = 0; match < matchCount; match++) {
-      if (ssid_cross_index[match] >= 0) {
-        VF("MSG: Connect menu, added ");
-        V(wifiManager.settings.station[ssid_cross_index[match]].host);
-        VF(" w/SSID "); VL(wifiManager.settings.station[ssid_cross_index[match]].ssid);
-        strncat(selection_list, wifiManager.settings.station[ssid_cross_index[match]].host, 16);
-        strncat(selection_list, " WiFi\n", 16);
       }
     }
     selection_list[strlen(selection_list) - 1] = 0;
@@ -66,7 +62,6 @@
     } else {
       VLF("unknown");
     }
-
   }
 #endif
 
