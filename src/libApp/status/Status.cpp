@@ -2,17 +2,17 @@
 // Status, from OnStep
 
 #include "Status.h"
-#include "../cmd/Cmd.h"
+#include "../cmdLx200/CmdLx200.h"
 #include "../../lib/convert/Convert.h"
 
 void Status::updateRaDec(boolean immediate) {
   if (((millis() - lastStateRaDec > backgroundCommandRate) && connected) || immediate) {
     if (updateSeq%3 == 1 || immediate) {
-      hasInfoRa = onStep.Get(":GR#", TempRa) == CR_VALUE_GET;
+      hasInfoRa = onStepLx200.Get(":GR#", TempRa) == CR_VALUE_GET;
       if (!hasInfoRa) connected = false;
     }
     if (updateSeq%3 == 2 || immediate) {
-      hasInfoDec = onStep.Get(":GD#", TempDec) == CR_VALUE_GET;
+      hasInfoDec = onStepLx200.Get(":GD#", TempDec) == CR_VALUE_GET;
       if (!hasInfoDec) connected = false;
       lastStateRaDec = millis();
     }
@@ -22,11 +22,11 @@ void Status::updateRaDec(boolean immediate) {
 void Status::updateAzAlt(boolean immediate) {
   if (((millis() - lastStateAzAlt > backgroundCommandRate) && connected) || immediate) {
     if (updateSeq%3 == 1 || immediate) {
-      hasInfoAz = onStep.Get(":GZ#", TempAz) == CR_VALUE_GET;
+      hasInfoAz = onStepLx200.Get(":GZ#", TempAz) == CR_VALUE_GET;
       if (!hasInfoAz) connected = false;
     }
     if (updateSeq%3 == 2 || immediate) {
-      hasInfoAlt = onStep.Get(":GA#", TempAlt) == CR_VALUE_GET;
+      hasInfoAlt = onStepLx200.Get(":GA#", TempAlt) == CR_VALUE_GET;
       if (!hasInfoAlt) connected = false;
       lastStateAzAlt = millis();
     }
@@ -36,11 +36,11 @@ void Status::updateAzAlt(boolean immediate) {
 void Status::updateTime(boolean immediate) {
   if (((millis() - lastStateTime > backgroundCommandRate) && connected) || immediate) {
     if (updateSeq%3 == 1 || immediate) {
-      hasInfoUTC = onStep.Get(":GX80#", TempUniversalTime) == CR_VALUE_GET;
+      hasInfoUTC = onStepLx200.Get(":GX80#", TempUniversalTime) == CR_VALUE_GET;
       if (!hasInfoUTC) connected = false;
     }
     if (updateSeq%3 == 2 || immediate) {
-      hasInfoSidereal = onStep.Get(":GS#", TempSidereal) == CR_VALUE_GET;
+      hasInfoSidereal = onStepLx200.Get(":GS#", TempSidereal) == CR_VALUE_GET;
       if (!hasInfoSidereal) connected = false;
       lastStateTime = millis();
     }
@@ -50,7 +50,7 @@ void Status::updateTime(boolean immediate) {
 void Status::updateTel(boolean immediate) {
   if (((millis() - lastStateTel > backgroundCommandRate) && connected) || immediate) {
     if (updateSeq%3 == 0 || immediate) {
-      hasTelStatus = onStep.Get(":Gu#", TelStatus) == CR_VALUE_GET;
+      hasTelStatus = onStepLx200.Get(":Gu#", TelStatus) == CR_VALUE_GET;
       if (!hasTelStatus) connected = false;
       lastStateTel = millis();
     }
@@ -59,7 +59,7 @@ void Status::updateTel(boolean immediate) {
 
 bool Status::getRA(double &RA) {
   char temp[20] = "";
-  if (onStep.Get(":GR#", temp) == CR_VALUE_GET) {
+  if (onStepLx200.Get(":GR#", temp) == CR_VALUE_GET) {
     int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
     double f;
     convert.hmsToDouble(&f, temp);
@@ -73,7 +73,7 @@ bool Status::getRA(double &RA) {
 
 bool Status::getDec(double &Dec) {
   char temp[20] = "";
-  if (onStep.Get(":GD#", temp) == CR_VALUE_GET) {
+  if (onStepLx200.Get(":GD#", temp) == CR_VALUE_GET) {
     int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
     double f;
     convert.dmsToDouble(&f, temp, true, PM_HIGH);
@@ -88,7 +88,7 @@ bool Status::getDec(double &Dec) {
 double Status::getLstT0() {
   char temp[20] = "";
   double f = 0;
-  if (onStep.Get(":GS#", temp) == CR_VALUE_GET) {
+  if (onStepLx200.Get(":GS#", temp) == CR_VALUE_GET) {
     int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
     convert.hmsToDouble(&f, temp);
   }
@@ -98,7 +98,7 @@ double Status::getLstT0() {
 double Status::getLat() {
   char temp[20] = "";
   double f = -10000;
-  if (onStep.Get(":Gt#", temp) == CR_VALUE_GET) {
+  if (onStepLx200.Get(":Gt#", temp) == CR_VALUE_GET) {
     int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
     convert.dmsToDouble(&f, temp, true, PM_LOW);
   }
@@ -107,7 +107,7 @@ double Status::getLat() {
 
 int Status::getAlignStars(int *maxStars, int *thisStar, int *numStars) {
   char temp[20] = "";
-  if (onStep.Get(":A?#", temp) == CR_VALUE_GET) {
+  if (onStepLx200.Get(":A?#", temp) == CR_VALUE_GET) {
     int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
     if (l != 4) return false;
     int v = temp[0] - '0'; if (v < 0 || v > 9) return false; *maxStars = v;
@@ -214,7 +214,7 @@ int Status::getOnStepVersion() {
   static char patch = 0;
   if (!processed) {
     char out[20], ver[20];
-    if (onStep.Get(":GVN#", out) != CR_VALUE_GET || out[0] == 0 ) return -1;
+    if (onStepLx200.Get(":GVN#", out) != CR_VALUE_GET || out[0] == 0 ) return -1;
     strcpy(ver, out);
     if (strlen(out) > 0) { patch = out[strlen(out) - 1]; out[strlen(out) - 1] = 0; }
     char *s1 = strchr(out, '.');
@@ -234,15 +234,15 @@ bool Status::hasFocuser(int n) {
   if (!processed) {
     char out[40];
     if (getOnStepVersion() < 1000) {
-      if ((onStep.Get(":FA#", out) == CR_VALUE_GET)) focuser[0] = (out[0] == '1');
-      if ((onStep.Get(":fA#", out) == CR_VALUE_GET)) focuser[1] = (out[0] == '1');
+      if ((onStepLx200.Get(":FA#", out) == CR_VALUE_GET)) focuser[0] = (out[0] == '1');
+      if ((onStepLx200.Get(":fA#", out) == CR_VALUE_GET)) focuser[1] = (out[0] == '1');
     } else {
-      if ((onStep.Get(":F1a#", out) == CR_VALUE_GET)) focuser[0] = (out[0] == '1');
-      if ((onStep.Get(":F2a#", out) == CR_VALUE_GET)) focuser[1] = (out[0] == '1');
-      if ((onStep.Get(":F3a#", out) == CR_VALUE_GET)) focuser[2] = (out[0] == '1');
-      if ((onStep.Get(":F4a#", out) == CR_VALUE_GET)) focuser[3] = (out[0] == '1');
-      if ((onStep.Get(":F5a#", out) == CR_VALUE_GET)) focuser[4] = (out[0] == '1');
-      if ((onStep.Get(":F6a#", out) == CR_VALUE_GET)) focuser[5] = (out[0] == '1');
+      if ((onStepLx200.Get(":F1a#", out) == CR_VALUE_GET)) focuser[0] = (out[0] == '1');
+      if ((onStepLx200.Get(":F2a#", out) == CR_VALUE_GET)) focuser[1] = (out[0] == '1');
+      if ((onStepLx200.Get(":F3a#", out) == CR_VALUE_GET)) focuser[2] = (out[0] == '1');
+      if ((onStepLx200.Get(":F4a#", out) == CR_VALUE_GET)) focuser[3] = (out[0] == '1');
+      if ((onStepLx200.Get(":F5a#", out) == CR_VALUE_GET)) focuser[4] = (out[0] == '1');
+      if ((onStepLx200.Get(":F6a#", out) == CR_VALUE_GET)) focuser[5] = (out[0] == '1');
     }
     for (int i = 0; i < 6; i++) { if (focuser[i]) focuserCount++; }
     processed = true;
@@ -260,7 +260,7 @@ float Status::getFocuserPosition() {
   static unsigned long last = 0;
   if ((millis() - last > 500) || !hasValue) {
     char out[20];
-    if (onStep.Get(":FG#", out) == CR_VALUE_GET) {
+    if (onStepLx200.Get(":FG#", out) == CR_VALUE_GET) {
       position = atoi(out);
       if (position >= -500000.0F && position <= 1000000.0F) { last = millis(); hasValue = true; } else position = NAN;
     }
@@ -273,7 +273,7 @@ static int _derotator  = -1;
 bool Status::hasRotator() {
   if (_rotator == -1) {
     char out[20];
-    if (onStep.Get(":GX98#",out) == CR_VALUE_GET) {
+    if (onStepLx200.Get(":GX98#",out) == CR_VALUE_GET) {
       _rotator = (out[0] == 'R');
       _derotator = (out[0] == 'D'); if (_derotator) _rotator = true;
     }
@@ -284,7 +284,7 @@ bool Status::hasRotator() {
 bool Status::hasDeRotator() {
   if (_rotator == -1) {
     char out[20];
-    if (onStep.Get(":GX98#",out) == CR_VALUE_GET) {
+    if (onStepLx200.Get(":GX98#",out) == CR_VALUE_GET) {
       _rotator = (out[0] == 'R');
       _derotator = (out[0] == 'D'); if (_derotator) _rotator = true;
     }
@@ -298,7 +298,7 @@ float Status::getRotatorPosition() {
   static unsigned long last = 0;
   if ((millis() - last > 500) || !hasValue) {
     char out[20];
-    if (onStep.Get(":rG#", out) == CR_VALUE_GET) {
+    if (onStepLx200.Get(":rG#", out) == CR_VALUE_GET) {
       position = atoi(out);
       if (position >= -360.0F && position <= 720.0F) { last = millis(); hasValue = true; } else position = NAN;
     }
@@ -315,7 +315,7 @@ bool Status::hasDateTime() {
   if (dateTimeKnownValid) return true; // once OnStep says the date/time has been set no need to keep asking
   bool dateTime = false; // default is to assume the date/time has been set unless OnStep tells us otherwise
   char out[20];
-  if ((onStep.Get(":GX89#", out) == CR_VALUE_GET)) dateTime = (out[0] == '0');
+  if ((onStepLx200.Get(":GX89#", out) == CR_VALUE_GET)) dateTime = (out[0] == '0');
   if (dateTime == true) dateTimeKnownValid = true;
   return dateTime;
 }
@@ -326,7 +326,7 @@ bool Status::getT(double &T) {
   static bool hasValue = false;
   static unsigned long last = 0;
   if ((millis() - last > 30000) || !hasValue)
-    if (onStep.Get(":GX9A#", temp) == CR_VALUE_GET) 
+    if (onStepLx200.Get(":GX9A#", temp) == CR_VALUE_GET) 
     {
       int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
       f = atof(temp);
@@ -341,7 +341,7 @@ bool Status::getP(double &P) {
   static bool hasValue = false;
   static unsigned long last = 0;
   if ((millis() - last > 75000) || !hasValue)
-    if (onStep.Get(":GX9B#", temp) == CR_VALUE_GET) 
+    if (onStepLx200.Get(":GX9B#", temp) == CR_VALUE_GET) 
     {
       int l=strlen(temp); if (l > 0) temp[l - 1] = 0;
       f = atof(temp);
@@ -356,7 +356,7 @@ bool Status::getH(double &H) {
   static bool hasValue = false;
   static unsigned long last = 0;
   if ((millis()-last > 75000) || !hasValue)
-    if (onStep.Get(":GX9C#", temp) == CR_VALUE_GET) 
+    if (onStepLx200.Get(":GX9C#", temp) == CR_VALUE_GET) 
     {
       int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
       f = atof(temp);
@@ -371,7 +371,7 @@ bool Status::getDP(double &DP) {
   static bool hasValue = false;
   static unsigned long last = 0;
   if ((millis() - last > 30000) || !hasValue)
-    if (onStep.Get(":GX9E#", temp) == CR_VALUE_GET) 
+    if (onStepLx200.Get(":GX9E#", temp) == CR_VALUE_GET) 
     {
       int l = strlen(temp); if (l > 0) temp[l - 1] = 0;
       f = atof(temp);
@@ -382,7 +382,7 @@ bool Status::getDP(double &DP) {
 
 bool Status::alignAddStar() {
   if (align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3 || align == ALI_RECENTER_4 || align == ALI_RECENTER_5 || align == ALI_RECENTER_6 || align == ALI_RECENTER_7 || align == ALI_RECENTER_8 || align == ALI_RECENTER_9) {
-    if (onStep.Set(":A+#") == CR_VALUE_SET) {
+    if (onStepLx200.Set(":A+#") == CR_VALUE_SET) {
       if (aliMode == ALIM_ONE || 
          (aliMode == ALIM_TWO   && align == ALI_RECENTER_2) ||
          (aliMode == ALIM_THREE && align == ALI_RECENTER_3) ||

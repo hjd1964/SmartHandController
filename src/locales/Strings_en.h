@@ -341,7 +341,7 @@
 #define L_SG_FILT_BY_PER_MAX "Filter Var* Period"
 
 // ------------------- SmartController.h -----------------------
-#define L_WIFI_SELECT "SHC, Select WiFi:"
+#define L_WIFI_SELECT "SHC, Connection:"
 #define L_WIFI_CONNECTION1 "Starting WiFi:"
 #define L_WIFI_CONNECTION2 "Restart WiFi:"
 #define L_LOOKING "Looking for"

@@ -1,5 +1,5 @@
 #include "Status.h"
-#include "../cmd/Cmd.h"
+#include "../cmdLx200/CmdLx200.h"
 
 bool Status::featureSelectByOrder(int order) {
   int found = 0;
@@ -18,7 +18,7 @@ bool Status::featureScan() {
     char out[40], present[40], cmd[40];
     _featureValid = true;
 
-    if (onStep.Get(":GXY0#", present) == CR_VALUE_GET) {
+    if (onStepLx200.Get(":GXY0#", present) == CR_VALUE_GET) {
 
       if (strlen(present) != 9) { featureClearAll(); return false; }
 
@@ -29,7 +29,7 @@ bool Status::featureScan() {
         char *purpose_str = NULL;
 
         sprintf(cmd, ":GXY%d#", i + 1);
-        if ((onStep.Get(cmd, out) != CR_VALUE_GET)) _featureValid = false;
+        if ((onStepLx200.Get(cmd, out) != CR_VALUE_GET)) _featureValid = false;
         if (!_featureValid) { featureClearAll(); return false; }
 
         if (strlen(out) > 1) {
@@ -70,7 +70,7 @@ bool Status::featureUpdate(int index) {
 
     if (index == 0 || ((index == i + 1) && (feature[i].purpose == SWITCH || feature[i].purpose == ANALOG_OUTPUT || feature[i].purpose == DEW_HEATER || feature[i].purpose == INTERVALOMETER))) {
       sprintf(cmd, ":GXX%d#", i + 1);
-      if ((onStep.Get(cmd, out) != CR_VALUE_GET)) _featureValid = false;
+      if ((onStepLx200.Get(cmd, out) != CR_VALUE_GET)) _featureValid = false;
       if (!_featureValid) {
         for (uint8_t j = 0; j < 8; j++) feature[j].purpose = 0;
         return false;

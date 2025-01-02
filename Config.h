@@ -24,6 +24,7 @@
                                           //         for example.  This is the serial interface connected to OnStep.
 #define SERIAL_ONSTEP_BAUD_DEFAULT   9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
                                           //         Only used for async serial communication with OnStep.
+#define SERIAL_RADIO                  OFF //    OFF, Or use WIFI_STATION (ESP32 only.)                                        Option
 
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
 #define UTILITY_LIGHT                 OFF //    OFF, n. Where n=0..255 (0..100%) activates feature sets default brightness.   Adjust

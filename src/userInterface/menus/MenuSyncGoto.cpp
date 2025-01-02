@@ -51,7 +51,7 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
       case 2:
         if (sync) {
           bool isYes = true;
-          if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HERE "?", &isYes)) if (isYes) { message.show(onStep.Set(":CS#"),false); return MR_QUIT; }
+          if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HERE "?", &isYes)) if (isYes) { message.show(onStepLx200.Set(":CS#"),false); return MR_QUIT; }
         } else {
           if (menuUser(sync) == MR_QUIT) return MR_QUIT;
         }
@@ -64,13 +64,13 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
       break;
       case 5:
         message.show(L_SG_SPIRAL, "", 2000);
-        onStep.Set(":Mp#");
+        onStepLx200.Set(":Mp#");
         message.show(L_SG_SPIRAL, "...", -1);
-        onStep.Set(":Q#");
+        onStepLx200.Set(":Q#");
       break;
       case 6:
         message.show(L_SG_GOTO_LAST, L_SG_TARGET, 2000);
-        onStep.Move2Target();
+        onStepLx200.Move2Target();
       break;
       case 7:
       {
@@ -80,7 +80,7 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
             char cmd[5];
             sprintf(cmd, ":hX#");
             cmd[2] = sync ? 'F' : 'C';
-            if (onStep.Set(cmd) == CR_VALUE_SET) message.show(sync ? L_SG_HOME2 : L_SG_HOME3, " " L_SG_HOME4, -1);
+            if (onStepLx200.Set(cmd) == CR_VALUE_SET) message.show(sync ? L_SG_HOME2 : L_SG_HOME3, " " L_SG_HOME4, -1);
             return MR_QUIT;
           }
         }
@@ -147,7 +147,7 @@ MENU_RESULT UI::menuCatalog(bool sync, int number) {
   if (cat_mgr.isInitialized()) {
     if (cat_mgr.setIndex(cat_mgr.getIndex())) {
       if (display->UserInterfaceCatalog(&keyPad, title)) {
-        if (message.show(onStep.SyncGotoCat(sync), false)) return MR_QUIT;
+        if (message.show(onStepLx200.SyncGotoCat(sync), false)) return MR_QUIT;
       }
     } else message.show(cat_mgr.catalogTitle(), L_SG_NO_OBJECT, 2000);
   } else message.show(cat_mgr.catalogTitle(), L_SG_NO_INIT "?", 2000);
@@ -170,7 +170,7 @@ MENU_RESULT UI::menuSolarSys(bool sync) {
     if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_GSUN "?", &GotoSun)) { if (!GotoSun) return MR_CANCEL; } else return MR_CANCEL;
   }
 
-  if (message.show(onStep.SyncGotoPlanet(sync, current_selection-1),false)) return MR_QUIT;
+  if (message.show(onStepLx200.SyncGotoPlanet(sync, current_selection-1),false)) return MR_QUIT;
   return MR_CANCEL;
 }
 
@@ -187,9 +187,9 @@ MENU_RESULT UI::menuUser(bool sync) {
   char temp1[500];
   for (int l=0; l<=14; l++) {
     strcpy(temp, ":Lo0#"); temp[3] = l + '0';
-    onStep.Set(temp);
-    onStep.Set(":L$#");
-    onStep.Get(":LI#",temp1);
+    onStepLx200.Set(temp);
+    onStepLx200.Set(":L$#");
+    onStepLx200.Get(":LI#",temp1);
     
     int len = strlen(temp1);
     if (len > 4) temp1[len - 5] = 0;
@@ -210,11 +210,11 @@ MENU_RESULT UI::menuUser(bool sync) {
 
     // select this user catalog
     strcpy(temp,":Lo0#"); temp[3] = userCatalog[current_selection_UserCatalog - 1] + '0';
-    onStep.Set(temp);
+    onStepLx200.Set(temp);
 
     // show the catalog objects
     if (display->UserInterfaceUserCatalog(&keyPad, sync ? L_SG_SYNC_USER_ITEM : L_SG_GOTO_USER_ITEM)) {
-      if (message.show(onStep.Set(":LIG#"))) return MR_QUIT;
+      if (message.show(onStepLx200.Set(":LIG#"))) return MR_QUIT;
     }
   }
 }
@@ -408,7 +408,7 @@ MENU_RESULT UI::menuRADec(bool sync) {
     if (display->UserInterfaceInputValueDec(&keyPad, &angleDEC)) {
       float fD;
       secondsToFloat(angleDEC,fD);
-      if (message.show(onStep.SyncGoto(sync, fR, fD))) return MR_QUIT;
+      if (message.show(onStepLx200.SyncGoto(sync, fR, fD))) return MR_QUIT;
     }
   }
   return MR_CANCEL;

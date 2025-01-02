@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "u8g2_ext_catalog.h"
 #include "u8g2_ext_value.h"
 #include "u8g2_ext_event.h"
-#include "../../libApp/cmd/Cmd.h"
+#include "../../libApp/cmdLx200/CmdLx200.h"
 #include "../../catalogs/Catalog.h"
 
 #define MY_BORDER_SIZE 1
@@ -360,7 +360,7 @@ static uint8_t ext_draw_user_catalog_list_line(u8g2_t *u8g2, uint8_t y)
   char line2[128];
 
   // user object catalog
-  onStep.Get(":LI#",line1);
+  onStepLx200.Get(":LI#",line1);
 
   bool nextString=false;
   int j=0;
@@ -435,7 +435,7 @@ bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, KeyPad* extPad, const char *titl
       }
       if (ext_draw_user_catalog_list_line(u8g2, yy)==0) {
         // display of item failed due to it being a key or beyond end of list
-        if (strlen(oppositeMove)>0) { onStep.Set(oppositeMove); strcpy(oppositeMove,""); }
+        if (strlen(oppositeMove)>0) { onStepLx200.Set(oppositeMove); strcpy(oppositeMove,""); }
       }
     } while (u8g2_NextPage(u8g2));
     
@@ -447,8 +447,8 @@ bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, KeyPad* extPad, const char *titl
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return true; else
       if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return false; else
-      if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) { strcpy(oppositeMove,":LB#"); onStep.Set(":LN#"); break; } else
-      if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) { strcpy(oppositeMove,":LN#"); onStep.Set(":LB#"); break; }
+      if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) { strcpy(oppositeMove,":LB#"); onStepLx200.Set(":LN#"); break; } else
+      if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) { strcpy(oppositeMove,":LN#"); onStepLx200.Set(":LB#"); break; }
     }
   }
 }

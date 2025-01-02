@@ -1,7 +1,7 @@
 
 #include "../../libApp/u8g2ext/u8g2_ext.h"
 #include "../../libApp/keyPad/KeyPad.h"
-#include "../../libApp/cmd/Cmd.h"
+#include "../../libApp/cmdLx200/CmdLx200.h"
 
 class Message {
   public:

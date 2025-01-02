@@ -6,7 +6,7 @@
 #include "../libApp/keyPad/KeyPad.h"
 #include "../libApp/u8g2ext/u8g2_ext.h"
 #include "../libApp/status/Status.h"
-#include "../libApp/cmd/Cmd.h"
+#include "../libApp/cmdLx200/CmdLx200.h"
 #include "message/Message.h"
 
 // coordinate mode for getting and setting RA/Dec
@@ -20,6 +20,8 @@
 
 #define onstep_logo_width 128
 #define onstep_logo_height 68
+
+enum OperatingMode {OM_SERIAL, OM_WIFI};
 
 enum OLED { OLED_SH1106, OLED_SH1106_4W_SW_SPI, OLED_SH1106_4W_HW_SPI, OLED_SSD1306, OLED_SSD1309, OLED_SSD1309_4W_SW_SPI, OLED_SSD1309_4W_HW_SPI };
 #define SH1106 OLED_SH1106
@@ -65,7 +67,7 @@ private:
 
   void menuMain();
   void menuFeatureKey();
-  #if SERIAL_IP_MODE == STATION
+  #if SERIAL_IP_MODE != OFF
     void menuWifi();
   #endif
   

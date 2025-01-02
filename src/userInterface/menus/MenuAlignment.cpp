@@ -61,9 +61,9 @@ void UI::menuAlignment() {
     // handle misc. resulting actions
     if (showAlign) {
       char r2[20] = ""; char r3[20] = ""; char r4[20] = ""; char r5[20] = ""; char r8[20] = "";
-      if ((onStep.GetTrim(":GX02#", r2) == CR_VALUE_GET) && (onStep.GetTrim(":GX03#", r3) == CR_VALUE_GET) && 
-          (onStep.GetTrim(":GX04#", r4) == CR_VALUE_GET) && (onStep.GetTrim(":GX05#", r5) == CR_VALUE_GET) && 
-          (onStep.GetTrim(":GX08#", r8) == CR_VALUE_GET)) {
+      if ((onStepLx200.GetTrim(":GX02#", r2) == CR_VALUE_GET) && (onStepLx200.GetTrim(":GX03#", r3) == CR_VALUE_GET) && 
+          (onStepLx200.GetTrim(":GX04#", r4) == CR_VALUE_GET) && (onStepLx200.GetTrim(":GX05#", r5) == CR_VALUE_GET) && 
+          (onStepLx200.GetTrim(":GX08#", r8) == CR_VALUE_GET)) {
         char s1[20] = ""; strcat(s1, "PE:"); strcat(s1, r2); strcat(s1, ", PZ:"); strcat(s1, r3);
         char s2[20] = ""; strcat(s2, "DO (cone):"); strcat(s2, r4);
         char s3[20] = ""; strcat(s3, "PD:"); strcat(s3, r5); strcat(s3, ", TF:"); strcat(s3, r8);
@@ -71,14 +71,14 @@ void UI::menuAlignment() {
       }
     } else  
     if (clearAlign) {
-      if ((onStep.Set(":SX02,0#") == CR_VALUE_SET) && (onStep.Set(":SX03,0#") == CR_VALUE_SET) &&
-          (onStep.Set(":SX04,0#") == CR_VALUE_SET) && (onStep.Set(":SX05,0#") == CR_VALUE_SET) &&
-          (onStep.Set(":SX06,0#") == CR_VALUE_SET) && (onStep.Set(":SX07,0#") == CR_VALUE_SET) &&
-          (onStep.Set(":SX08,0#") == CR_VALUE_SET)) message.show(CR_VALUE_SET,false); else message.show(CR_SET_VALUE_FAILED,false);
+      if ((onStepLx200.Set(":SX02,0#") == CR_VALUE_SET) && (onStepLx200.Set(":SX03,0#") == CR_VALUE_SET) &&
+          (onStepLx200.Set(":SX04,0#") == CR_VALUE_SET) && (onStepLx200.Set(":SX05,0#") == CR_VALUE_SET) &&
+          (onStepLx200.Set(":SX06,0#") == CR_VALUE_SET) && (onStepLx200.Set(":SX07,0#") == CR_VALUE_SET) &&
+          (onStepLx200.Set(":SX08,0#") == CR_VALUE_SET)) message.show(CR_VALUE_SET,false); else message.show(CR_SET_VALUE_FAILED,false);
     } else
     if (resetAlign) {
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
-      if (onStep.Set(":hF#") == CR_VALUE_SET) message.show(L_ALGN_RESUME0, L_ALGN_RESUME1, -1);
+      if (onStepLx200.Set(":hF#") == CR_VALUE_SET) message.show(L_ALGN_RESUME0, L_ALGN_RESUME1, -1);
     } else
     if (starsForAlign>0) {
       // check if date/time is set, if not set it
@@ -86,8 +86,8 @@ void UI::menuAlignment() {
 
       // start the align
       char s[20]; sprintf(s,":A%d#",starsForAlign);
-      if (onStep.Set(s) == CR_VALUE_SET) status.aliMode = (Status::AlignMode)starsForAlign; else message.show(L_ALIGNMENT, L_FAILED "!", -1);
-      if (onStep.Set(":R7#") == CR_VALUE_SET) { message.show(L_ALGN_RESUME4, L_ALGN_RESUME5, 1000);  activeGuideRate=8; }
+      if (onStepLx200.Set(s) == CR_VALUE_SET) status.aliMode = (Status::AlignMode)starsForAlign; else message.show(L_ALIGNMENT, L_FAILED "!", -1);
+      if (onStepLx200.Set(":R7#") == CR_VALUE_SET) { message.show(L_ALGN_RESUME4, L_ALGN_RESUME5, 1000);  activeGuideRate=8; }
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
     } else
     if (refinePA) {
@@ -98,7 +98,7 @@ void UI::menuAlignment() {
       message.show(L_ALGN_REFINE_MSG9, L_ALGN_REFINE_MSG10,4500);
       message.show(L_ALGN_REFINE_MSG11,L_ALGN_REFINE_MSG12,3500);
       if (display->UserInterfaceInputValueBoolean(&keyPad, L_ALGN_REFINE_MSG13, &refinePA)) {
-        if ((refinePA) && (onStep.Set(":MP#") == CR_VALUE_SET)) message.show(L_ALGN_REFINE_MSG14, L_ALGN_REFINE_MSG15, -1);
+        if ((refinePA) && (onStepLx200.Set(":MP#") == CR_VALUE_SET)) message.show(L_ALGN_REFINE_MSG14, L_ALGN_REFINE_MSG15, -1);
         if (refinePA) { current_selection_L0 = 0; current_selection_L1 = 0; } // Quit Menu
       }
     }

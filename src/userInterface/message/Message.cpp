@@ -128,7 +128,7 @@ bool Message::show(CMD_RESULT cmdResult, bool silentOk) {
     else if (cmdResult == CR_GOTO_GOING_TO) { sprintf(text1, L_CMD_GOTOK_1); sprintf(text2, L_CMD_GOTOK_2);  }
     show(text1, text2, time);
   }
-  return onStep.isOk(cmdResult);
+  return onStepLx200.isOk(cmdResult);
 }
 
 void Message::brief(const char* txt1, int duration) {

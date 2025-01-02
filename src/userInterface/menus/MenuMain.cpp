@@ -2,36 +2,68 @@
 // MenuMain, for UserInterface
 #include "../UserInterface.h"
 
-#if SERIAL_IP_MODE == STATION
-  void UI::menuWifi() {
-    static unsigned short current_selection_wifi = 1;
+#if SERIAL_IP_MODE != OFF
 
-    int wifiCount = 0;
-    char host_list[40];
-    strcpy(host_list, "");
-    if (strlen(STA1_HOST_NAME) != 0) {
-      wifiCount++;
-      strncat(host_list, STA1_HOST_NAME, 16);
-      if (strlen(STA2_HOST_NAME) != 0) {
-        wifiCount++;
-        strcat(host_list, "\n");
-        strncat(host_list, STA2_HOST_NAME, 16);
-        if (strlen(STA3_HOST_NAME) != 0) {
-          wifiCount++;
-          strcat(host_list, "\n");
-          strncat(host_list, STA3_HOST_NAME, 16);
+  void UI::menuWifi() {
+    static unsigned short current_selection_connect = 1;
+
+    int selectionCount = 0;
+    char ssid_list[3][16] = {STA1_HOST_NAME, STA2_HOST_NAME, STA3_HOST_NAME};
+    int ssid_cross_index[3];
+    char host_list[64] = "";
+
+    int ssidCount = WiFi.scanNetworks();
+    VF("MSG: Connect menu, found "); V(ssidCount); VLF(" WiFi networks");
+
+    // see if any of our SSID's match what's present
+    int matchCount = 0;
+    for (int i = 0; i < 3; i++) {
+      strupr(ssid_list[i]);
+      for (int ssid = 0; ssid < ssidCount; ssid++) {
+        if (WiFi.SSID(ssid).equals(ssid_list[i])) {
+          VF("MSG: Connect menu, matched SSID "); VL(ssid_list[i]);
+          ssid_cross_index[matchCount++] = i;
+          break;
         }
       }
     }
 
-    if (wifiCount > 1) {
+    // build the menu selections
+    #if SERIAL_ONSTEP != OFF
+      selectionCount++;
+      strncat(host_list, "Serial\n", 16);
+    #endif
+    for (int i = 0; i++; i < matchCount) {
+      if (ssid_cross_index[i] > 0) {
+        VF("MSG: Connect menu, added SSID "); VL(ssid_list[ssid_cross_index[i]]);
+        strncat(host_list, ssid_list[ssid_cross_index[i]], 16);
+        strncat(host_list, " WiFi\n", 16);
+      }
+    }
+    host_list[strlen(host_list) - 1] = 0;
+
+    // show the menu
+    if (selectionCount > 0) {
       do {
-        current_selection_wifi = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_wifi, host_list);
-        VL(current_selection_wifi);
-      } while (current_selection_wifi == 0); 
+        current_selection_connect = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_connect, host_list);
+      } while (current_selection_connect == 0); 
+    }
+    current_selection_connect--;
+
+    // flag serial mode or start WiFi
+    VF("MSG: Connect menu, user selected ");
+    if (current_selection_connect == 0) {
+      VLF("Serial");
+      onStep.useWiFiOnly = false;
+    } else
+    if (current_selection_connect > 0 && current_selection_connect < 3) {
+      VF("WiFi "); VL(ssid_cross_index[current_selection_connect]);
+      wifiManager.setStation(ssid_cross_index[current_selection_connect]);
+      onStep.useWiFiOnly = true;
+    } else {
+      VLF("unknown");
     }
 
-    wifiManager.setStation(current_selection_wifi);
   }
 #endif
 
@@ -79,12 +111,12 @@ void UI::menuFeatureKey() {
     if (current_selection_feature_mode == j[0]) featureKeyMode = 3; else // util. light
     if (current_selection_feature_mode == j[1]) featureKeyMode = 4; else // reticle
     if (current_selection_feature_mode == j[2]) featureKeyMode = 5; else // rotator
-    if (current_selection_feature_mode == j[3]) { featureKeyMode = 6; onStep.Set(":FA1#"); } else // focuser 1
-    if (current_selection_feature_mode == j[4]) { featureKeyMode = 7; onStep.Set(":FA2#"); } else // focuser 2
-    if (current_selection_feature_mode == j[5]) { featureKeyMode = 8; onStep.Set(":FA3#"); } else // focuser 3
-    if (current_selection_feature_mode == j[6]) { featureKeyMode = 9; onStep.Set(":FA4#"); } else // focuser 4
-    if (current_selection_feature_mode == j[7]) { featureKeyMode = 10; onStep.Set(":FA5#"); } else // focuser 5
-    if (current_selection_feature_mode == j[8]) { featureKeyMode = 11; onStep.Set(":FA6#"); } else // focuser 6
+    if (current_selection_feature_mode == j[3]) { featureKeyMode = 6; onStepLx200.Set(":FA1#"); } else // focuser 1
+    if (current_selection_feature_mode == j[4]) { featureKeyMode = 7; onStepLx200.Set(":FA2#"); } else // focuser 2
+    if (current_selection_feature_mode == j[5]) { featureKeyMode = 8; onStepLx200.Set(":FA3#"); } else // focuser 3
+    if (current_selection_feature_mode == j[6]) { featureKeyMode = 9; onStepLx200.Set(":FA4#"); } else // focuser 4
+    if (current_selection_feature_mode == j[7]) { featureKeyMode = 10; onStepLx200.Set(":FA5#"); } else // focuser 5
+    if (current_selection_feature_mode == j[8]) { featureKeyMode = 11; onStepLx200.Set(":FA6#"); } else // focuser 6
   	if (current_selection_feature_mode == j[9])  featureKeyMode = 12; else // feature 1
 	  if (current_selection_feature_mode == j[10]) featureKeyMode = 13; else // feature 2
     if (current_selection_feature_mode == j[11]) featureKeyMode = 14; else // feature 3
@@ -140,14 +172,14 @@ void UI::menuParking() {
     current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_PARKING, current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1) {
       case 1:
-        if (onStep.Set(":hP#")== CR_VALUE_SET) {
+        if (onStepLx200.Set(":hP#")== CR_VALUE_SET) {
           message.show(L_PARKING, L_TELESCOPE, 500); 
           current_selection_L1 = 0;
           current_selection_L0 = 0;
         } else message.show(L_PARK, L_FAILED, 1000);
       break;
       case 2:
-        if (onStep.Set(":hR#")== CR_VALUE_SET) {
+        if (onStepLx200.Set(":hR#")== CR_VALUE_SET) {
           message.show(L_UNPARKING, L_TELESCOPE, 500); 
           current_selection_L1 = 0;
         } else message.show(L_UNPARK, L_FAILED, 1000);
@@ -156,7 +188,7 @@ void UI::menuParking() {
         boolean SetP=false; 
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_SETPARK "?", &SetP)) {
           if (SetP) {
-            if (onStep.Set(":hQ#")== CR_VALUE_SET) {
+            if (onStepLx200.Set(":hQ#")== CR_VALUE_SET) {
               message.show(L_SETPARK, L_OK, 500);
               current_selection_L1 = 0;
             } else message.show(L_SETPARK, L_FAILED, 1000); 
@@ -183,17 +215,17 @@ void UI::menuTracking() {
       switch (current_selection_L1) {
         case 1:
           if (currentstate == Status::TRK_ON) {
-            if (onStep.Set(":Td#")== CR_VALUE_SET) { message.show(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else message.show(L_SET_STATE, L_FAILED, 1000);
+            if (onStepLx200.Set(":Td#")== CR_VALUE_SET) { message.show(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else message.show(L_SET_STATE, L_FAILED, 1000);
           } else {
-            if (onStep.Set(":Te#")== CR_VALUE_SET) { message.show(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else message.show(L_SET_STATE, L_FAILED, 1000);
+            if (onStepLx200.Set(":Te#")== CR_VALUE_SET) { message.show(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else message.show(L_SET_STATE, L_FAILED, 1000);
           }
         break;
-        case 2: message.show(onStep.Set(":TQ#"), false); break;
-        case 3: message.show(onStep.Set(":TS#"), false); break;
-        case 4: message.show(onStep.Set(":TL#"), false); break;
-        case 5: message.show(onStep.Set(":TR#"), false); break;
-        case 6: message.show(onStep.Set(":T+#"), false); break;
-        case 7: message.show(onStep.Set(":T-#"), false); break;
+        case 2: message.show(onStepLx200.Set(":TQ#"), false); break;
+        case 3: message.show(onStepLx200.Set(":TS#"), false); break;
+        case 4: message.show(onStepLx200.Set(":TL#"), false); break;
+        case 5: message.show(onStepLx200.Set(":TR#"), false); break;
+        case 6: message.show(onStepLx200.Set(":T+#"), false); break;
+        case 7: message.show(onStepLx200.Set(":T-#"), false); break;
       }
     }
   } else {
@@ -209,22 +241,22 @@ void UI::menuTracking() {
       switch (current_selection_L1) {
         case 1:
           if (currentstate == Status::TRK_ON) {
-            if (onStep.Set(":Td#")== CR_VALUE_SET) { message.show(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else message.show(L_SET_STATE, L_FAILED, 1000);
+            if (onStepLx200.Set(":Td#")== CR_VALUE_SET) { message.show(L_TRACKING, L_OFF, 500); currentstate=Status::TRK_OFF; } else message.show(L_SET_STATE, L_FAILED, 1000);
           } else {
-            if (onStep.Set(":Te#")== CR_VALUE_SET) { message.show(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else message.show(L_SET_STATE, L_FAILED, 1000);
+            if (onStepLx200.Set(":Te#")== CR_VALUE_SET) { message.show(L_TRACKING, L_ON, 500); currentstate=Status::TRK_ON; } else message.show(L_SET_STATE, L_FAILED, 1000);
           }
         break;
-        case 2:  message.show(onStep.Set(":TQ#"), false); break;
-        case 3:  message.show(onStep.Set(":TS#"), false); break;
-        case 4:  message.show(onStep.Set(":TL#"), false); break;
-        case 5:  message.show(onStep.Set(":To#"), false); break;
-        case 6:  message.show(onStep.Set(":Tr#"), false); break;
-        case 7:  message.show(onStep.Set(":Tn#"), false); break;
-        case 8:  message.show(onStep.Set(":T1#"), false); break;
-        case 9:  message.show(onStep.Set(":T2#"), false); break;
-        case 10: message.show(onStep.Set(":TR#"), false); break;
-        case 11: message.show(onStep.Set(":T+#"), false); break;
-        case 12: message.show(onStep.Set(":T-#"), false); break;
+        case 2:  message.show(onStepLx200.Set(":TQ#"), false); break;
+        case 3:  message.show(onStepLx200.Set(":TS#"), false); break;
+        case 4:  message.show(onStepLx200.Set(":TL#"), false); break;
+        case 5:  message.show(onStepLx200.Set(":To#"), false); break;
+        case 6:  message.show(onStepLx200.Set(":Tr#"), false); break;
+        case 7:  message.show(onStepLx200.Set(":Tn#"), false); break;
+        case 8:  message.show(onStepLx200.Set(":T1#"), false); break;
+        case 9:  message.show(onStepLx200.Set(":T2#"), false); break;
+        case 10: message.show(onStepLx200.Set(":TR#"), false); break;
+        case 11: message.show(onStepLx200.Set(":T+#"), false); break;
+        case 12: message.show(onStepLx200.Set(":T-#"), false); break;
       }
     }
   }
@@ -239,11 +271,11 @@ void UI::menuPEC() {
     current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_PEC, current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {
-    case 1: message.show(onStep.Set(":$QZ+#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_PLAYING, 1000); break;
-    case 2: message.show(onStep.Set(":$QZ-#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_STOPPED, 1000); break;
-    case 3: message.show(onStep.Set(":$QZZ#"), false); break;
-    case 4: message.show(onStep.Set(":$QZ/#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_RECORDING, 1000); break;
-    case 5: message.show(onStep.Set(":$QZ!#"), false); break;
+    case 1: message.show(onStepLx200.Set(":$QZ+#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_PLAYING, 1000); break;
+    case 2: message.show(onStepLx200.Set(":$QZ-#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_STOPPED, 1000); break;
+    case 3: message.show(onStepLx200.Set(":$QZZ#"), false); break;
+    case 4: message.show(onStepLx200.Set(":$QZ/#"), true); current_selection_L0 = 0; current_selection_L1 = 0; message.show(L_PEC, L_PEC_RECORDING, 1000); break;
+    case 5: message.show(onStepLx200.Set(":$QZ!#"), false); break;
     default: break;
     }
   }

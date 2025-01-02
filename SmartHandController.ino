@@ -60,9 +60,9 @@ void systemServices() {
     char command[80];
 
     switch (i++ % 3) {
-      case 0: sprintF(command, ":SX9A,%0.1f#", weather.getTemperature()); onStep.Set(command); break;
-      case 1: sprintF(command, ":SX9B,%0.1f#", weather.getPressure()); onStep.Set(command); break;
-      case 2: sprintF(command, ":SX9C,%0.1f#", weather.getHumidity()); onStep.Set(command); break;
+      case 0: sprintF(command, ":SX9A,%0.1f#", weather.getTemperature()); onStepLx200.Set(command); break;
+      case 1: sprintF(command, ":SX9B,%0.1f#", weather.getPressure()); onStepLx200.Set(command); break;
+      case 2: sprintF(command, ":SX9C,%0.1f#", weather.getHumidity()); onStepLx200.Set(command); break;
     }
   }
 #endif

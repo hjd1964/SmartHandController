@@ -1,58 +1,35 @@
 // -----------------------------------------------------------------------------------
-// LX200 command processing
+// Help with commands, etc.
 #pragma once
 
 #include "../../Common.h"
 
-enum CMD_RESULT {
-  CR_NOT_OK, CR_SET_VALUE_FAILED, CR_GET_VALUE_FAILED, CR_SET_TARGET_FAILED, CR_NO_OBJECT_SELECTED, CR_UNKOWN,
-  
-  CR_GOTO_ERR_BELOW_HORIZON, CR_GOTO_ERR_ABOVE_OVERHEAD, CR_GOTO_ERR_STANDBY, CR_GOTO_ERR_PARK, CR_GOTO_ERR_GOTO, 
-  CR_GOTO_ERR_OUTSIDE_LIMITS, CR_GOTO_ERR_HARDWARE_FAULT, CR_GOTO_ERR_IN_MOTION, CR_GOTO_ERR_UNSPECIFIED,
-  
-  CR_OK, CR_VALUE_SET, CR_VALUE_GET, CR_SYNCED, CR_GOTO_GOING_TO
-};
+enum CommandErrors {
+  CE_NONE, CE_0, CE_CMD_UNKNOWN, CE_REPLY_UNKNOWN, CE_PARAM_RANGE, CE_PARAM_FORM,
+  CE_ALIGN_FAIL, CE_ALIGN_NOT_ACTIVE, CE_NOT_PARKED_OR_AT_HOME, CE_PARKED,
+  CE_PARK_FAILED, CE_NOT_PARKED, CE_NO_PARK_POSITION_SET, CE_GOTO_FAIL, CE_LIBRARY_FULL,
+  CE_GOTO_ERR_BELOW_HORIZON, CE_GOTO_ERR_ABOVE_OVERHEAD, CE_SLEW_ERR_IN_STANDBY, 
+  CE_SLEW_ERR_IN_PARK, CE_GOTO_ERR_GOTO, CE_GOTO_ERR_OUTSIDE_LIMITS, CE_SLEW_ERR_HARDWARE_FAULT,
+  CE_MOUNT_IN_MOTION, CE_GOTO_ERR_UNSPECIFIED, CE_NULL};
+
 
 class OnStepCmd {
   public:
-    bool isOk(CMD_RESULT val);
-    CMD_RESULT Get(char* command, char* output);
-    // overloaded to allow const char* strings without compiler warnings, similar follow below
-    CMD_RESULT Get(const char* command, char* output);
-    CMD_RESULT GetTrim(char* command, char* output);
-    CMD_RESULT GetTrim(const char* command, char* output);
-    CMD_RESULT GetTime(unsigned int &hour, unsigned int &minute, unsigned int &second, boolean ut=false);
-    CMD_RESULT GetTime(long &value, boolean ut=false);
-    CMD_RESULT Set(char* command);
-    CMD_RESULT Set(const char* command);
-    CMD_RESULT SetTime(long &value);
-    CMD_RESULT GetSite(int &value);
-    CMD_RESULT SetSite(int &value);
-    CMD_RESULT Move2Target();
-    CMD_RESULT SetTargetRa(int vr1, int vr2, int vr3);
-    CMD_RESULT SetTargetDec(char sign, int vd1, int vd2, int vd3);
-    CMD_RESULT SyncGoto(bool, float &Ra, float &Dec);
-    CMD_RESULT SyncSelectedStar(long alignSelectedStar);
-    CMD_RESULT GetDate(unsigned int &day, unsigned int &month, unsigned int &year, boolean ut=false);
-    CMD_RESULT SyncGotoCat(bool sync);
-    CMD_RESULT SyncGotoPlanet(bool sync, unsigned short obj);
-    CMD_RESULT readBacklash(const uint8_t &axis, float &backlash);
-    CMD_RESULT writeBacklash(const uint8_t &axis, const float &backlash);
-    CMD_RESULT readFocTCCoef(const uint8_t &foc, float &tccoef);
-    CMD_RESULT writeFocTCCoef(const uint8_t &foc, const float &tccoef);
-    CMD_RESULT readFocBacklash(const uint8_t &foc, float &tccoef);
-    CMD_RESULT writeFocBacklash(const uint8_t &foc, const float &tccoef);
-    CMD_RESULT readFocTCDeadband(const uint8_t &foc, float &tccoef);
-    CMD_RESULT writeFocTCDeadband(const uint8_t &foc, const float &tccoef);
+    // low level smart LX200 aware command and response (up to 80 chars) over serial (includes any '#' frame char)
+    bool processCommand(const char* cmd, char* response, long timeOutMs);
+
+    // writes command directly to buffer
+    void commandDirect(const char* command);
+
+    bool useWiFiOnly = false;
 
   private:
-    CMD_RESULT GetLatitude(int &degree, int &minute, int &second);
-    CMD_RESULT GetLongitude(int &degree, int &minute, int &second);
-    void serialRecvFlush();
-    void char2RA(char* txt, unsigned int& hour, unsigned int& minute, unsigned int& second);
-    void char2DEC(char* txt, int& deg, unsigned int& min, unsigned int& sec);
-    bool processCommand(char* command, char* response, unsigned long timeOutMs);
-
 };
+
+// timeout period for the web
+extern int webTimeout;
+
+// timeout period for the command channel(s)
+extern int cmdTimeout;
 
 extern OnStepCmd onStep;

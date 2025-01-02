@@ -2,19 +2,28 @@
 
 // use the HAL specified default NV driver
 #ifndef NV_DRIVER
-#define NV_DRIVER                     NV_DEFAULT
+  #define NV_DRIVER              NV_DEFAULT
 #endif
 
 // activate ST4 port serial interface
 #define SERIAL_ST4
-#define SERIAL_ST4_SLAVE ON
+#define SERIAL_ST4_SLAVE         ON
 #define SERIAL_ST4_SLAVE_PRESENT
+
+#define SERIAL_BAUD              SERIAL_ONSTEP_BAUD_DEFAULT
+#define SERIAL_BAUD_DEFAULT      SERIAL_ONSTEP_BAUD_DEFAULT
 
 // setup for Wifi IP communications to OnStep
 // for other settings see the WiFiManager class
-
 #ifndef SERIAL_IP_MODE
-#define SERIAL_IP_MODE OFF
+  #ifndef SERIAL_RADIO
+    #define SERIAL_RADIO         OFF
+  #endif
+  #if SERIAL_RADIO == WIFI_STATION
+    #define SERIAL_IP_MODE       STATION
+  #else
+    #define SERIAL_IP_MODE       OFF
+  #endif
 #endif
 
 #if SERIAL_IP_MODE == STATION
