@@ -26,7 +26,7 @@
                                           //              ***     WEAR AND DAMAGE THE MICROCONTROLLER NV SUBSYSTEM !!!        ***
 
 // IP ADDRESS SETTINGS -------------------------------------------------------------------------------------------------------------
-                                          //              then specify SERIAL_IP as the serial port in Config.h
+// these are active when SERIAL_RADIO is set to WIFI_STATION in Config.h
 
 #define ONSTEP1_HOST_NAME        "OnStep" //    "OnStep", Wifi Host Name to connnect to, leave blank to disable.              Adjust
 #define ONSTEP1_SSID             "ONSTEP" //    "ONSTEP", Wifi alternate Station SSID to connnect to.                         Adjust
