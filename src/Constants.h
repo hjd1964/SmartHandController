@@ -13,7 +13,6 @@
 #define FWU                         -205
 #define JS1                         -206
 
-#define TIMEOUT_WEB                 2000  // Unused
 #define TIMEOUT_CMD                 2000  // Default 2000 ms, 2 seconds
 #define FOREGROUND_CMD_RATE         300   // Default 300 ms, regulates the forground command rate
 #define BACKGROUND_CMD_RATE         1500  // Default 1500 ms, regulates the background (dimmed display) command rate
