@@ -8,10 +8,11 @@
 // smart LX200 aware command and response (up to 80 chars) over serial
 bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) {
 
-  // clear the queues and send the command
+    // clear the queues and send the command
   #if SERIAL_IP_MODE != OFF
     if (useWiFiOnly) {
       SERIAL_IP.flush();
+      SERIAL_IP.setTimeout(timeOutMs);
       while (SERIAL_IP.available() > 0) SERIAL_IP.read();
       SERIAL_IP.print(cmd);
     }
@@ -19,6 +20,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
   #if SERIAL_ONSTEP != OFF
     if (!useWiFiOnly) {
       SERIAL_ONSTEP.flush();
+      SERIAL_ONSTEP.setTimeout(timeOutMs);
       while (SERIAL_ONSTEP.available() > 0) SERIAL_ONSTEP.read();
       SERIAL_ONSTEP.print(cmd);
     }
@@ -102,13 +104,6 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
     if (cmd[0] == ';') { noResponse = false; shortResponse = false; }
   }
 
-  #if SERIAL_IP_MODE != OFF
-    if (useWiFiOnly) SERIAL_IP.setTimeout(timeOutMs);
-  #endif
-  #if SERIAL_ONSTEP != OFF
-    if (!useWiFiOnly) SERIAL_ONSTEP.setTimeout(timeOutMs);
-  #endif
-  
   unsigned long timeout = millis() + (unsigned long)timeOutMs;
   if (noResponse) {
     response[0] = 0;
