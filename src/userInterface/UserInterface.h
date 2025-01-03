@@ -122,6 +122,8 @@ private:
   void menuMeridianE();
   void menuMeridianW();
   void menuFirmware();
+  
+  void initGuideCommands();
 
   Status status;
 

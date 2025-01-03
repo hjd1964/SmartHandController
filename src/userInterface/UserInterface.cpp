@@ -99,33 +99,6 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   drawIntro();
   delay(2000);
 
-  // get guide commands ready, use single byte for SerialST4 or normal LX200 otherwise
-  // SerialST4 always returns 0 "may block", Teensy and ESP32 always return > 0
-  bool useFastGuides = false;
-  #if SERIAL_ONSTEP != OFF
-    if (SERIAL_ONSTEP.availableForWrite() == 0) useFastGuides = true;
-  #endif
-
-  if (useFastGuides) {
-    strcpy(ccMe, "\x0e"); // 14
-    strcpy(ccMw, "\x0f"); // 15
-    strcpy(ccMn, "\x10"); // 16
-    strcpy(ccMs, "\x11"); // 17
-    strcpy(ccQe, "\x12"); // 18
-    strcpy(ccQw, "\x13"); // 19
-    strcpy(ccQn, "\x14"); // 20
-    strcpy(ccQs, "\x15"); // 21
-  } else {
-    strcpy(ccMe, ":Me#");
-    strcpy(ccMw, ":Mw#");
-    strcpy(ccMn, ":Mn#");
-    strcpy(ccMs, ":Ms#");
-    strcpy(ccQe, ":Qe#");
-    strcpy(ccQw, ":Qw#");
-    strcpy(ccQn, ":Qn#");
-    strcpy(ccQs, ":Qs#");
-  }
-
   VF("MSG: UserInterface, start UI update task (rate 30ms priority 6)... ");
   if (tasks.add(30, 0, true, 6, updateWrapper, "UIupd")) { VLF("success"); } else { VLF("FAILED!"); }
 }
@@ -743,6 +716,7 @@ void UI::connect() {
   #if SERIAL_IP_MODE != OFF
     if (firstConnect) menuWifi();
   #endif
+  initGuideCommands();
 
 initAgain:
   #if SERIAL_IP_MODE != OFF
@@ -887,6 +861,38 @@ again2:
   hasAuxFeatures = status.featureScan();
 
   status.connected = true;
+}
+
+// get guide commands ready, use single byte for SerialST4 or normal LX200 otherwise
+void UI::initGuideCommands() {
+
+  // SerialST4 always returns 0 "may block", Teensy and ESP32 always return > 0
+  bool useFastGuides = false;
+  #if SERIAL_ONSTEP != OFF
+    if (!onStep.useWiFiOnly && SERIAL_ONSTEP.availableForWrite() == 0) useFastGuides = true;
+  #endif
+
+  if (useFastGuides) {
+    VLF("MSG: UserInterface, using fast single byte guide commands ");
+    strcpy(ccMe, "\x0e"); // 14
+    strcpy(ccMw, "\x0f"); // 15
+    strcpy(ccMn, "\x10"); // 16
+    strcpy(ccMs, "\x11"); // 17
+    strcpy(ccQe, "\x12"); // 18
+    strcpy(ccQw, "\x13"); // 19
+    strcpy(ccQn, "\x14"); // 20
+    strcpy(ccQs, "\x15"); // 21
+  } else {
+    VLF("MSG: UserInterface, using LX200 guide commands ");
+    strcpy(ccMe, ":Me#");
+    strcpy(ccMw, ":Mw#");
+    strcpy(ccMn, ":Mn#");
+    strcpy(ccMs, ":Ms#");
+    strcpy(ccQe, ":Qe#");
+    strcpy(ccQw, ":Qw#");
+    strcpy(ccQn, ":Qn#");
+    strcpy(ccQs, ":Qs#");
+  }
 }
 
 UI userInterface;
