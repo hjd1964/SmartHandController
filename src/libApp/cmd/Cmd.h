@@ -17,9 +17,13 @@ class OnStepCmd {
   public:
     // low level smart LX200 aware command and response (up to 80 chars) over serial (includes any '#' frame char)
     bool processCommand(const char* cmd, char* response, long timeOutMs);
+    bool processCommandIP(const char* cmd, char* response, long timeOutMs);
+    bool processCommandSerial(const char* cmd, char* response, long timeOutMs);
 
     // writes command directly to buffer
     void commandDirect(const char* command);
+    void commandDirectIP(const char* command);
+    void commandDirectSerial(const char* command);
 
     bool useWiFiOnly = false;
 

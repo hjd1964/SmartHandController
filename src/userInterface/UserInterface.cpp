@@ -101,7 +101,12 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
 
   // get guide commands ready, use single byte for SerialST4 or normal LX200 otherwise
   // SerialST4 always returns 0 "may block", Teensy and ESP32 always return > 0
-  if (SERIAL_ONSTEP.availableForWrite() == 0) {
+  bool useFastGuides = false;
+  #if SERIAL_ONSTEP != OFF
+    if (SERIAL_ONSTEP.availableForWrite() == 0) useFastGuides = true;
+  #endif
+
+  if (useFastGuides) {
     strcpy(ccMe, "\x0e"); // 14
     strcpy(ccMw, "\x0f"); // 15
     strcpy(ccMn, "\x10"); // 16

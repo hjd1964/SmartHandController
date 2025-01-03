@@ -11,7 +11,6 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
   // clear the queues and send the command
   #if SERIAL_IP_MODE != OFF
     if (useWiFiOnly) {
-      SERIAL_IP.setTimeout(timeOutMs);
       SERIAL_IP.flush();
       while (SERIAL_IP.available() > 0) SERIAL_IP.read();
       SERIAL_IP.print(cmd);
@@ -19,7 +18,6 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
   #endif
   #if SERIAL_ONSTEP != OFF
     if (!useWiFiOnly) {
-      SERIAL_ONSTEP.setTimeout(timeOutMs);
       SERIAL_ONSTEP.flush();
       while (SERIAL_ONSTEP.available() > 0) SERIAL_ONSTEP.read();
       SERIAL_ONSTEP.print(cmd);
@@ -104,6 +102,13 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
     if (cmd[0] == ';') { noResponse = false; shortResponse = false; }
   }
 
+  #if SERIAL_IP_MODE != OFF
+    if (useWiFiOnly) SERIAL_IP.setTimeout(timeOutMs);
+  #endif
+  #if SERIAL_ONSTEP != OFF
+    if (!useWiFiOnly) SERIAL_ONSTEP.setTimeout(timeOutMs);
+  #endif
+  
   unsigned long timeout = millis() + (unsigned long)timeOutMs;
   if (noResponse) {
     response[0] = 0;
@@ -176,6 +181,227 @@ void OnStepCmd::commandDirect(const char* command) {
   #if SERIAL_ONSTEP != OFF
     if (!useWiFiOnly) SERIAL_ONSTEP.write(command);
   #endif
+}
+
+// smart LX200 aware command and response over serial
+bool OnStepCmd::processCommandIP(const char* cmd, char* response, long timeOutMs) {
+  SERIAL_IP.setTimeout(timeOutMs);
+
+  // clear the read/write buffers
+  SERIAL_IP.flush();
+  while (SERIAL_IP.available() > 0) SERIAL_IP.read();
+
+  // send the command
+  SERIAL_IP.print(cmd);
+
+  boolean noResponse = false;
+  boolean shortResponse = false;
+  if ((cmd[0] == (char)6) && (cmd[1] == 0)) shortResponse = true;
+  if (cmd[0] == ':') {
+    if (cmd[1] == '%') {
+      SERIAL_IP.setTimeout(timeOutMs * 4);
+    }
+    if (cmd[1] == 'A') {
+      if (strchr("W123456789+", cmd[2])) {
+        shortResponse = true;
+        SERIAL_IP.setTimeout(1000);
+      }
+    }
+    if ((cmd[1] == 'F') || (cmd[1] == 'f')) {
+      if (strchr("123456", cmd[2]) && cmd[3] != '#') {
+        // direct focuser select command?
+        if (strchr("+-QZHhF", cmd[3])) noResponse = true;
+        if (strchr("1234", cmd[3])) noResponse = true;
+        if (strchr("Aap",cmd[3])) shortResponse = true;
+      } else {
+        // normal command
+        if (strchr("+-QZHhF", cmd[2])) noResponse = true;
+        if (strchr("1234", cmd[2])) noResponse = true;
+        if (strchr("Aap",cmd[2])) shortResponse = true;
+      }
+    } else
+
+    if (cmd[1] == 'M') {
+      if (strchr("ewnsg", cmd[2])) noResponse = true;
+      if (strchr("SAP", cmd[2])) shortResponse = true;
+    }
+    if (cmd[1] == 'Q') {
+      if (strchr("#ewns", cmd[2])) noResponse = true;
+    }
+    if (cmd[1] == 'R') {
+      if (strchr("AEGCMS0123456789", cmd[2])) noResponse = true;
+    }
+    if (cmd[1] == 'S') {
+      if (strchr("CLSGtgMNOPrdhoTBX", cmd[2])) shortResponse = true;
+    }
+    if (cmd[1] == 'L') {
+      if (strchr("BNCDL!", cmd[2])) noResponse = true;
+      if (strchr("o$W", cmd[2])) shortResponse = true;
+    }
+    if (cmd[1] == 'B') {
+      if (strchr("+-", cmd[2])) noResponse = true;
+    }
+    if (cmd[1] == 'C') {
+      if (strchr("S", cmd[2])) noResponse = true;
+    }
+    if (cmd[1] == 'h') {
+      if (strchr("F", cmd[2])) noResponse = true;
+      if (strchr("COPQR", cmd[2])) {
+        shortResponse = true;
+        SERIAL_IP.setTimeout(timeOutMs * 2);
+      }
+    }
+    if (cmd[1] == 'T') {
+      if (strchr("QR+-SLK", cmd[2])) noResponse = true;
+      if (strchr("edrn", cmd[2])) shortResponse = true;
+    }
+    if (cmd[1] == 'U') noResponse = true;
+    if (cmd[1] == 'W' && cmd[2] != '?') { noResponse = true; }
+    if (cmd[1] == '$' && cmd[2] == 'Q' && cmd[3] == 'Z') {
+      if (strchr("+-Z/!", cmd[4])) noResponse = true;
+    }
+    if (cmd[1] == 'G') {
+      if (strchr("RD", cmd[2])) { timeOutMs *= 2; }
+    }
+  }
+
+  if (noResponse) {
+    response[0] = 0;
+    return true;
+  }
+  else
+    if (shortResponse) {
+      response[SERIAL_IP.readBytes(response, 1)] = 0;
+      return (response[0] != 0);
+    }
+    else {
+      // get full response, '#' terminated
+      unsigned long start = millis();
+      int responsePos = 0;
+      char b = 0;
+      while ((millis() - start < timeOutMs) && (b != '#')) {
+        if (SERIAL_IP.available()) {
+          b = SERIAL_IP.read();
+          response[responsePos] = b; responsePos++; if (responsePos > 19) responsePos = 19; response[responsePos] = 0;
+        }
+        Y;
+      }
+      return (response[0] != 0);
+    }
+}
+
+void OnStepCmd::commandDirectIP(const char* command) {
+  SERIAL_IP.write(command);
+}
+
+bool OnStepCmd::processCommandSerial(const char* cmd, char* response, long timeOutMs) {
+  SERIAL_ONSTEP.setTimeout(timeOutMs);
+
+  // clear the read/write buffers
+  SERIAL_ONSTEP.flush();
+  while (SERIAL_ONSTEP.available() > 0) SERIAL_ONSTEP.read();
+
+  // send the command
+  SERIAL_ONSTEP.print(cmd);
+
+  boolean noResponse = false;
+  boolean shortResponse = false;
+  if ((cmd[0] == (char)6) && (cmd[1] == 0)) shortResponse = true;
+  if (cmd[0] == ':') {
+    if (cmd[1] == '%') {
+      SERIAL_ONSTEP.setTimeout(timeOutMs * 4);
+    }
+    if (cmd[1] == 'A') {
+      if (strchr("W123456789+", cmd[2])) {
+        shortResponse = true;
+        SERIAL_ONSTEP.setTimeout(1000);
+      }
+    }
+    if ((cmd[1] == 'F') || (cmd[1] == 'f')) {
+      if (strchr("123456", cmd[2]) && cmd[3] != '#') {
+        // direct focuser select command?
+        if (strchr("+-QZHhF", cmd[3])) noResponse = true;
+        if (strchr("1234", cmd[3])) noResponse = true;
+        if (strchr("Aap",cmd[3])) shortResponse = true;
+      } else {
+        // normal command
+        if (strchr("+-QZHhF", cmd[2])) noResponse = true;
+        if (strchr("1234", cmd[2])) noResponse = true;
+        if (strchr("Aap",cmd[2])) shortResponse = true;
+      }
+    } else
+
+    if (cmd[1] == 'M') {
+      if (strchr("ewnsg", cmd[2])) noResponse = true;
+      if (strchr("SAP", cmd[2])) shortResponse = true;
+    }
+    if (cmd[1] == 'Q') {
+      if (strchr("#ewns", cmd[2])) noResponse = true;
+    }
+    if (cmd[1] == 'R') {
+      if (strchr("AEGCMS0123456789", cmd[2])) noResponse = true;
+    }
+    if (cmd[1] == 'S') {
+      if (strchr("CLSGtgMNOPrdhoTBX", cmd[2])) shortResponse = true;
+    }
+    if (cmd[1] == 'L') {
+      if (strchr("BNCDL!", cmd[2])) noResponse = true;
+      if (strchr("o$W", cmd[2])) shortResponse = true;
+    }
+    if (cmd[1] == 'B') {
+      if (strchr("+-", cmd[2])) noResponse = true;
+    }
+    if (cmd[1] == 'C') {
+      if (strchr("S", cmd[2])) noResponse = true;
+    }
+    if (cmd[1] == 'h') {
+      if (strchr("F", cmd[2])) noResponse = true;
+      if (strchr("COPQR", cmd[2])) {
+        shortResponse = true;
+        SERIAL_ONSTEP.setTimeout(timeOutMs * 2);
+      }
+    }
+    if (cmd[1] == 'T') {
+      if (strchr("QR+-SLK", cmd[2])) noResponse = true;
+      if (strchr("edrn", cmd[2])) shortResponse = true;
+    }
+    if (cmd[1] == 'U') noResponse = true;
+    if (cmd[1] == 'W' && cmd[2] != '?') { noResponse = true; }
+    if (cmd[1] == '$' && cmd[2] == 'Q' && cmd[3] == 'Z') {
+      if (strchr("+-Z/!", cmd[4])) noResponse = true;
+    }
+    if (cmd[1] == 'G') {
+      if (strchr("RD", cmd[2])) { timeOutMs *= 2; }
+    }
+  }
+
+  if (noResponse) {
+    response[0] = 0;
+    return true;
+  }
+  else
+    if (shortResponse) {
+      response[SERIAL_ONSTEP.readBytes(response, 1)] = 0;
+      return (response[0] != 0);
+    }
+    else {
+      // get full response, '#' terminated
+      unsigned long start = millis();
+      int responsePos = 0;
+      char b = 0;
+      while ((millis() - start < timeOutMs) && (b != '#')) {
+        if (SERIAL_ONSTEP.available()) {
+          b = SERIAL_ONSTEP.read();
+          response[responsePos] = b; responsePos++; if (responsePos > 19) responsePos = 19; response[responsePos] = 0;
+        }
+        Y;
+      }
+      return (response[0] != 0);
+    }
+}
+
+void OnStepCmd::commandDirectSerial(const char* command) {
+  SERIAL_ONSTEP.write(command);
 }
 
 OnStepCmd onStep;
