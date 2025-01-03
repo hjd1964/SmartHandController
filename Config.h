@@ -45,7 +45,7 @@
 
 // ST4 AUXILIARY INTERFACE ---------------------------------------------------------------------------------------------------------
 // *** It is up to you to verify the interface meets the electrical specifications of any connected device, use at your own risk ***
-#define ST4_AUX_INTERFACE             OFF //    OFF, ON, ON_PULLUP enables auxillary "pass-through" ST4 interface.            Option
+#define ST4_AUX_INTERFACE             OFF //    OFF, ON enables auxillary "pass-through" ST4 interface.                       Option
 
 // CATALOGS ------------------------------------------------------------------------------------------------------------------------
 // Advanced users can also customize which celestial object catalogs are included or even add new catalogs using Config.catalogs.h
