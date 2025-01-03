@@ -8,7 +8,7 @@
 // smart LX200 aware command and response (up to 80 chars) over serial
 bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) {
 
-    // clear the queues and send the command
+  // clear the queues and send the command
   #if SERIAL_IP_MODE != OFF
     if (useWiFiOnly) {
       SERIAL_IP.flush();
