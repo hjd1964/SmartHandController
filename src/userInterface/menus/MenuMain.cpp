@@ -33,7 +33,7 @@
           selectionCount++;
           strncat(selection_list, wifiManager.settings.station[i].host, 16);
           strncat(selection_list, " WiFi\n", 16);
-          ssid_cross_index[matchCount++] = i;
+          ssid_cross_index[matchCount++] = i + 1;
           break;
         }
       }
@@ -47,21 +47,25 @@
       } while (current_selection_connect == 0); 
     }
 
+    VF("MSG: Connect menu, user selected ");
+
     #if SERIAL_ONSTEP != OFF
       current_selection_connect--;
 
-      // flag serial mode or start WiFi
-      VF("MSG: Connect menu, user selected ");
+      // flag serial mode
       if (current_selection_connect == 0) {
-        VLF("Serial");
         onStep.useWiFiOnly = false;
+        VLF("Serial");
       }
     #endif
 
     if (current_selection_connect > 0 && current_selection_connect <= 3) {
+      current_selection_connect--;
+
+      // flag and start WiFi
+      onStep.useWiFiOnly = true;
       VF("WiFi "); VL(ssid_cross_index[current_selection_connect]);
       wifiManager.setStation(ssid_cross_index[current_selection_connect]);
-      onStep.useWiFiOnly = true;
     } else {
       VLF("unknown");
     }
