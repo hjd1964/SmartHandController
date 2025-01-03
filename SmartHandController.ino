@@ -33,6 +33,7 @@
 #define FirmwareVersionPatch  "b"
 
 #include "src/Common.h"
+#include "src/Validate.h"
 
 #include "src/lib/nv/Nv.h"
 #include "src/lib/tasks/OnTask.h"
