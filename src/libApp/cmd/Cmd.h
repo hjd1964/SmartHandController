@@ -21,7 +21,7 @@ class OnStepCmd {
     // writes command directly to buffer
     void commandDirect(const char* command);
 
-    bool useWiFiOnly = false;
+    bool useWirelessOnly = false;
 
   private:
 };

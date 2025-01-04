@@ -713,14 +713,21 @@ void UI::connect() {
   int thisTry = 0;
   bool connectSuccess;
 
-  #if SERIAL_IP_MODE != OFF
-    if (firstConnect) menuWifi();
+initAgain:
+  #if SERIAL_BT_MODE != OFF
+    SERIAL_BT.begin(SERIAL_BT_NAME, true);
+  #endif
+
+  #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
+    if (firstConnect) {
+      bool success;
+      do { success = menuWireless(); } while (!success);
+    }
   #endif
   initGuideCommands();
 
-initAgain:
   #if SERIAL_IP_MODE != OFF
-    if (onStep.useWiFiOnly) { 
+    if (onStep.useWirelessOnly) { 
       if (!wifiManager.active) {
         bool initSuccess = true;
         if (firstConnect) {
@@ -745,13 +752,13 @@ initAgain:
 
   connectSuccess = true;
   #if SERIAL_IP_MODE != OFF
-    if (onStep.useWiFiOnly) {
+    if (onStep.useWirelessOnly) {
       message.show(L_CONNECTING, IPAddress(wifiManager.sta->target).toString().c_str(), 1000);
       if (!SERIAL_IP.begin(serialBaud)) connectSuccess = false;
     }
   #endif
   #if SERIAL_ONSTEP != OFF
-    if (!onStep.useWiFiOnly) {
+    if (!onStep.useWirelessOnly) {
       #if defined(SERIAL_ONSTEP_RX) && defined(SERIAL_ONSTEP_TX)
         SERIAL_ONSTEP.begin(serialBaud, SERIAL_8N1, SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
       #else
@@ -763,16 +770,21 @@ initAgain:
   if (!connectSuccess) {
     VLF("MSG: Connect, to target failed");
 
+    #if SERIAL_BT_MODE != OFF
+      if (onStep.useWirelessOnly) {
+        SERIAL_BT.end();
+      }
+    #endif
     #if SERIAL_IP_MODE != OFF
-      if (onStep.useWiFiOnly) SERIAL_IP.end();
+      if (onStep.useWirelessOnly) {
+        SERIAL_IP.end();
+        wifiManager.disconnect();
+      }
     #endif
     #if SERIAL_ONSTEP != OFF
-      if (!onStep.useWiFiOnly) SERIAL_ONSTEP.end();
+      if (!onStep.useWirelessOnly) SERIAL_ONSTEP.end();
     #endif
 
-    #if SERIAL_IP_MODE != OFF
-      if (onStep.useWiFiOnly) wifiManager.disconnect();
-    #endif
     delay(7000);
 
     message.show(L_CONNECTING, L_FAILED, 2000);
@@ -790,29 +802,29 @@ queryAgain:
 
     delay(400);
     #if SERIAL_IP_MODE != OFF
-      if (onStep.useWiFiOnly) SERIAL_IP.flush();
+      if (onStep.useWirelessOnly) SERIAL_IP.flush();
     #endif
     #if SERIAL_ONSTEP != OFF
-      if (!onStep.useWiFiOnly) SERIAL_ONSTEP.flush();
+      if (!onStep.useWirelessOnly) SERIAL_ONSTEP.flush();
     #endif
   }
 
   CMD_RESULT r = onStepLx200.Get(":GVP#", s);
   if (r != CR_VALUE_GET || !strstr(s, "On-Step")) {
-    if (++thisTry % 5 != 0) {
+    if (++thisTry % 3 != 0) {
       goto queryAgain;
     } else {
       #if SERIAL_IP_MODE != OFF
-        if (onStep.useWiFiOnly) SERIAL_IP.end();
+        if (onStep.useWirelessOnly) SERIAL_IP.end();
       #endif
       #if SERIAL_ONSTEP != OFF
-        if (!onStep.useWiFiOnly) SERIAL_ONSTEP.end();
+        if (!onStep.useWirelessOnly) SERIAL_ONSTEP.end();
       #endif
 
       #if SERIAL_IP_MODE != OFF
-        if (onStep.useWiFiOnly) wifiManager.disconnect();
+        if (onStep.useWirelessOnly) wifiManager.disconnect();
       #endif
-      delay(7000);
+      delay(1000);
 
       thisTry = 0;
       goto initAgain;
@@ -869,7 +881,7 @@ void UI::initGuideCommands() {
   // SerialST4 always returns 0 "may block", Teensy and ESP32 always return > 0
   bool useFastGuides = false;
   #if SERIAL_ONSTEP != OFF
-    if (!onStep.useWiFiOnly && SERIAL_ONSTEP.availableForWrite() == 0) useFastGuides = true;
+    if (!onStep.useWirelessOnly && SERIAL_ONSTEP.availableForWrite() == 0) useFastGuides = true;
   #endif
 
   if (useFastGuides) {

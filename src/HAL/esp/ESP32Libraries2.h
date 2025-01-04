@@ -50,14 +50,16 @@
 
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL, optionally also early init of SERIAL_SIP/PIP or SERIAL_BT
-
-#if SERIAL_BT_MODE == SLAVE
+#ifndef SERIAL_BT_MODE
+  #define SERIAL_BT_MODE OFF
+#endif
+#if SERIAL_BT_MODE != OFF
   #include <BluetoothSerial.h>
   extern BluetoothSerial bluetoothSerial;
   #define SERIAL_BT bluetoothSerial
 #endif
-#if defined(SERIAL_BT)
-  #define SERIAL_BT_BEGIN() SERIAL_BT.begin(SERIAL_BT_NAME);
+#if SERIAL_BT_MODE == SLAVE
+  #define SERIAL_BT_BEGIN() SERIAL_BT.begin(SERIAL_BT_NAME)
 #else
   #define SERIAL_BT_BEGIN()
 #endif

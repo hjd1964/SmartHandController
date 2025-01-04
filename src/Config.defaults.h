@@ -13,6 +13,16 @@
 #define SERIAL_BAUD              SERIAL_ONSTEP_BAUD_DEFAULT
 #define SERIAL_BAUD_DEFAULT      SERIAL_ONSTEP_BAUD_DEFAULT
 
+#ifndef SERIAL_RADIO
+  #define SERIAL_RADIO           OFF
+#endif
+
+// setup for Bluetooth communications to OnStep
+#if SERIAL_RADIO == BLUETOOTH
+  #define SERIAL_BT_MODE         MASTER
+  #define SERIAL_BT_NAME         "SHC"
+#endif
+
 // setup for Wifi IP communications to OnStep
 // for other settings see the WiFiManager class
 #ifndef SERIAL_IP_MODE

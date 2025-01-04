@@ -2,17 +2,17 @@
 // MenuMain, for UserInterface
 #include "../UserInterface.h"
 
-#if SERIAL_IP_MODE != OFF
+#if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
 
-  void UI::menuWifi() {
+  #ifndef SERIAL_BT_DISCOVERY_TIME
+    #define SERIAL_BT_DISCOVERY_TIME 5000
+  #endif
+
+  bool UI::menuWireless() {
     static unsigned short current_selection_connect = 1;
 
     int selectionCount = 0;
-    int ssid_cross_index[3];
     char selection_list[64] = "";
-
-    int ssidCount = WiFi.scanNetworks();
-    VF("MSG: Connect menu, found "); V(ssidCount); VLF(" WiFi networks");
 
     // build the menu selections
 
@@ -22,29 +22,76 @@
       strncat(selection_list, "Serial\n", 16);
     #endif
 
-    // then any matching SSID's for active SHC WiFi stations
-    int matchCount = 0;
-    for (int i = 0; i < 3; i++) {
-      for (int ssid = 0; ssid < ssidCount; ssid++) {
-        if ((strlen(wifiManager.settings.station[i].host) > 0) &&
-            (WiFi.SSID(ssid).equals(wifiManager.settings.station[i].ssid))) {
-          VF("MSG: Connect menu, added "); V(wifiManager.settings.station[i].host);
-          VF(" w/SSID "); VL(wifiManager.settings.station[i].ssid);
-          selectionCount++;
-          strncat(selection_list, wifiManager.settings.station[i].host, 16);
-          strncat(selection_list, " WiFi\n", 16);
-          ssid_cross_index[matchCount++] = i + 1;
-          break;
+    #if SERIAL_IP_MODE != OFF
+      int ssid_cross_index[3];
+      int ssidCount = WiFi.scanNetworks();
+      VF("MSG: Connect menu, found "); V(ssidCount); VLF(" WiFi networks");
+
+      // then any matching SSID's for active SHC WiFi stations
+      int matchCount = 0;
+      for (int i = 0; i < 3; i++) {
+        for (int ssid = 0; ssid < ssidCount; ssid++) {
+          if ((strlen(wifiManager.settings.station[i].host) > 0) &&
+              (WiFi.SSID(ssid).equals(wifiManager.settings.station[i].ssid))) {
+            VF("MSG: Connect menu, added "); V(wifiManager.settings.station[i].host);
+            VF(" w/SSID "); VL(wifiManager.settings.station[i].ssid);
+            selectionCount++;
+            strncat(selection_list, wifiManager.settings.station[i].host, 16);
+            strncat(selection_list, " wifi\n", 16);
+            ssid_cross_index[matchCount++] = i + 1;
+            break;
+          }
         }
       }
-    }
+    #endif
+
+    #if SERIAL_BT_MODE != OFF
+      VF("MSG: Connect menu, starting asynchronous BT discovery");
+
+      BTScanResults *btDeviceList = SERIAL_BT.getScanResults();  // maybe accessing from different threads!
+      if (SERIAL_BT.discoverAsync([](BTAdvertisedDevice *pDevice) { VF("."); })) {
+        delay(SERIAL_BT_DISCOVERY_TIME);
+        VLF("");
+        VLF("MSG: Connect menu, stopping asynchronous BT discovery");
+        SERIAL_BT.discoverAsyncStop();
+        delay(4000);
+
+        VF("MSG: Connect menu, found "); V(btDeviceList->getCount()); VLF(" BT devices");
+
+        if (btDeviceList->getCount() > 0) {
+          for (int i = 0; i < btDeviceList->getCount(); i++) {
+            BTAdvertisedDevice *device = btDeviceList->getDevice(i);
+            VF("MSG: Connect menu, device ");
+            VF(device->getAddress().toString().c_str()); DF(" ");
+            VLF(device->getName().c_str());
+            // VLF(device->getRSSI()); // crashes why?
+
+            std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
+
+            VF("MSG: Connect menu, device found "); V(channels.size()); VLF(" services");
+            for (auto const &entry: channels) {
+              VF("MSG: Connect menu, device service "); V(entry.first); VF(" "); VL(entry.second.c_str());
+            }
+
+            selectionCount++;
+            strncat(selection_list, device->getName().c_str(), 16);
+            strncat(selection_list, " bt\n", 16);
+          }
+        } else {
+          VF("MSG: Connect menu, no BT devices found");
+        }
+      } else {
+        VF("MSG: Connect menu, discovery failed no BT devices found");
+      }
+    #endif
+
     selection_list[strlen(selection_list) - 1] = 0;
 
     // show the menu
     if (selectionCount > 0) {
       do {
         current_selection_connect = display->UserInterfaceSelectionList(&keyPad, L_WIFI_SELECT, current_selection_connect, selection_list);
-      } while (current_selection_connect == 0); 
+      } while (current_selection_connect == 0);
     }
 
     VF("MSG: Connect menu, user selected ");
@@ -54,21 +101,61 @@
 
       // flag serial mode
       if (current_selection_connect == 0) {
-        onStep.useWiFiOnly = false;
+        onStep.useWirelessOnly = false;
         VLF("Serial");
       }
     #endif
 
-    if (current_selection_connect > 0 && current_selection_connect <= 3) {
-      current_selection_connect--;
+    #if SERIAL_IP_MODE != OFF
+      if (current_selection_connect > 0 && current_selection_connect <= 3) {
+        current_selection_connect--;
 
-      // flag and start WiFi
-      onStep.useWiFiOnly = true;
-      VF("WiFi "); VL(ssid_cross_index[current_selection_connect]);
-      wifiManager.setStation(ssid_cross_index[current_selection_connect]);
-    } else {
-      VLF("unknown");
-    }
+        // flag and start WiFi
+        onStep.useWirelessOnly = true;
+        VF("WiFi "); VL(ssid_cross_index[current_selection_connect]);
+        wifiManager.setStation(ssid_cross_index[current_selection_connect]);
+      } else {
+        VLF("unknown");
+      }
+    #endif
+
+    #if SERIAL_BT_MODE != OFF
+        VF("MSG: Connect menu, scanning "); V(btDeviceList->getCount()); VLF(" BT devices");
+
+        current_selection_connect--;
+        if (btDeviceList->getCount() >= current_selection_connect) {
+          BTAddress addr;
+          int channel = 0;
+
+          BTAdvertisedDevice *device = btDeviceList->getDevice(current_selection_connect);
+          VF("MSG: Connect menu, selected device ");
+          VF(device->getAddress().toString().c_str()); DF(" ");
+          VLF(device->getName().c_str());
+          // VLF(device->getRSSI()); // crashes?
+
+          std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
+
+          if (channels.size() > 0) {
+            addr = device->getAddress();
+            channel = channels.begin()->first;
+          }
+
+          if (addr) {
+            VF("MSG: Connect menu, connecting to "); V(addr.toString().c_str());
+            VF(" channel "); V(channel); VF("...");
+            if (SERIAL_BT.connect(addr, channel, ESP_SPP_SEC_NONE, ESP_SPP_ROLE_SLAVE)) {
+              VLF(" success");
+              onStep.useWirelessOnly = true;
+            } else {
+              VLF(" failed!");
+              onStep.useWirelessOnly = false;
+            return false;
+            }
+          }
+        }
+    #endif
+
+    return true;
   }
 #endif
 

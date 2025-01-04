@@ -67,8 +67,8 @@ private:
 
   void menuMain();
   void menuFeatureKey();
-  #if SERIAL_IP_MODE != OFF
-    void menuWifi();
+  #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
+    bool menuWireless();
   #endif
   
   MENU_RESULT menuSyncGoto(bool sync);
@@ -139,6 +139,9 @@ private:
   RotState rotState = RS_STOPPED;
   int nextRotMessageUpdateCycles = 0;
 
+  #if SERIAL_BT_MODE != OFF
+    bool bluetoothStarted = false;
+  #endif
   bool firstConnect = true;
   bool hasAuxFeatures = false;
   bool sleepDisplay = false;

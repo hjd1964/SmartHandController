@@ -19,12 +19,12 @@
                                           //         The SSD1309 is often used on 1.54" or 2.3" I2C displays.
 
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
-#define SERIAL_ONSTEP          SERIAL_ST4 // .._ST4, SERIAL_ST4 for ST4 port sync comms, you can instead use any available    Infreq
-                                          //         serial port, Serial1 on a Teensy4.0 for example, or OFF to disable.
-                                          //         This is the serial interface connected to OnStep.
+#define SERIAL_ONSTEP          SERIAL_ST4 // .._ST4, Allow SERIAL_ST4 connections to OnStep using its ST4 port synchronous    Infreq
+                                          //         communications mode.  Or, use Serial/Serial1/etc. for standard
+                                          //         asynchronous serial communications.  Or, use OFF to disable.
 #define SERIAL_ONSTEP_BAUD_DEFAULT   9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
-                                          //         Only used for async serial communication with OnStep.
-#define SERIAL_RADIO                  OFF //    OFF, Or use WIFI_STATION (ESP32 only.)                                        Option
+                                          //         Only used for asynchronous serial communication with OnStep.
+#define SERIAL_RADIO                  OFF //    OFF, Allow BLUETOOTH or WIFI_STATION connections to OnStep (ESP32 only.)      Option
 
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
 #define UTILITY_LIGHT                 OFF //    OFF, n. Where n=0..255 (0..100%) activates feature sets default brightness.   Adjust

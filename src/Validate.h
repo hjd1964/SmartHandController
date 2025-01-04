@@ -21,8 +21,8 @@
   #warning "Configuration (Config.h): Setting SERIAL_ONSTEP_BAUD_DEFAULT unknown, use 9600, 19200, 38400, 57600, 115200, 230400, 460800, or 921600 (baud.)"
 #endif
 
-#if SERIAL_RADIO != OFF && SERIAL_RADIO != WIFI_STATION
-  #warning "Configuration (Config.h): Setting SERIAL_RADIO unknown, use OFF or WIFI_STATION"
+#if SERIAL_RADIO != OFF && SERIAL_RADIO != BLUETOOTH && SERIAL_RADIO != WIFI_STATION
+  #warning "Configuration (Config.h): Setting SERIAL_RADIO unknown, use OFF or BLUETOOTH or WIFI_STATION"
 #endif
 
 #if UTILITY_LIGHT != OFF && (UTILITY_LIGHT < 0 || UTILITY_LIGHT > 255)
