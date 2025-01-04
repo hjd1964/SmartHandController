@@ -815,15 +815,15 @@ queryAgain:
       goto queryAgain;
     } else {
       #if SERIAL_IP_MODE != OFF
-        if (onStep.useWirelessOnly) SERIAL_IP.end();
+        if (onStep.useWirelessOnly) {
+          SERIAL_IP.end();
+          wifiManager.disconnect();
+        }
       #endif
       #if SERIAL_ONSTEP != OFF
         if (!onStep.useWirelessOnly) SERIAL_ONSTEP.end();
       #endif
 
-      #if SERIAL_IP_MODE != OFF
-        if (onStep.useWirelessOnly) wifiManager.disconnect();
-      #endif
       delay(1000);
 
       thisTry = 0;
