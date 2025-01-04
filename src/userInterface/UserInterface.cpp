@@ -108,7 +108,22 @@ void UI::poll() {
   // connect/reconnect
   static unsigned long lastConnectedTime = 0;
   if (!status.connected && (long)(millis() - lastConnectedTime) > 2000) {
-    if (!firstConnect) { message.show(L_LOST_MSG, L_CONNECTION, 1000); }
+    if (!firstConnect) {
+      message.show(L_LOST_MSG, L_CONNECTION, 1000);
+
+      #if SERIAL_IP_MODE != OFF
+        if (onStep.useWirelessOnly) {
+          SERIAL_IP.end();
+          wifiManager.disconnect();
+        }
+      #endif
+      #if SERIAL_BT_MODE != OFF
+       if (onStep.useWirelessOnly) { HAL_RESET(); }
+      #endif
+      #if SERIAL_ONSTEP != OFF
+        if (!onStep.useWirelessOnly) SERIAL_ONSTEP.end();
+      #endif
+    }
     connect();
     firstConnect = false;
   } else lastConnectedTime = millis();
@@ -715,11 +730,15 @@ void UI::connect() {
 
 initAgain:
   #if SERIAL_BT_MODE != OFF
-    SERIAL_BT.begin(SERIAL_BT_NAME, true);
+    static bool btStarted = false;
+    if (!btStarted) {
+      SERIAL_BT.begin(SERIAL_BT_NAME, true);
+      btStarted = true;
+    }
   #endif
 
   #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
-    if (firstConnect) {
+    if (!status.connected) {
       bool success;
       do { success = menuWireless(); } while (!success);
     }

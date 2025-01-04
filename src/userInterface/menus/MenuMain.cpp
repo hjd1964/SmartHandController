@@ -9,12 +9,25 @@
   #endif
 
   bool UI::menuWireless() {
-    static unsigned short current_selection_connect = 1;
+  rescan:
+    display->clearDisplay();
+    display->firstPage(); do {
+      display->drawStr(36, 25, "Scanning");
+      display->drawStr(25, 50, "Please wait...");
+    } while ( display->nextPage() );
 
-    int selectionCount = 0;
-    char selection_list[64] = "";
+    unsigned short current_selection_connect;
+    current_selection_connect = 1;
+
+    int selectionCount;
+    selectionCount = 0;
+
+    char selection_list[240];
+    selection_list[0] = 0;
 
     // build the menu selections
+    selectionCount++;
+    strncat(selection_list, L_REFRESH "\n", 16);
 
     // first serial if it's available
     #if SERIAL_ONSTEP != OFF
@@ -35,10 +48,13 @@
               (WiFi.SSID(ssid).equals(wifiManager.settings.station[i].ssid))) {
             VF("MSG: Connect menu, added "); V(wifiManager.settings.station[i].host);
             VF(" w/SSID "); VL(wifiManager.settings.station[i].ssid);
-            selectionCount++;
-            strncat(selection_list, wifiManager.settings.station[i].host, 16);
-            strncat(selection_list, " wifi\n", 16);
-            ssid_cross_index[matchCount++] = i + 1;
+
+            if (strlen(selection_list) + 17 < sizeof(selection_list)) {
+              selectionCount++;
+              strncat(selection_list, wifiManager.settings.station[i].host, 16);
+              strncat(selection_list, " wifi\n", 16);
+              ssid_cross_index[matchCount++] = i + 1;
+            }
             break;
           }
         }
@@ -61,27 +77,32 @@
         if (btDeviceList->getCount() > 0) {
           for (int i = 0; i < btDeviceList->getCount(); i++) {
             BTAdvertisedDevice *device = btDeviceList->getDevice(i);
-            VF("MSG: Connect menu, device ");
-            VF(device->getAddress().toString().c_str()); DF(" ");
-            VLF(device->getName().c_str());
-            // VLF(device->getRSSI()); // crashes why?
+            if (strlen(device->getName().c_str()) != 0) {
+              VF("MSG: Connect menu, device ");
+              VF(device->getAddress().toString().c_str()); DF(" ");
+              VLF(device->getName().c_str());
+              // VLF(device->getRSSI()); // crashes why?
 
-            std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
+              std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
 
-            VF("MSG: Connect menu, device found "); V(channels.size()); VLF(" services");
-            for (auto const &entry: channels) {
-              VF("MSG: Connect menu, device service "); V(entry.first); VF(" "); VL(entry.second.c_str());
+              VF("MSG: Connect menu, device found "); V(channels.size()); VLF(" services");
+              for (auto const &entry: channels) {
+                VF("MSG: Connect menu, device service "); V(entry.first); VF(" "); VL(entry.second.c_str());
+              }
+
+              if (strlen(selection_list) + 17 < sizeof(selection_list)) {
+                selectionCount++;
+                strncat(selection_list, device->getName().c_str(), 16);
+                strncat(selection_list, " bt\n", 16);
+              }
             }
-
-            selectionCount++;
-            strncat(selection_list, device->getName().c_str(), 16);
-            strncat(selection_list, " bt\n", 16);
           }
         } else {
-          VF("MSG: Connect menu, no BT devices found");
+          VLF("MSG: Connect menu, no BT devices found");
         }
       } else {
-        VF("MSG: Connect menu, discovery failed no BT devices found");
+        VLF("");
+        VLF("MSG: Connect menu, discovery failed no BT devices found");
       }
     #endif
 
@@ -95,6 +116,13 @@
     }
 
     VF("MSG: Connect menu, user selected ");
+
+    // check for re-scan
+    current_selection_connect--;
+    if (current_selection_connect == 0) {
+      VLF("Re-scan");
+      goto rescan;
+    } else
 
     #if SERIAL_ONSTEP != OFF
       current_selection_connect--;
@@ -148,7 +176,7 @@
           } else {
             VLF(" failed!");
             onStep.useWirelessOnly = false;
-          return false;
+            return false;
           }
         }
       } else
