@@ -131,7 +131,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
       #endif
 
       if (available) {
-        int length;
+        int length = 0;
         #if SERIAL_IP_MODE != OFF
           if (useWirelessOnly) length = SERIAL_IP.readBytes(response, 1);
         #endif
@@ -154,7 +154,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
     int responsePos = 0;
     char b = 0;
     while ((long)(timeout - millis()) > 0 && b != '#') {
-      int available;
+      int available = 0;
       #if SERIAL_IP_MODE != OFF
         if (useWirelessOnly) available = SERIAL_IP.available();
       #endif
