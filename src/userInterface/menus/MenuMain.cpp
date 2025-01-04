@@ -27,12 +27,12 @@
 
     // build the menu selections
     selectionCount++;
-    strncat(selection_list, L_REFRESH "\n", 16);
+    strcat(selection_list, L_REFRESH "\n");
 
     // first serial if it's available
     #if SERIAL_ONSTEP != OFF
       selectionCount++;
-      strncat(selection_list, "Serial\n", 16);
+      strcat(selection_list, "Serial\n");
     #endif
 
     #if SERIAL_IP_MODE != OFF
@@ -49,10 +49,10 @@
             VF("MSG: Connect menu, added "); V(wifiManager.settings.station[i].host);
             VF(" w/SSID "); VL(wifiManager.settings.station[i].ssid);
 
-            if (strlen(selection_list) + 17 < sizeof(selection_list)) {
+            if (strlen(selection_list) + 18 < sizeof(selection_list)) {
               selectionCount++;
-              strncat(selection_list, wifiManager.settings.station[i].host, 16);
-              strncat(selection_list, " wifi\n", 16);
+              strncat(selection_list, wifiManager.settings.station[i].host, 12);
+              strcat(selection_list, " wifi\n");
               ssid_cross_index[matchCount++] = i + 1;
             }
             break;
@@ -90,10 +90,10 @@
                 VF("MSG: Connect menu, device service "); V(entry.first); VF(" "); VL(entry.second.c_str());
               }
 
-              if (strlen(selection_list) + 17 < sizeof(selection_list)) {
+              if (strlen(selection_list) + 18 < sizeof(selection_list)) {
                 selectionCount++;
-                strncat(selection_list, device->getName().c_str(), 16);
-                strncat(selection_list, " bt\n", 16);
+                strncat(selection_list, device->getName().c_str(), 14);
+                strcat(selection_list, " bt\n");
               }
             }
           }
@@ -182,7 +182,9 @@
       } else
     #endif
 
-    VLF("unknown");
+    {
+      VLF("unknown");
+    }
 
     return true;
   }
