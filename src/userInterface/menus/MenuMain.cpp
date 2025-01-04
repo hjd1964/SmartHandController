@@ -103,7 +103,7 @@
       if (current_selection_connect == 0) {
         onStep.useWirelessOnly = false;
         VLF("Serial");
-      }
+      } else
     #endif
 
     #if SERIAL_IP_MODE != OFF
@@ -114,46 +114,47 @@
         onStep.useWirelessOnly = true;
         VF("WiFi "); VL(ssid_cross_index[current_selection_connect]);
         wifiManager.setStation(ssid_cross_index[current_selection_connect]);
-      } else {
-        VLF("unknown");
-      }
+      } else
     #endif
 
     #if SERIAL_BT_MODE != OFF
-        VF("MSG: Connect menu, scanning "); V(btDeviceList->getCount()); VLF(" BT devices");
-
+      if (btDeviceList->getCount() >= current_selection_connect - 1) {
         current_selection_connect--;
-        if (btDeviceList->getCount() >= current_selection_connect) {
-          BTAddress addr;
-          int channel = 0;
+        VF("Bluetooth "); VL(current_selection_connect);
+        
+        VF("MSG: Connect menu, scanning "); V(btDeviceList->getCount()); VLF(" BT devices");
+        BTAddress addr;
+        int channel = 0;
 
-          BTAdvertisedDevice *device = btDeviceList->getDevice(current_selection_connect);
-          VF("MSG: Connect menu, selected device ");
-          VF(device->getAddress().toString().c_str()); DF(" ");
-          VLF(device->getName().c_str());
-          // VLF(device->getRSSI()); // crashes?
+        BTAdvertisedDevice *device = btDeviceList->getDevice(current_selection_connect);
+        VF("MSG: Connect menu, selected device ");
+        VF(device->getAddress().toString().c_str()); DF(" ");
+        VLF(device->getName().c_str());
+        // VLF(device->getRSSI()); // crashes?
 
-          std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
+        std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
 
-          if (channels.size() > 0) {
-            addr = device->getAddress();
-            channel = channels.begin()->first;
-          }
+        if (channels.size() > 0) {
+          addr = device->getAddress();
+          channel = channels.begin()->first;
+        }
 
-          if (addr) {
-            VF("MSG: Connect menu, connecting to "); V(addr.toString().c_str());
-            VF(" channel "); V(channel); VF("...");
-            if (SERIAL_BT.connect(addr, channel, ESP_SPP_SEC_NONE, ESP_SPP_ROLE_SLAVE)) {
-              VLF(" success");
-              onStep.useWirelessOnly = true;
-            } else {
-              VLF(" failed!");
-              onStep.useWirelessOnly = false;
-            return false;
-            }
+        if (addr) {
+          VF("MSG: Connect menu, connecting to "); V(addr.toString().c_str());
+          VF(" channel "); V(channel); VF("...");
+          if (SERIAL_BT.connect(addr, channel, ESP_SPP_SEC_NONE, ESP_SPP_ROLE_SLAVE)) {
+            VLF(" success");
+            onStep.useWirelessOnly = true;
+          } else {
+            VLF(" failed!");
+            onStep.useWirelessOnly = false;
+          return false;
           }
         }
+      } else
     #endif
+
+    VLF("unknown");
 
     return true;
   }
