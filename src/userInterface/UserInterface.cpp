@@ -108,22 +108,7 @@ void UI::poll() {
   // connect/reconnect
   static unsigned long lastConnectedTime = 0;
   if (!status.connected && (long)(millis() - lastConnectedTime) > 2000) {
-    if (!firstConnect) {
-      message.show(L_LOST_MSG, L_CONNECTION, 1000);
-
-      #if SERIAL_IP_MODE != OFF
-        if (onStep.useWirelessOnly) {
-          SERIAL_IP.end();
-          wifiManager.disconnect();
-        }
-      #endif
-      #if SERIAL_BT_MODE != OFF
-       if (onStep.useWirelessOnly) { HAL_RESET(); }
-      #endif
-      #if SERIAL_ONSTEP != OFF
-        if (!onStep.useWirelessOnly) SERIAL_ONSTEP.end();
-      #endif
-    }
+    if (!firstConnect) message.show(L_LOST_MSG, L_CONNECTION, 1000);
     connect();
     firstConnect = false;
   } else lastConnectedTime = millis();
@@ -724,25 +709,33 @@ bool UI::SelectStarAlign() {
 }
 
 void UI::connect() {
-  char s[20] = "";
-  int thisTry = 0;
-  bool connectSuccess;
 
 initAgain:
-  #if SERIAL_BT_MODE != OFF
-    static bool btStarted = false;
-    if (!btStarted) {
-      SERIAL_BT.begin(SERIAL_BT_NAME, true);
-      btStarted = true;
-    }
-  #endif
+  // count down reconnect attempts
+  if (--skipConnectMenu < 0) skipConnectMenu = 0;
+
+  if (!skipConnectMenu && !firstConnect) {
+    #if SERIAL_IP_MODE != OFF
+      if (onStep.useWirelessOnly) {
+        SERIAL_IP.end();
+        wifiManager.disconnect();
+      }
+    #endif
+    #if SERIAL_BT_MODE != OFF
+      if (onStep.useWirelessOnly) { HAL_RESET(); }
+    #endif
+    #if SERIAL_ONSTEP != OFF
+      if (!onStep.useWirelessOnly) SERIAL_ONSTEP.end();
+    #endif
+  }
 
   #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
-    if (!status.connected) {
+    if (!skipConnectMenu) {
       bool success;
       do { success = menuWireless(); } while (!success);
     }
   #endif
+
   initGuideCommands();
 
   #if SERIAL_IP_MODE != OFF
@@ -756,7 +749,7 @@ initAgain:
           VLF("MSG: Connect, WiFi restarting");
           message.show(L_WIFI_CONNECTION2, wifiManager.sta->ssid, 100);
         }
-        delay(1000);
+        delay(500);
         if (!wifiManager.init()) initSuccess = false;
 
         if (!initSuccess) {
@@ -769,11 +762,16 @@ initAgain:
     }
   #endif
 
-  connectSuccess = true;
   #if SERIAL_IP_MODE != OFF
     if (onStep.useWirelessOnly) {
       message.show(L_CONNECTING, IPAddress(wifiManager.sta->target).toString().c_str(), 1000);
-      if (!SERIAL_IP.begin(serialBaud)) connectSuccess = false;
+      if (!SERIAL_IP.begin(serialBaud)) {
+        VLF("MSG: Connect, to target failed");
+        wifiManager.disconnect();
+        delay(2000);
+        message.show(L_CONNECTING, L_FAILED, 2000);
+        goto initAgain;
+      }
     }
   #endif
   #if SERIAL_ONSTEP != OFF
@@ -786,14 +784,31 @@ initAgain:
     }
   #endif
 
-  if (!connectSuccess) {
-    VLF("MSG: Connect, to target failed");
+  VLF("MSG: Connect, looking for OnStep...");
 
-    #if SERIAL_BT_MODE != OFF
-      if (onStep.useWirelessOnly) {
-        SERIAL_BT.end();
-      }
+  onStepContactTry = 0;
+
+queryAgain:
+  if (onStepContactTry % 1 == 0) message.show(L_LOOKING, "OnStep", 500); else message.show(L_LOOKING, "...", 500);
+
+  for (int i = 0; i < 3; i++) {
+    delay(100);
+    onStepLx200.SetF(":#");
+
+    delay(300);
+    #if SERIAL_IP_MODE != OFF
+      if (onStep.useWirelessOnly) SERIAL_IP.flush();
     #endif
+    #if SERIAL_ONSTEP != OFF
+      if (!onStep.useWirelessOnly) SERIAL_ONSTEP.flush();
+    #endif
+  }
+
+  char s[80] = "";
+  CMD_RESULT r = onStepLx200.Get(":GVP#", s);
+  if (r != CR_VALUE_GET || !strstr(s, "On-Step")) {
+    if (++onStepContactTry < 3) goto queryAgain;
+
     #if SERIAL_IP_MODE != OFF
       if (onStep.useWirelessOnly) {
         SERIAL_IP.end();
@@ -804,83 +819,49 @@ initAgain:
       if (!onStep.useWirelessOnly) SERIAL_ONSTEP.end();
     #endif
 
-    delay(7000);
+    delay(1000);
 
-    message.show(L_CONNECTING, L_FAILED, 2000);
     goto initAgain;
-  }
-
-  VLF("MSG: Connect, looking for OnStep...");
-
-queryAgain:
-  if (thisTry % 1 == 0) message.show(L_LOOKING, "OnStep", 1000); else message.show(L_LOOKING, "...", 1000);
-
-  for (int i = 0; i < 3; i++) {
-    delay(100);
-    onStepLx200.SetF(":#");
-
-    delay(400);
-    #if SERIAL_IP_MODE != OFF
-      if (onStep.useWirelessOnly) SERIAL_IP.flush();
-    #endif
-    #if SERIAL_ONSTEP != OFF
-      if (!onStep.useWirelessOnly) SERIAL_ONSTEP.flush();
-    #endif
-  }
-
-  CMD_RESULT r = onStepLx200.Get(":GVP#", s);
-  if (r != CR_VALUE_GET || !strstr(s, "On-Step")) {
-    if (++thisTry % 3 != 0) {
-      goto queryAgain;
-    } else {
-      #if SERIAL_IP_MODE != OFF
-        if (onStep.useWirelessOnly) {
-          SERIAL_IP.end();
-          wifiManager.disconnect();
-        }
-      #endif
-      #if SERIAL_ONSTEP != OFF
-        if (!onStep.useWirelessOnly) SERIAL_ONSTEP.end();
-      #endif
-
-      delay(1000);
-
-      thisTry = 0;
-      goto initAgain;
-    }
   }
 
   VLF("MSG: Connect, found OnStep");
 
+  #if SERIAL_ONSTEP != OFF
+    if (!onStep.useWirelessOnly) skipConnectMenu = 2;
+  #endif
+  #if SERIAL_IP_MODE != OFF
+    if (onStep.useWirelessOnly) skipConnectMenu = 3;
+  #endif
+  #if SERIAL_BT_MODE != OFF
+    if (onStep.useWirelessOnly) skipConnectMenu = 2;
+  #endif
+
 again2:
-  delay(1000);
+  delay(500);
 
   // OnStep coordinate mode for getting and setting RA/Dec
   // 0 = OBSERVED_PLACE (same as not supported)
   // 1 = TOPOCENTRIC (does refraction)
   // 2 = ASTROMETRIC_J2000 (does refraction and precession/nutation)
-  thisTry = 0;
+  onStepContactTry = 0;
   if (onStepLx200.Get(":GXEE#", s) == CR_VALUE_GET && s[0] >= '0' && s[0] <= '3' && s[1] == 0) {
     if (s[0] == '0') {
       VLF("MSG: Connect, coords Observed Place");
       telescopeCoordinates = OBSERVED_PLACE; 
-      message.show(L_CONNECTION, L_OK "!", 1000);
-      status.connected = true;
+      message.show(L_CONNECTION, L_OK "!", 500);
     } else 
     if (s[0] == '1') {
       VLF("MSG: Connect, coords Topocentric");
       telescopeCoordinates = TOPOCENTRIC; 
-      message.show(L_CONNECTION, L_OK "!", 1000);
-      status.connected = true;
+      message.show(L_CONNECTION, L_OK "!", 500);
     } else 
     if (s[0] == '2') {
       VLF("MSG: Connect, coords J2000");
       telescopeCoordinates = ASTROMETRIC_J2000;
-      message.show(L_CONNECTION, L_OK "!", 1000);
-      status.connected = true;
+      message.show(L_CONNECTION, L_OK "!", 500);
     }
   } else {
-    if (++thisTry <= 3) goto again2;
+    if (++onStepContactTry <= 3) goto again2;
     VLF("WRN: Connect, get coords failed");
     VLF("MSG: Connect, fallback Observed Place");
     telescopeCoordinates = OBSERVED_PLACE;

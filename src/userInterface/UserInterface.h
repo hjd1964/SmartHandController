@@ -143,6 +143,8 @@ private:
     bool bluetoothStarted = false;
   #endif
   bool firstConnect = true;
+  int skipConnectMenu = 1;
+  int onStepContactTry;
   bool hasAuxFeatures = false;
   bool sleepDisplay = false;
   bool lowContrast = false;

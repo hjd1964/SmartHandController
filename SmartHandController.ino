@@ -78,6 +78,9 @@ void setup(void) {
   VF("MSG: MCU = "); VLF(MCU_STR);
   
   HAL_INIT();
+  #if SERIAL_BT_MODE != OFF
+    SERIAL_BT.begin(SERIAL_BT_NAME, true);
+  #endif
   nv.init();
   
   // System services
