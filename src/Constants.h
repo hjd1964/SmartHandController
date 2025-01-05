@@ -5,6 +5,8 @@
 // misc.
 #define PROD_ABV                    "SHC" // Friendly three letter product abbreviation
 
+#define TASKS_HWTIMERS              1
+
 #define METRIC                      -200
 #define IMPERIAL                    -201
 #define LOCALE_DEFAULT              -202
