@@ -3,7 +3,7 @@
 
 #include "Cmd.h"
 
-#include "..\..\lib\tasks\OnTask.h"
+#include "../../lib/tasks/OnTask.h"
 
 // smart LX200 aware command and response (up to 80 chars) over serial
 bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) {
