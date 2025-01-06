@@ -90,7 +90,7 @@
 // a really short fixed delay (none needed)
 #define HAL_DELAY_25NS()
 
-#ifdef ARDUINO_ESP32C3_DEV
+#ifdef CONFIG_IDF_TARGET_ESP32C3
   // stand-in for delayNanoseconds(), assumes 80MHz clock
   #define delayNanoseconds(ns) { unsigned int c = ESP.getCycleCount() + ns/12.5F; do {} while ((int)(ESP.getCycleCount() - c) < 0); }
 #else
