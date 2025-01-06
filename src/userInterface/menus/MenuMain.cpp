@@ -124,9 +124,9 @@
       VLF("Re-scan");
       goto rescan;
     }
-    current_selection_connect--;
 
     #if SERIAL_ONSTEP != OFF
+      current_selection_connect--;
       if (current_selection_connect == 0) {
         onStep.connectionMode = CM_SERIAL;
         VLF("Serial");
