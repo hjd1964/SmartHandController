@@ -15,6 +15,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
       SERIAL_IP.setTimeout(timeOutMs);
       while (SERIAL_IP.available() > 0) SERIAL_IP.read();
       SERIAL_IP.print(cmd);
+      SERIAL_IP.flush();
     }
   #endif
   #if SERIAL_BT_MODE != OFF
@@ -23,6 +24,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
       SERIAL_BT.setTimeout(timeOutMs);
       while (SERIAL_BT.available() > 0) SERIAL_BT.read();
       SERIAL_BT.print(cmd);
+      SERIAL_BT.flush();
     }
   #endif
   #if SERIAL_ONSTEP != OFF
@@ -31,6 +33,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
       SERIAL_ONSTEP.setTimeout(timeOutMs);
       while (SERIAL_ONSTEP.available() > 0) SERIAL_ONSTEP.read();
       SERIAL_ONSTEP.print(cmd);
+      SERIAL_ONSTEP.flush();
     }
   #endif
 
