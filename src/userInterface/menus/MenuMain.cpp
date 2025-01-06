@@ -12,8 +12,8 @@
   rescan:
     display->clearDisplay();
     display->firstPage(); do {
-      display->drawStr(36, 25, "Scanning");
-      display->drawStr(25, 50, "Please wait...");
+      display->drawStr(33, 25, "Scanning");
+      display->drawStr(22, 50, "Please wait...");
     } while ( display->nextPage() );
 
     unsigned short current_selection_connect;
@@ -21,6 +21,8 @@
 
     int selectionCount;
     selectionCount = 0;
+    int ssidMatchCount = 0;
+    UNUSED(ssidMatchCount);
 
     char selection_list[240];
     selection_list[0] = 0;
@@ -41,7 +43,6 @@
       VF("MSG: Connect menu, found "); V(ssidCount); VLF(" WiFi networks");
 
       // then any matching SSID's for active SHC WiFi stations
-      int matchCount = 0;
       for (int i = 0; i < 3; i++) {
         for (int ssid = 0; ssid < ssidCount; ssid++) {
           if ((strlen(wifiManager.settings.station[i].host) > 0) &&
@@ -51,9 +52,9 @@
 
             if (strlen(selection_list) + 18 < sizeof(selection_list)) {
               selectionCount++;
-              strncat(selection_list, wifiManager.settings.station[i].host, 12);
-              strcat(selection_list, " wifi\n");
-              ssid_cross_index[matchCount++] = i + 1;
+              strncat(selection_list, wifiManager.settings.station[i].host, 14);
+              strcat(selection_list, " ip\n");
+              ssid_cross_index[ssidMatchCount++] = i + 1;
             }
             break;
           }
@@ -122,32 +123,30 @@
     if (current_selection_connect == 0) {
       VLF("Re-scan");
       goto rescan;
-    } else
+    }
+    current_selection_connect--;
 
     #if SERIAL_ONSTEP != OFF
-      current_selection_connect--;
-
-      // flag serial mode
       if (current_selection_connect == 0) {
-        onStep.useWirelessOnly = false;
+        onStep.connectionMode = CM_SERIAL;
         VLF("Serial");
       } else
     #endif
 
     #if SERIAL_IP_MODE != OFF
-      if (current_selection_connect > 0 && current_selection_connect <= 3) {
+      if (current_selection_connect > 0 && current_selection_connect <= ssidMatchCount) {
         current_selection_connect--;
 
         // flag and start WiFi
-        onStep.useWirelessOnly = true;
+        onStep.connectionMode = CM_WIFI;
         VF("WiFi "); VL(ssid_cross_index[current_selection_connect]);
         wifiManager.setStation(ssid_cross_index[current_selection_connect]);
       } else
     #endif
 
     #if SERIAL_BT_MODE != OFF
-      if (btDeviceList->getCount() >= current_selection_connect - 1) {
-        current_selection_connect--;
+      if (btDeviceList->getCount() >= current_selection_connect - (ssidMatchCount + 1)) {
+        current_selection_connect = current_selection_connect - (ssidMatchCount + 1);
         VF("Bluetooth "); VL(current_selection_connect);
         
         VF("MSG: Connect menu, scanning "); V(btDeviceList->getCount()); VLF(" BT devices");
@@ -172,11 +171,10 @@
           VF(" channel "); V(channel); VF("...");
           if (SERIAL_BT.connect(addr, channel, ESP_SPP_SEC_NONE, ESP_SPP_ROLE_SLAVE)) {
             VLF(" success");
-            onStep.useWirelessOnly = true;
+            onStep.connectionMode = CM_BLUETOOTH;
           } else {
             VLF(" failed!");
-            onStep.useWirelessOnly = false;
-            return false;
+            goto rescan;
           }
         }
       } else

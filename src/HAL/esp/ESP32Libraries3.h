@@ -66,10 +66,6 @@
   #define SERIAL_BT_BEGIN()
 #endif
 
-#if (SERIAL_BT_MODE != OFF) && (defined(SERIAL_IP_MODE) && SERIAL_IP_MODE != OFF)
-  #error "Configuration (Config.h): SERIAL_BT_MODE and SERIAL_IP_MODE can't be enabled at the same time, disable one or both options."
-#endif
-
 #define HAL_INIT() { \
   analogReadResolution((int)log2(ANALOG_READ_RANGE + 1)); \
   SERIAL_BT_BEGIN(); \

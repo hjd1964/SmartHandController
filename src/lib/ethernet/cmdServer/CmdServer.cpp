@@ -52,7 +52,7 @@
       if (b == '#' || (strlen(cmdBuffer) == 1 && b == (char)6)) {
         char result[40] = "";
 
-        onStep.processCommand(cmdBuffer, result, cmdTimeout);
+        onStep.processCommand(cmdBuffer, result, TIMEOUT_CMD);
 
         // pickup response
         if (strlen(result) > 0) {

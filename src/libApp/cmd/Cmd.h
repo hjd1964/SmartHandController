@@ -12,6 +12,7 @@ enum CommandErrors {
   CE_SLEW_ERR_IN_PARK, CE_GOTO_ERR_GOTO, CE_GOTO_ERR_OUTSIDE_LIMITS, CE_SLEW_ERR_HARDWARE_FAULT,
   CE_MOUNT_IN_MOTION, CE_GOTO_ERR_UNSPECIFIED, CE_NULL};
 
+enum ConnectionMode {CM_NONE, CM_SERIAL, CM_WIFI, CM_BLUETOOTH};
 
 class OnStepCmd {
   public:
@@ -21,15 +22,9 @@ class OnStepCmd {
     // writes command directly to buffer
     void commandDirect(const char* command);
 
-    bool useWirelessOnly = false;
+    ConnectionMode connectionMode = CM_NONE;
 
   private:
 };
-
-// timeout period for the web
-extern int webTimeout;
-
-// timeout period for the command channel(s)
-extern int cmdTimeout;
 
 extern OnStepCmd onStep;

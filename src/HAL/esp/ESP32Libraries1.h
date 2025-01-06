@@ -66,10 +66,6 @@
   #define SERIAL_BT_BEGIN()
 #endif
 
-#if (defined(SERIAL_BT_MODE) && SERIAL_BT_MODE != OFF) && (defined(SERIAL_IP_MODE) && SERIAL_IP_MODE != OFF)
-  #error "Configuration (Config.h): SERIAL_BT_MODE and SERIAL_IP_MODE can't be enabled at the same time, disable one or both options."
-#endif
-
 #ifndef ANALOG_READ_RANGE
   #define ANALOG_READ_RANGE 4095
 #endif
