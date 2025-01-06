@@ -7,7 +7,12 @@
 
 class KeyPad {
 public:
-  void init(const int pin[7], const int active[7], int thresholdNS, int thresholdEW);
+  struct Pin {
+    int pinNumber;
+    int activeState;
+    int inputMode;
+  };
+  void init(const Pin pins[7], int thresholdNS, int thresholdEW);
 
   void poll();
   bool anyPressed();

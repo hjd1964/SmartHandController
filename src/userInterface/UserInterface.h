@@ -48,7 +48,7 @@ typedef struct DisplaySettings {
 
 class UI {
 public:
-  void init(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model);
+  void init(const char version[], const KeyPad::Pin pins[7], const int SerialBaud, const OLED model);
 
   void connect();
   void drawIntro();

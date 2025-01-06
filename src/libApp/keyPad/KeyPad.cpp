@@ -2,29 +2,29 @@
 // Button pad
 #include "KeyPad.h"
 
-void KeyPad::init(const int pin[7], const int active[7], int thresholdNS, int thresholdEW) {
+void KeyPad::init(const Pin pins[7], int thresholdNS, int thresholdEW) {
   if (ready) return;
 
   if (thresholdNS == 0 && thresholdEW == 0) {
-    shift = new Button(pin[0], INPUT_PULLUP, active[0] | HYST(debounceMs));
-    n     = new Button(pin[1], INPUT_PULLUP, active[1] | HYST(debounceMs));
-    s     = new Button(pin[2], INPUT_PULLUP, active[2] | HYST(debounceMs));
-    e     = new Button(pin[3], INPUT_PULLUP, active[3] | HYST(debounceMs));
-    w     = new Button(pin[4], INPUT_PULLUP, active[4] | HYST(debounceMs));
-    F     = new Button(pin[5], INPUT_PULLUP, active[5] | HYST(debounceMs));
-    f     = new Button(pin[6], INPUT_PULLUP, active[6] | HYST(debounceMs));
+    shift = new Button(pins[0].pinNumber, pins[0].inputMode, pins[0].activeState | HYST(debounceMs));
+    n     = new Button(pins[1].pinNumber, pins[1].inputMode, pins[1].activeState | HYST(debounceMs));
+    s     = new Button(pins[2].pinNumber, pins[2].inputMode, pins[2].activeState | HYST(debounceMs));
+    e     = new Button(pins[3].pinNumber, pins[3].inputMode, pins[3].activeState | HYST(debounceMs));
+    w     = new Button(pins[4].pinNumber, pins[4].inputMode, pins[4].activeState | HYST(debounceMs));
+    F     = new Button(pins[5].pinNumber, pins[5].inputMode, pins[5].activeState | HYST(debounceMs));
+    f     = new Button(pins[6].pinNumber, pins[6].inputMode, pins[6].activeState | HYST(debounceMs));
   } else {
-    int active1 = active[1];
-    int active3 = active[3];
+    int active1 = pins[1].activeState;
+    int active3 = pins[3].activeState;
     if (active1 == LOW) active1 = HIGH; else if (active1 == HIGH) active1 = LOW;
     if (active3 == LOW) active3 = HIGH; else if (active3 == HIGH) active3 = LOW;
-    shift = new Button(pin[0], INPUT_PULLUP, active[0] | HYST(debounceMs));
-    n     = new Button(pin[1], INPUT_PULLUP, active1   | THLD(thresholdNS) | HYST(KEYPAD_JOYSTICK_HYSTERESIS));
-    s     = new Button(pin[2], INPUT_PULLUP, active[2] | THLD(thresholdNS) | HYST(KEYPAD_JOYSTICK_HYSTERESIS));
-    e     = new Button(pin[3], INPUT_PULLUP, active3   | THLD(thresholdEW) | HYST(KEYPAD_JOYSTICK_HYSTERESIS));
-    w     = new Button(pin[4], INPUT_PULLUP, active[4] | THLD(thresholdEW) | HYST(KEYPAD_JOYSTICK_HYSTERESIS));
-    F     = new Button(pin[5], INPUT_PULLUP, active[5] | HYST(debounceMs));
-    f     = new Button(pin[6], INPUT_PULLUP, active[6] | HYST(debounceMs));
+    shift = new Button(pins[0].pinNumber, pins[0].inputMode, pins[0].activeState | HYST(debounceMs));
+    n     = new Button(pins[1].pinNumber, pins[1].inputMode, active1   | THLD(thresholdNS) | HYST(KEYPAD_JOYSTICK_HYSTERESIS));
+    s     = new Button(pins[2].pinNumber, pins[2].inputMode, pins[2].activeState | THLD(thresholdNS) | HYST(KEYPAD_JOYSTICK_HYSTERESIS));
+    e     = new Button(pins[3].pinNumber, pins[3].inputMode, active3   | THLD(thresholdEW) | HYST(KEYPAD_JOYSTICK_HYSTERESIS));
+    w     = new Button(pins[4].pinNumber, pins[4].inputMode, pins[4].activeState | THLD(thresholdEW) | HYST(KEYPAD_JOYSTICK_HYSTERESIS));
+    F     = new Button(pins[5].pinNumber, pins[5].inputMode, pins[5].activeState | HYST(debounceMs));
+    f     = new Button(pins[6].pinNumber, pins[6].inputMode, pins[6].activeState | HYST(debounceMs));
   }
 
   ready = true;
