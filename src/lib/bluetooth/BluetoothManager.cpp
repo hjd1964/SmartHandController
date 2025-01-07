@@ -25,7 +25,7 @@ bool BluetoothManager::init() {
     VF("MSG: Bluetooth, Station#     = "); VL(stationNumber);
     VF("MSG: Bluetooth, Station Name = "); VL(sta->host);
     VF("MSG: Bluetooth, Station MAC  = "); VL(sta->address);
-    VF("MSG: Bluetooth, Station PIN  = "); VL(sta->pin);
+    VF("MSG: Bluetooth, Station KEY  = "); VL(sta->passkey);
 
     active = true;
   }
