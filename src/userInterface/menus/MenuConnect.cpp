@@ -39,11 +39,12 @@
     selectionList[0] = 0;
     for (int i = 0; i < crossIndexSize; i++) crossIndex[i].code = CI_NONE;
 
-    if (showEditList)
+    if (showEditList) {
       strcpy(current_title, L_WIFI_SELECT_EDIT);
-    else {
+      message.show(L_UPDATING, L_PLEASE_WAIT "...", 250);
+    } else {
       strcpy(current_title, L_WIFI_SELECT);
-      message.show(L_SCANNING_LINE1, L_SCANNING_LINE2, 10);
+      message.show(L_SCANNING, L_PLEASE_WAIT "...", 10);
     }
 
     // first serial if it's available
@@ -124,13 +125,15 @@
             if (strlen(device->getName().c_str()) != 0) {
               VF("MSG: Connect menu, BT ADDR ");
               VF(device->getAddress().toString().c_str()); VF(" ("); V(device->getName().c_str());
-
               // VLF(device->getRSSI()); // crashes why?
-              std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
-              VF(" "); V(channels.size()); VF(" svcs -");
-              for (auto const &entry: channels) {
-                UNUSED(entry);
-                VF(" "); V(entry.first); VF(":"); V(entry.second.c_str());
+
+              if (DEBUG != OFF) {
+                std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
+                VF(" "); V(channels.size()); VF(" svcs -");
+                for (auto const &entry: channels) {
+                  UNUSED(entry);
+                  VF(" "); V(entry.first); VF(":"); V(entry.second.c_str());
+                }
               }
 
               VF(") ");
@@ -196,7 +199,6 @@
 
     #if SERIAL_IP_MODE != OFF
       if (crossIndex[userSelection].code == CI_IP_LIST_INDEX) {
-        onStep.connectionMode = CM_WIFI;
         VF("WiFi "); VL(crossIndex[userSelection].index);
 
         VF("MSG: Connect menu, selected device SSID ");
@@ -226,6 +228,7 @@
         goto rescan;
       } else
       if (crossIndex[userSelection].code == CI_BT_STATION_INDEX) {
+        VF("Bluetooth station "); VL(crossIndex[userSelection].index);
 
         VF("MSG: Connect menu, scanning "); V(btDeviceList->getCount()); VLF(" BT devices");
 
@@ -270,15 +273,17 @@
     #endif
 
     if (userSelection == showAllSelection) {
-      VLF("Showing all for editing");
+      VLF("showing all for editing");
       showEditList = true;
       goto rescan;
     } else
 
     if (userSelection == 0) {
       if (showEditList) {
-        VLF("Showing known");
+        VLF("show known");
         showEditList = false;
+      } else {
+        VLF("refresh");
       }
       goto rescan;
     } else

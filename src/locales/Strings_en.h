@@ -29,8 +29,9 @@
 #define L_DAYS "Days"
 #define L_SHOW_EDIT "- Edit -"
 #define L_SHOW_KNOWN "- Show Known -"
-#define L_SCANNING_LINE1 "Scanning"
-#define L_SCANNING_LINE2 "Please wait..."
+#define L_UPDATING "Updating"
+#define L_SCANNING "Scanning"
+#define L_PLEASE_WAIT "Please wait"
 
 // common abbreviations
 #define L_TELESCOPE "Scope" // telescope
