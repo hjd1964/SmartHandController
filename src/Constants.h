@@ -3,8 +3,6 @@
 #pragma once
 
 // misc.
-#define PROD_ABV                    "SHC" // Friendly three letter product abbreviation
-
 #define TASKS_HWTIMERS              1
 
 #define METRIC                      -200
