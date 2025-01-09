@@ -888,7 +888,7 @@ void UI::initGuideCommands() {
   // SerialST4 always returns 0 "may block", Teensy and ESP32 always return > 0
   bool useFastGuides = false;
   #if SERIAL_ONSTEP != OFF
-    if (onStep.connectionMode && SERIAL_ONSTEP.availableForWrite() == 0) useFastGuides = true;
+    if (onStep.connectionMode == CM_SERIAL && SERIAL_ONSTEP.availableForWrite() == 0) useFastGuides = true;
   #endif
 
   if (useFastGuides) {
