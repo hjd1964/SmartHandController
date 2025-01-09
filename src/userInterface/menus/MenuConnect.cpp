@@ -161,8 +161,6 @@
 
             }
           }
-        } else {
-          VLF("MSG: Connect menu, no BT devices found");
         }
       } else {
         VLF("");
