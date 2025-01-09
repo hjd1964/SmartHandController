@@ -32,7 +32,7 @@ bool WifiManager::init() {
         IPAddress(wifiManager.sta->target) = ip;
         VF("MSG: WiFi, host name "); V(wifiManager.sta->host); VF(" resolved to "); VL(ip.toString().c_str());
       } else {
-        VLF("MSG: WiFi, host name resolution failed!");
+        VLF("MSG: WiFi, host name "); V(wifiManager.sta->host); VF(" resolution failed!");
         VLF("MSG: WiFi, falling back to static target IP");
       }
     }
