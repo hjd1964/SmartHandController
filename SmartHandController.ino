@@ -52,7 +52,7 @@ const int pin[7] = {B_PIN0, B_PIN1, B_PIN2, B_PIN3, B_PIN4, B_PIN5, B_PIN6};
 const int active[7] = {B_PIN0_ACTIVE_STATE, B_PIN1_ACTIVE_STATE, B_PIN2_ACTIVE_STATE, B_PIN3_ACTIVE_STATE, B_PIN4_ACTIVE_STATE, B_PIN5_ACTIVE_STATE, B_PIN6_ACTIVE_STATE};
 
 void systemServices() {
-  nv.poll();
+  nv.poll(false);
 }
 
 #if WEATHER != OFF
@@ -78,15 +78,15 @@ void setup(void) {
   VF("MSG: MCU = "); VLF(MCU_STR);
   
   HAL_INIT();
-  #if SERIAL_BT_MODE != OFF
-    SERIAL_BT.begin(SERIAL_BT_NAME, true);
-  #endif
-  nv.init();
-  
+  if (!nv.init()) {
+    DLF("WRN: Setup, NV (EEPROM/FRAM/Flash/etc.) device not found!");
+    nv.initError = true;
+  }
+ 
   // System services
   // add task for system services, runs at 10ms intervals so commiting 1KB of NV takes about 10 seconds
   VF("MSG: Setup, starting system services task (rate 10ms priority 7)... ");
-  if (tasks.add(10, 0, true, 7, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
+  if (tasks.add(10, 0, true, 5, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
   userInterface.init(Version, pin, active, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<OLED>(DISPLAY_OLED));
 

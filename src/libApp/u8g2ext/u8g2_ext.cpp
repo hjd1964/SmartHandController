@@ -19,9 +19,20 @@ uint8_t U8G2_EXT::UserInterfaceMessage(KeyPad *extPad, const char *title1, const
 {
   return ext_UserInterfaceMessage(U8G2_EXT::getU8g2(), extPad, title1, title2, title3, buttons);
 };
+
 uint8_t U8G2_EXT::UserInterfaceSelectionList(KeyPad *extPad, const char *title, uint8_t start_pos, const char *sl, boolean wrap)
 {
   return ext_UserInterfaceSelectionList(U8G2_EXT::getU8g2(), extPad, title, start_pos, sl, wrap);
+};
+
+uint8_t U8G2_EXT::UserInterfaceInputValuePassword(KeyPad *extPad, const char *title, const char *pre, char *value, uint8_t lo, uint8_t hi, uint8_t width, const char *post)
+{
+  return ext_UserInterfaceInputValuePassword(U8G2_EXT::getU8g2(), extPad, title, pre, value, lo, hi, width, post);
+};
+
+uint8_t U8G2_EXT::UserInterfaceInputValueFQDN(KeyPad *extPad, const char *title, const char *pre, char *value, uint8_t width, const char *post)
+{
+  return ext_UserInterfaceInputValueFQDN(U8G2_EXT::getU8g2(), extPad, title, pre, value, width, post);
 };
 
 uint8_t U8G2_EXT::UserInterfaceInputValueBoolean(KeyPad *extPad, const char *title, boolean *value)

@@ -28,6 +28,15 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
     if (nv.verify()) { VLF("MSG: NV, ready for reset to defaults"); }
   } else { VLF("MSG: NV, correct key found"); }
 
+  // get wireless ready
+  #if SERIAL_IP_MODE != OFF
+    wifiManager.readSettings();
+  #endif
+  #if SERIAL_BT_MODE != OFF
+    SERIAL_BT.begin(SERIAL_BT_NAME, true);
+    bluetoothManager.init();
+  #endif
+
   // confirm the data structure size
   if (DisplaySettingsSize < sizeof(DisplaySettings)) { nv.initError = true; DL("ERR: UserInterface::setup(); DisplaySettingsSize error NV subsystem writes disabled"); }
 
@@ -755,6 +764,18 @@ initAgain:
           message.show(L_WIFI_CONNECTION2, L_FAILED, 2000);
           delay(5000);
           goto initAgain;
+        }
+      }
+
+      // attempt to use a host name
+      if (strlen(wifiManager.sta->host) > 0) {
+        IPAddress ip;
+        if (WiFi.hostByName(wifiManager.sta->host, ip)) {
+          IPAddress(wifiManager.sta->target) = ip;
+//          for (int i = 0; i < 3; i++) wifiManager.sta->target[i] = ip[i];
+          message.show(wifiManager.sta->host, ip.toString().c_str(), 1000);
+        } else {
+          message.show(wifiManager.sta->host, L_FAILED, 1000);
         }
       }
 

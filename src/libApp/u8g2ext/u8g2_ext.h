@@ -16,6 +16,8 @@ public:
 #else
   uint8_t UserInterfaceSelectionList(KeyPad *extPad, const char *title, uint8_t start_pos, const char *sl, bool wrap=false);
 #endif
+  uint8_t UserInterfaceInputValuePassword(KeyPad *extPad, const char *title, const char *pre, char *value, uint8_t lo, uint8_t hi, uint8_t digits, const char *post);
+  uint8_t UserInterfaceInputValueFQDN(KeyPad *extPad, const char *title, const char *pre, char *value, uint8_t digits, const char *post);
   uint8_t UserInterfaceInputValueBoolean(KeyPad *extPad, const char *title, boolean *value);
   uint8_t UserInterfaceInputValueInteger(KeyPad *extPad, const char *title, const char *pre, uint8_t *value, uint8_t lo, uint8_t hi, uint8_t digits, const char *post);
   uint8_t UserInterfaceInputValueFloat(KeyPad *extPad, const char *title, const char *pre, float *value, float lo, float hi, uint8_t len, uint8_t dec, const char *post);

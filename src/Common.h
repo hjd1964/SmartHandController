@@ -13,3 +13,4 @@
 #include "lib/debug/Debug.h"
 #include "lib/serial/Serial_ST4_Slave.h"
 #include "lib/serial/Serial_IP_Wifi_Client.h"
+#include "lib/bluetooth/BluetoothManager.h"

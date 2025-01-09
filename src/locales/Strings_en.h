@@ -27,7 +27,10 @@
 #define L_ARCSEC "arc-sec"
 #define L_MICRON_PER_C "um/C"
 #define L_DAYS "Days"
-#define L_REFRESH "Refresh..."
+#define L_SHOW_EDIT "- Edit -"
+#define L_SHOW_KNOWN "- Show Known -"
+#define L_SCANNING_LINE1 "Scanning"
+#define L_SCANNING_LINE2 "Please wait..."
 
 // common abbreviations
 #define L_TELESCOPE "Scope" // telescope
@@ -343,6 +346,7 @@
 
 // ------------------- SmartController.h -----------------------
 #define L_WIFI_SELECT "OnStep Connection:"
+#define L_WIFI_SELECT_EDIT "Edit Connection:"
 #define L_WIFI_CONNECTION1 "Starting WiFi:"
 #define L_WIFI_CONNECTION2 "Restart WiFi:"
 #define L_LOOKING "Looking for"

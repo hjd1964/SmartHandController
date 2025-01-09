@@ -69,6 +69,10 @@ private:
   void menuFeatureKey();
   #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
     bool menuWireless();
+    void menuWiFiStationEditSelect(const char *ssid);
+    void menuWiFiStationEdit(const char *ssid, int index);
+    void menuBTStationEditSelect(const char *name, const char *address);
+    void menuBTStationEdit(const char *name, const char *address, int index);
   #endif
   
   MENU_RESULT menuSyncGoto(bool sync);
