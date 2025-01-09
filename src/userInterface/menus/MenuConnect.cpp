@@ -30,8 +30,6 @@
     int showAllSelection;
     int ssidCount = 0;
     UNUSED(ssidCount);
-    bool scanDone = false;
-    UNUSED(scanDone);
 
   rescan:
     // build the menu selections
@@ -98,7 +96,7 @@
     #endif
 
     #if SERIAL_BT_MODE != OFF
-      BTScanResults *btDeviceList;
+      BTScanResults *btDeviceList = NULL;
 
       if (!showEditList) {
         VF("MSG: Connect menu, starting asynchronous BT discovery");
@@ -109,11 +107,10 @@
           VLF("MSG: Connect menu, stopping asynchronous BT discovery");
           SERIAL_BT.discoverAsyncStop();
           delay(3000);
-          scanDone = true;
         }
       }
 
-      if (scanDone) {
+      if (btDeviceList != NULL) {
         VF("MSG: Connect menu, found "); V(btDeviceList->getCount()); VLF(" BT devices");
 
         if (btDeviceList->getCount() > 0) {
@@ -216,7 +213,7 @@
     #endif
 
     #if SERIAL_BT_MODE != OFF
-      if (crossIndex[userSelection].code == CI_BT_LIST_INDEX) {
+      if (crossIndex[userSelection].code == CI_BT_LIST_INDEX && btDeviceList != NULL) {
         VF("Bluetooth "); VL(crossIndex[userSelection].index);
         
         BTAdvertisedDevice *device = btDeviceList->getDevice(crossIndex[userSelection].index);
