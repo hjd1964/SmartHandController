@@ -106,13 +106,13 @@
 
 #ifndef STA_DHCP_ENABLED
 #define STA_DHCP_ENABLED           false  // true to use LAN DHCP addresses
-#define STA_DHCP        STA_DHCP_ENABLED
 #endif
+#define STA_DHCP        STA_DHCP_ENABLED
 
 #ifndef STA_TARGET_IP_ADDR 
 #define STA_TARGET_IP_ADDR  {192,168,0,1} // IP Address to connect to (OnStep for example)
-#define STA_TARGET     STA_TARGET_IP_ADDR
 #endif
+#define STA_TARGET     STA_TARGET_IP_ADDR
 
 #ifndef STA_IP_ADDR
 #define STA_IP_ADDR         {192,168,0,2} // Wifi Station IP Address
