@@ -106,6 +106,8 @@ void EthernetManager::readSettings() {
 }
 
 void EthernetManager::writeSettings() {
+  if (!settingsReady) return;
+
   #ifdef NV_ETHERNET_SETTINGS_BASE
     VLF("MSG: Ethernet, writing settings to NV");
     nv.writeBytes(NV_ETHERNET_SETTINGS_BASE, &settings, sizeof(EthernetSettings));

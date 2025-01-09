@@ -60,6 +60,8 @@ void BluetoothManager::readSettings() {
 }
 
 void BluetoothManager::writeSettings() {
+  if (!settingsReady) return;
+  
   #ifdef NV_BT_SETTINGS_BASE
     VLF("MSG: BluetoothManager, writing settings to NV");
     nv.writeBytes(NV_BT_SETTINGS_BASE, &settings, sizeof(BluetoothSettings));
