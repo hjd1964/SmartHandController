@@ -43,7 +43,8 @@ return:
 uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const char *title, const char *pre, char *value, uint8_t lo, uint8_t hi, uint8_t width, const char *post) {
   u8g2_SetFont(u8g2, LF_STANDARD);
 
-  const int pixel_char_width_scale = 1.2; // horizontal spacing of chars
+  const float pixel_char_width_scale = 1.4; // horizontal spacing of chars
+  const int visual_width_max = 9;           // maximum display width in chars (before scrolling)
 
   uint8_t line_height;
   uint8_t height;
@@ -57,7 +58,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
   // transfer password to local variable and pad with spaces
   if (width > 16) width = 16;
   int visible_width = width;
-  if (visible_width > 10) visible_width = 10;
+  if (visible_width > visual_width_max) visible_width = visual_width_max;
   char local_value[17];
   strncpy(local_value, value, 16);
   while (strlen(local_value) < width) { strcat(local_value, " "); }
@@ -115,7 +116,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
 
       xx += u8g2_DrawUTF8(u8g2, xx, yy, pre);
 
-      int start = selectedChar - 9;
+      int start = selectedChar - (visible_width - 1);
       if (start < 0) start = 0;
 
       char thisChar[] = " ";
@@ -123,7 +124,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
         thisChar[0] = local_value[i + start];
         thisChar[1] = 0;
 
-        if (i < 10) {
+        if (i < visible_width) {
           int xl = xx + pixel_char_width*pixel_char_width_scale*i;
           int yh = yy - pixel_char_height + 16;
           u8g2_DrawUTF8(u8g2, xl, yy, thisChar);
@@ -149,7 +150,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
 
       if (event == U8X8_MSG_GPIO_MENU_NEXT) {
         local_value[width] = 0;
-        for (int i = width - 1; i > 0; i--) { if (local_value[i] == ' ') local_value[i] = 0; else break; }
+        for (int i = width - 1; i >= 0; i--) { if (local_value[i] == ' ') local_value[i] = 0; else break; }
         for (int i = 0; i < width; i++) { if (local_value[i] == ' ') local_value[i] = lo; else break; }
         strcpy(value, local_value);
         return 1;
@@ -187,7 +188,8 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
 uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char *title, const char *pre, char *value, uint8_t width, const char *post) {
   u8g2_SetFont(u8g2, LF_STANDARD);
 
-  const int pixel_char_width_scale = 1.2; // horizontal spacing of chars
+  const float pixel_char_width_scale = 1.4; // horizontal spacing of chars
+  const int visual_width_max = 9;           // maximum display width in chars (before scrolling)
 
   char cross_ref[] = "? -.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -203,17 +205,17 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
   // transfer password to local variable and pad with spaces
   if (width > 16) width = 16;
   int visible_width = width;
-  if (visible_width > 10) visible_width = 10;
+  if (visible_width > visual_width_max) visible_width = visual_width_max;
   char local_value[17];
   strncpy(local_value, value, 16);
   while (strlen(local_value) < width) { strcat(local_value, " "); }
 
   for (int i = 0; i < strlen(local_value); i++) {
+    bool found = false;
     for (int j = 0; j < strlen(cross_ref); j++) {
-      if (local_value[i] == cross_ref[j]) local_value[i] = j;
-      break;
+      if (local_value[i] == cross_ref[j]) { local_value[i] = j; found = true; break; }
     }
-    local_value[i] = (char)1;
+    if (!found) local_value[i] = (char)1;
   }
 
   uint8_t selectedChar = 0; // the character being edited
@@ -269,7 +271,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
 
       xx += u8g2_DrawUTF8(u8g2, xx, yy, pre);
 
-      int start = selectedChar - 9;
+      int start = selectedChar - (visible_width - 1);
       if (start < 0) start = 0;
 
       char thisChar[] = " ";
@@ -277,7 +279,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
         thisChar[0] = cross_ref[(uint8_t)local_value[i + start]];
         thisChar[1] = 0;
 
-        if (i < 10) {
+        if (i < visible_width) {
           int xl = xx + pixel_char_width*pixel_char_width_scale*i;
           int yh = yy - pixel_char_height + 16;
           u8g2_DrawUTF8(u8g2, xl, yy, thisChar);
