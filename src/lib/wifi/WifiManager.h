@@ -65,16 +65,37 @@ typedef struct WifiSettings {
 
 class WifiManager {
   public:
+    // starts WiFi
     bool init();
+
+    // stops WiFi
     void disconnect();
+
     #if STA_AUTO_RECONNECT == true
       void reconnectStation();
     #endif
+
+    // set the currently active station
+    // \param number from 1 to WifiStationCount
     void setStation(int number);
+
+    // read settings from NV
     void readSettings();
+
+    // write settings to NV
     void writeSettings();
 
+    // currently selected station
     StationSettings *sta;
+
+    // currently selected station number
+    int stationNumber = 1;
+
+    // optional station host name lookup overrides target IP
+    bool staNameLookup = false;
+
+    // true if the WiFi AP or Station is active
+    bool active = false;
 
     WifiSettings settings = {
       PASSWORD_DEFAULT,
@@ -111,12 +132,8 @@ class WifiManager {
       }
     };
 
-    bool active = false;
-    bool settingsReady = false;
-    int stationNumber = 1;
-
   private:
-    
+    bool settingsReady = false;
 };
 
 extern WifiManager wifiManager;

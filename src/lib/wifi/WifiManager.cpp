@@ -26,6 +26,17 @@ bool WifiManager::init() {
     IPAddress sta_sn = IPAddress(sta->sn);
 
   TryAgain:
+    if (staNameLookup && strlen(wifiManager.sta->host) > 0) {
+      IPAddress ip;
+      if (WiFi.hostByName(wifiManager.sta->host, ip)) {
+        IPAddress(wifiManager.sta->target) = ip;
+        VF("MSG: WiFi, host name "); V(wifiManager.sta->host); VF(" resolved to "); VL(ip.toString().c_str());
+      } else {
+        VLF("MSG: WiFi, host name resolution failed!");
+        VLF("MSG: WiFi, falling back to static target IP");
+      }
+    }
+
     if (settings.accessPointEnabled && !settings.stationEnabled) {
       VLF("MSG: WiFi, starting Soft AP");
       WiFi.softAP(settings.ap.ssid, settings.ap.pwd, settings.ap.channel);
