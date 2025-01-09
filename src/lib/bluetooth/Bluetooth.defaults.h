@@ -3,6 +3,14 @@
 // -------------------------------------------------------------------------------------------------
 // general bt settings
 
+#ifndef HOST_NAME
+#define HOST_NAME               "Unknown"
+#endif
+
+#ifndef SERIAL_BT_NAME
+#define SERIAL_BT_NAME          HOST_NAME
+#endif
+
 // -------------------------------------------------------------------------------------------------
 // bluetooth manager settings
 
@@ -13,7 +21,7 @@
 // station 1
 
 #ifndef STA1_BT_NAME
-#define STA1_BT_NAME             "OnStep" // bluetooth Name for easy identification, leave blank to disable
+#define STA1_BT_NAME             "OnStep" // the bluetooth server name this station is connecting to
 #endif
 #ifndef STA1_BT_ADDR
 #define STA1_BT_ADDR                   "" // bluetooth MAC address to connect to

@@ -3,6 +3,10 @@
 // -------------------------------------------------------------------------------------------------
 // general ip settings
 
+#ifndef HOST_NAME
+#define HOST_NAME                "Unknown"
+#endif
+
 // first, you must have an Wifi or Ethernet device:  OFF or WIFI, ETHERNET_W5100, ETHERNET_W5500
 #ifndef OPERATIONAL_MODE
 #define OPERATIONAL_MODE              OFF
@@ -32,19 +36,15 @@
 
 // mDNS defaults
 #ifndef MDNS_SERVER
-#define MDNS_SERVER                   OFF // by default mDNS is disabled
+#define MDNS_SERVER                   OFF
 #endif
 
 #ifndef MDNS_NAME
-#define MDNS_NAME               "arduino" // host name
+#define MDNS_NAME               HOST_NAME
 #endif
 
 // -------------------------------------------------------------------------------------------------
 // wifi manager settings
-
-#ifndef PROD_ABV
-#define PROD_ABV                "Unknown"
-#endif
 
 #ifndef PASSWORD_DEFAULT
 #define PASSWORD_DEFAULT       "password" // default pwd for wifi settings
@@ -55,7 +55,7 @@
 #endif
 
 #ifndef AP_SSID
-#define AP_SSID                  PROD_ABV // Wifi Access Point SSID
+#define AP_SSID                 HOST_NAME // Wifi Access Point SSID
 #endif
 
 #ifndef AP_PASSWORD

@@ -5,11 +5,6 @@
 #define HOST_NAME                "OnStep-SHC"
 #endif
 
-// settings identification
-#ifndef CONFIG_NAME
-#define CONFIG_NAME              HOST_NAME
-#endif
-
 // use the HAL specified default NV driver
 #ifndef NV_DRIVER
 #define NV_DRIVER                NV_DEFAULT
@@ -27,32 +22,16 @@
 #define SERIAL_RADIO             OFF
 #endif
 
-// setup for Wifi IP communications to OnStep
-// for other settings see the WiFiManager class
-#if SERIAL_RADIO == WIFI_STATION
+// enable and customize WiFi functionality
+// for other default IP settings see the file:
+// src/lib/wifi/WifiManager.defaults.h
+#if SERIAL_RADIO == WIFI_STATION || SERIAL_RADIO == BOTH
 #define SERIAL_IP_MODE           STATION
-#endif
-
-// setup for Bluetooth communications to OnStep
-#if SERIAL_RADIO == BLUETOOTH
-#define SERIAL_BT_MODE           MASTER
-#define SERIAL_BT_NAME           HOST_NAME
-#endif
-
-// setup for either WiFi or Bluetooth communications to OnStep
-#if SERIAL_RADIO == BOTH
-#define SERIAL_IP_MODE           STATION
-#define SERIAL_BT_MODE           MASTER
-#define SERIAL_BT_NAME           HOST_NAME
 #endif
 
 // set defaults just incase
 #ifndef SERIAL_IP_MODE
 #define SERIAL_IP_MODE           OFF
-#endif
-
-#ifndef SERIAL_BT_MODE
-#define SERIAL_BT_MODE           OFF
 #endif
 
 #if SERIAL_IP_MODE == STATION
@@ -62,6 +41,21 @@
 // optional Arduino Serial class work-alike IP channel to port 9996 as a client (connects to a server)
 #define SERIAL_CLIENT            ON
 
-// set station mode
+// enable station mode and set default to connect to an OnStep
 #define STA_ENABLED              true
+#define STA_HOST_NAME            "onstep"
+#define STA_SSID                 "OnStep"
+#endif
+
+// enable and customize Bluetooth functionality
+// for other default BT settings see the file:
+// src/lib/bluetooth/BluetoothManager.defaults.h
+#if SERIAL_RADIO == BLUETOOTH || SERIAL_RADIO == BOTH
+#define SERIAL_BT_MODE           MASTER
+#define SERIAL_BT_NAME           HOST_NAME
+#endif
+
+#ifndef SERIAL_BT_MODE
+#define SERIAL_BT_MODE           OFF
+
 #endif
