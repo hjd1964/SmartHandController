@@ -252,18 +252,23 @@
 
               if (addr) {
                 VF("MSG: Connect menu, connecting to "); V(addr.toString().c_str());
-                VF(" channel "); V(channel);
+                VF(" on channel "); V(channel);
 
                 if (strlen(bluetoothManager.sta->passkey) > 0) {
-                  VF(" passkey "); V(bluetoothManager.sta->passkey);
+                  VF(" using passkey "); V(bluetoothManager.sta->passkey);
                   SERIAL_BT.setPin(bluetoothManager.sta->passkey);
                 }
 
                 VF("...");
                 if (SERIAL_BT.connect(addr, channel, ESP_SPP_SEC_NONE, ESP_SPP_ROLE_SLAVE)) {
                   VLF(" success");
+                  message.show("BT " L_CONNECTION, L_SUCCESS, 1000);
                   onStep.connectionMode = CM_BLUETOOTH;
                   return true;
+                } else {
+                  message.show("BT " L_CONNECTION, L_FAILED, 2000);
+                  VLF(" failed!");
+                  goto rescan;
                 }
               }
             }
