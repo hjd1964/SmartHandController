@@ -336,6 +336,10 @@ void UI::menuWiFiStationEdit(const char *ssid, int index) {
   "IP2\n"
   "IP3\n"
   "IP4\n"
+  "Gateway IP1\n"
+  "Gateway IP2\n"
+  "Gateway IP3\n"
+  "Gateway IP4\n"
   "Mask IP1\n"
   "Mask IP2\n"
   "Mask IP3\n"
@@ -406,38 +410,56 @@ void UI::menuWiFiStationEdit(const char *ssid, int index) {
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->ip[3], 0, 255, 3, "]");
         break;
 
-        // Subnet Mask IP
+        // Gateway Mask IP
         case 9:
+          sprintf(titleIP, "[?].%d.%d.%d", wifiManager.sta->gw[1], wifiManager.sta->gw[2], wifiManager.sta->gw[3]);
+          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->gw[0], 0, 255, 3, "]");
+        break;
+        case 10:
+          sprintf(titleIP, "%d.[?].%d.%d", wifiManager.sta->gw[0], wifiManager.sta->gw[2], wifiManager.sta->gw[3]);
+          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->gw[1], 0, 255, 3, "]");
+        break;
+        case 11:
+          sprintf(titleIP, "%d.%d.[?].%d", wifiManager.sta->gw[0], wifiManager.sta->gw[1], wifiManager.sta->gw[3]);
+          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->gw[2], 0, 255, 3, "]");
+        break;
+        case 12:
+          sprintf(titleIP, "%d.%d.%d.[?]", wifiManager.sta->gw[0], wifiManager.sta->gw[1], wifiManager.sta->gw[2]);
+          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->gw[3], 0, 255, 3, "]");
+        break;
+
+        // Subnet Mask IP
+        case 13:
           sprintf(titleIP, "[?].%d.%d.%d", wifiManager.sta->sn[1], wifiManager.sta->sn[2], wifiManager.sta->sn[3]);
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->sn[0], 0, 255, 3, "]");
         break;
-        case 10:
+        case 14:
           sprintf(titleIP, "%d.[?].%d.%d", wifiManager.sta->sn[0], wifiManager.sta->sn[2], wifiManager.sta->sn[3]);
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->sn[1], 0, 255, 3, "]");
         break;
-        case 11:
+        case 15:
           sprintf(titleIP, "%d.%d.[?].%d", wifiManager.sta->sn[0], wifiManager.sta->sn[1], wifiManager.sta->sn[3]);
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->sn[2], 0, 255, 3, "]");
         break;
-        case 12:
+        case 16:
           sprintf(titleIP, "%d.%d.%d.[?]", wifiManager.sta->sn[0], wifiManager.sta->sn[1], wifiManager.sta->sn[2]);
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->sn[3], 0, 255, 3, "]");
         break;
 
         // Target IP
-        case 13:
+        case 17:
           sprintf(titleIP, "[?].%d.%d.%d", wifiManager.sta->target[1], wifiManager.sta->target[2], wifiManager.sta->target[3]);
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[0], 0, 255, 3, "]");
         break;
-        case 14:
+        case 18:
           sprintf(titleIP, "%d.[?].%d.%d", wifiManager.sta->target[0], wifiManager.sta->target[2], wifiManager.sta->target[3]);
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[1], 0, 255, 3, "]");
         break;
-        case 15:
+        case 19:
           sprintf(titleIP, "%d.%d.[?].%d", wifiManager.sta->target[0], wifiManager.sta->target[1], wifiManager.sta->target[3]);
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[2], 0, 255, 3, "]");
         break;
-        case 16:
+        case 20:
           sprintf(titleIP, "%d.%d.%d.[?]", wifiManager.sta->target[0], wifiManager.sta->target[1], wifiManager.sta->target[2]);
           display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[3], 0, 255, 3, "]");
         break;
