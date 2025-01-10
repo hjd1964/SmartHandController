@@ -79,11 +79,14 @@ bool WifiManager::init() {
         goto TryAgain;
       }
 
-      if (!settings.accessPointEnabled) {
-        VLF("MSG: WiFi, initialization failed");
-      } else {
+      // no fallback but the AP is still enabled
+      if (settings.accessPointEnabled) {
         active = true;
         VLF("MSG: WiFi, AP initialized station failed");
+      } else {
+        // the station failed to connect and the AP isn't enabled
+        VLF("MSG: WiFi, initialization failed");
+        WiFi.disconnect();
       }
     } else {
       active = true;
