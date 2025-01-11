@@ -43,8 +43,8 @@ return:
 uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const char *title, const char *pre, char *value, uint8_t lo, uint8_t hi, uint8_t width, const char *post) {
   u8g2_SetFont(u8g2, LF_STANDARD);
 
-  const float pixel_char_width_scale = 1.4; // horizontal spacing of chars
-  const int visual_width_max = 9;           // maximum display width in chars (before scrolling)
+  const float pixel_char_width_scale = 1.1; // horizontal spacing of chars
+  const int visual_width_max = 10;          // maximum display width in chars (before scrolling)
 
   uint8_t line_height;
   uint8_t height;
@@ -93,6 +93,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
   }
 
   /* calculate offset from left for the label */
+  u8g2_SetFont(u8g2, LF_PASSWORD);
   x = 0;
   int pixel_char_width = u8g2_GetUTF8Width(u8g2, "X");
   int pixel_char_height = u8g2_GetFontAscent(u8g2);
@@ -109,11 +110,13 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
   for (;;) {
     u8g2_FirstPage(u8g2);
     do {
+      u8g2_SetFont(u8g2, LF_STANDARD);
       yy = y + line_height / 2;
       yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
       yy += line_height / 2;
       xx = x;
 
+      u8g2_SetFont(u8g2, LF_PASSWORD);
       xx += u8g2_DrawUTF8(u8g2, xx, yy, pre);
 
       int start = selected_char - (visible_width - 1);
@@ -126,7 +129,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
 
         if (i < visible_width) {
           int xl = xx + pixel_char_width*pixel_char_width_scale*i;
-          int yh = yy - pixel_char_height + 16;
+          int yh = yy - pixel_char_height + 17;
           u8g2_DrawUTF8(u8g2, xl, yy, thisChar);
           if (i + start == selected_char) {
             u8g2_DrawLine(u8g2, xl,  yh, xl + pixel_char_width, yh);
@@ -188,8 +191,8 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
 uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char *title, const char *pre, char *value, uint8_t width, const char *post) {
   u8g2_SetFont(u8g2, LF_STANDARD);
 
-  const float pixel_char_width_scale = 1.4; // horizontal spacing of chars
-  const int visual_width_max = 9;           // maximum display width in chars (before scrolling)
+  const float pixel_char_width_scale = 1.1; // horizontal spacing of chars
+  const int visual_width_max = 10;          // maximum display width in chars (before scrolling)
 
   char cross_ref[] = "? -.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -248,6 +251,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
   }
 
   /* calculate offset from left for the label */
+  u8g2_SetFont(u8g2, LF_PASSWORD);
   x = 0;
   int pixel_char_width = u8g2_GetUTF8Width(u8g2, "X");
   int pixel_char_height = u8g2_GetFontAscent(u8g2);
@@ -264,11 +268,13 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
   for (;;) {
     u8g2_FirstPage(u8g2);
     do {
+      u8g2_SetFont(u8g2, LF_STANDARD);
       yy = y + line_height / 2;
       yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
       yy += line_height / 2;
       xx = x;
 
+      u8g2_SetFont(u8g2, LF_PASSWORD);
       xx += u8g2_DrawUTF8(u8g2, xx, yy, pre);
 
       int start = selected_char - (visible_width - 1);
@@ -281,7 +287,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
 
         if (i < visible_width) {
           int xl = xx + pixel_char_width*pixel_char_width_scale*i;
-          int yh = yy - pixel_char_height + 16;
+          int yh = yy - pixel_char_height + 17;
           u8g2_DrawUTF8(u8g2, xl, yy, thisChar);
           if (i + start == selected_char) {
             u8g2_DrawLine(u8g2, xl,  yh, xl + pixel_char_width, yh);
