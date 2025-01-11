@@ -45,7 +45,7 @@
 
 // enable station mode and set default to connect to an OnStep
 #define STA_ENABLED              true
-#define STA_HOST_NAME            "onstep"
+#define STA_HOST_NAME            "OnStep"
 #define STA_SSID                 "OnStep"
 #define MDNS_SERVER              ON
 #endif
