@@ -202,7 +202,7 @@ void UI::menuPEC() {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0)
   {
-    const char *string_list_SettingsL1 = L_PEC_PLAY "\n" L_PEC_STOP "\n" L_PEC_CLEAR "\n" L_PEC_RECORD "\n" L_PEC_WRITENV;
+    const char *string_list_SettingsL1 = L_PEC_PLAY "\n" L_PEC_STOP "\n" L_CLEAR "\n" L_PEC_RECORD "\n" L_PEC_WRITENV;
     current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_PEC, current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {

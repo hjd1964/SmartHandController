@@ -18,11 +18,13 @@
 #define L_NOW "Now"
 #define L_SETV "Set"
 #define L_ALL "All"
+#define L_USE "Use"
 #define L_SET_STATE "Set State"
 #define L_VALUE "Value"
 #define L_WITHIN "Within"
 #define L_DISABLE "Disable"
 #define L_CANCELED "Canceled"
+#define L_CURRENT "Current"
 #define L_FAILED "Failed"
 #define L_DEGREE "degree"
 #define L_ARCSEC "arc-sec"
@@ -33,6 +35,11 @@
 #define L_UPDATING "Updating"
 #define L_SCANNING "Scanning"
 #define L_PLEASE_WAIT "Please wait"
+#define L_CONFIRM "Are you sure?"
+#define L_CLEAR "Clear"
+#define L_MEMORY "Memory"
+#define L_OVERWRITE "Overwrite"
+#define L_PASSWORD "Password"
 
 // common abbreviations
 #define L_TELESCOPE "Scope" // telescope
@@ -129,7 +136,6 @@
 // PEC menu
 #define L_PEC_PLAY "Play"
 #define L_PEC_STOP "Stop"
-#define L_PEC_CLEAR "Clear"
 #define L_PEC_RECORD "Record"
 #define L_PEC_WRITENV "Write to NV"
 #define L_PEC "PEC"
