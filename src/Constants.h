@@ -39,7 +39,7 @@
 #define WEATHER_LAST                6
 
 // NV -------------------------------------------------------------------------------------------------------------------
-#define INIT_NV_KEY                 159301355UL
+#define INIT_NV_KEY                 159301356UL
 
 #define NV_KEY                      0      // bytes: 4   , addr:   0..  3
 #define NV_DISPLAY_SETTINGS_BASE    4      // bytes: 24  , addr:   4.. 27
