@@ -7,6 +7,7 @@
 #define LF_GREEK u8g2_font_unifont_t_greek  // 10 pixel height
 #define LF_STANDARD u8g2_font_helvR10_tf    // 11 pixel height
 #define LF_LARGE u8g2_font_helvR12_tf       // 12 pixel height
+#define LF_PASSWORD u8g2_font_t0_17_mf      // 11 pixel height monospaced
 
 // General
 #define L_OK "OK"
