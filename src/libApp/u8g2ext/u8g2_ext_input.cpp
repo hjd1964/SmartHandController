@@ -63,7 +63,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
   strncpy(local_value, value, 16);
   while (strlen(local_value) < width) { strcat(local_value, " "); }
 
-  uint8_t selectedChar = 0; // the character being edited
+  uint8_t selected_char = 0; // the character being edited
 
   /* only horizontal strings are supported, so force this here */
   u8g2_SetFontDirection(u8g2, 0);
@@ -116,7 +116,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
 
       xx += u8g2_DrawUTF8(u8g2, xx, yy, pre);
 
-      int start = selectedChar - (visible_width - 1);
+      int start = selected_char - (visible_width - 1);
       if (start < 0) start = 0;
 
       char thisChar[] = " ";
@@ -128,7 +128,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
           int xl = xx + pixel_char_width*pixel_char_width_scale*i;
           int yh = yy - pixel_char_height + 16;
           u8g2_DrawUTF8(u8g2, xl, yy, thisChar);
-          if (i + start == selectedChar) {
+          if (i + start == selected_char) {
             u8g2_DrawLine(u8g2, xl,  yh, xl + pixel_char_width, yh);
           }
           if (thisChar[0] == ' ') {
@@ -161,24 +161,24 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
       } else
 
       if (event == U8X8_MSG_GPIO_MENU_SELECT) {
-        if (selectedChar > 0) selectedChar--;
+        if (selected_char > 0) selected_char--;
         break;
       } else
 
       if (event == U8X8_MSG_GPIO_MENU_HOME) {
-        if (selectedChar < width - 1) selectedChar++;
+        if (selected_char < width - 1) selected_char++;
         break;
       } else
 
       if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) {
-        if (local_value[selectedChar] >= hi) local_value[selectedChar] = ' '; else
-        if (local_value[selectedChar] >= ' ' && local_value[selectedChar] < lo) local_value[selectedChar] = lo; else local_value[selectedChar]++;
+        if (local_value[selected_char] >= hi) local_value[selected_char] = ' '; else
+        if (local_value[selected_char] >= ' ' && local_value[selected_char] < lo) local_value[selected_char] = lo; else local_value[selected_char]++;
         break;
       } else
 
       if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) {
-        if (local_value[selectedChar] <= lo && local_value[selectedChar] > ' ') local_value[selectedChar] = ' '; else
-        if (local_value[selectedChar] <= ' ') local_value[selectedChar] = hi; else local_value[selectedChar]--;
+        if (local_value[selected_char] <= lo && local_value[selected_char] > ' ') local_value[selected_char] = ' '; else
+        if (local_value[selected_char] <= ' ') local_value[selected_char] = hi; else local_value[selected_char]--;
         break;
       }
     }
@@ -218,7 +218,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
     if (!found) local_value[i] = (char)1;
   }
 
-  uint8_t selectedChar = 0; // the character being edited
+  uint8_t selected_char = 0; // the character being edited
 
   /* only horizontal strings are supported, so force this here */
   u8g2_SetFontDirection(u8g2, 0);
@@ -271,7 +271,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
 
       xx += u8g2_DrawUTF8(u8g2, xx, yy, pre);
 
-      int start = selectedChar - (visible_width - 1);
+      int start = selected_char - (visible_width - 1);
       if (start < 0) start = 0;
 
       char thisChar[] = " ";
@@ -283,7 +283,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
           int xl = xx + pixel_char_width*pixel_char_width_scale*i;
           int yh = yy - pixel_char_height + 16;
           u8g2_DrawUTF8(u8g2, xl, yy, thisChar);
-          if (i + start == selectedChar) {
+          if (i + start == selected_char) {
             u8g2_DrawLine(u8g2, xl,  yh, xl + pixel_char_width, yh);
           }
           if (thisChar[0] == ' ') {
@@ -316,24 +316,129 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
       } else
 
       if (event == U8X8_MSG_GPIO_MENU_SELECT) {
-        if (selectedChar > 0) selectedChar--;
+        if (selected_char > 0) selected_char--;
         break;
       } else
 
       if (event == U8X8_MSG_GPIO_MENU_HOME) {
-        if (selectedChar < width - 1) selectedChar++;
+        if (selected_char < width - 1) selected_char++;
         break;
       } else
 
       if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) {
-        if (local_value[selectedChar] >= strlen(cross_ref)) local_value[selectedChar] = 1; else
-        local_value[selectedChar]++;
+        if (local_value[selected_char] >= strlen(cross_ref)) local_value[selected_char] = 1; else
+        local_value[selected_char]++;
         break;
       } else
 
       if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) {
-        if (local_value[selectedChar] <= 1) local_value[selectedChar] = strlen(cross_ref); else
-        local_value[selectedChar]--;
+        if (local_value[selected_char] <= 1) local_value[selected_char] = strlen(cross_ref); else
+        local_value[selected_char]--;
+        break;
+      }
+    }
+  }
+}
+
+uint8_t ext_UserInterfaceInputValueIP(u8g2_t *u8g2, KeyPad* extPad, const char *title, uint8_t value[4])
+{
+  u8g2_SetFont(u8g2, LF_STANDARD);
+  uint8_t line_height;
+  uint8_t height;
+  u8g2_uint_t pixel_height;
+  u8g2_uint_t y, yy;
+  u8g2_uint_t pixel_width;
+  u8g2_uint_t x;
+
+  uint8_t local_value[4];
+  uint8_t selected_digit = 3;
+  ip4toip4(local_value, value);
+
+  //uint8_t r; /* not used ??? */
+  uint8_t event;
+
+  /* only horizontal strings are supported, so force this here */
+  u8g2_SetFontDirection(u8g2, 0);
+
+  /* force baseline position */
+  u8g2_SetFontPosBaseline(u8g2);
+
+  /* calculate line height */
+  line_height = u8g2_GetAscentEx(u8g2);
+  line_height -= u8g2_GetDescent(u8g2);
+
+  /* calculate overall height of the input value box */
+  height = 1;	/* value input line */
+  height += u8x8_GetStringLineCnt(title);
+
+  /* calculate the height in pixel */
+  pixel_height = height;
+  pixel_height *= line_height;
+
+  /* calculate offset from top */
+  y = 0;
+  if (pixel_height < u8g2_GetDisplayHeight(u8g2))
+  {
+    y = u8g2_GetDisplayHeight(u8g2);
+    y -= pixel_height;
+    y /= 2;
+  }
+
+  /* event loop */
+  for (;;) {
+    u8g2_FirstPage(u8g2);
+    do {
+      yy = y + line_height / 2;
+      yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
+      yy += line_height / 2;
+
+      char local_value_string[24];
+      switch (selected_digit) {
+        case 0: sprintf(local_value_string, "[%d].%d.%d.%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
+        case 1: sprintf(local_value_string, "%d.[%d].%d.%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
+        case 2: sprintf(local_value_string, "%d.%d.[%d].%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
+        case 3: sprintf(local_value_string, "%d.%d.%d.[%d]", local_value[0], local_value[1], local_value[2], local_value[3]); break;
+      }
+
+      x = 0;
+      pixel_width = u8g2_GetUTF8Width(u8g2, local_value_string);
+      if (pixel_width < u8g2_GetDisplayWidth(u8g2)) {
+        x = u8g2_GetDisplayWidth(u8g2);
+        x -= pixel_width;
+        x /= 2;
+      }
+
+      // show the edited value
+      u8g2_DrawUTF8(u8g2, x, yy, local_value_string);
+    } while (u8g2_NextPage(u8g2));
+
+    #ifdef U8G2_REF_MAN_PIC
+      return 0;
+    #endif
+
+    for (;;) {
+      event = ext_GetMenuEvent(extPad);
+      if (event == U8X8_MSG_GPIO_MENU_NEXT) {
+        ip4toip4(value, local_value);
+        return 1;
+      } else
+      if (event == U8X8_MSG_GPIO_MENU_PREV) {
+        return 0;
+      } else
+      if (event == U8X8_MSG_GPIO_MENU_SELECT) {
+        if (selected_digit > 0) selected_digit--;
+        break;
+      } else
+      if (event == U8X8_MSG_GPIO_MENU_HOME) {
+        if (selected_digit < 3) selected_digit++;
+        break;
+      } else
+      if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) {
+        if (local_value[selected_digit] >= 255) local_value[selected_digit] = 0; else local_value[selected_digit]++;
+        break;
+      } else
+      if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) {
+        if (local_value[selected_digit] <= 0) local_value[selected_digit] = 255; else local_value[selected_digit]--;
         break;
       }
     }

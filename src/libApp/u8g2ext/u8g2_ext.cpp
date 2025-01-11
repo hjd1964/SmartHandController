@@ -35,6 +35,11 @@ uint8_t U8G2_EXT::UserInterfaceInputValueFQDN(KeyPad *extPad, const char *title,
   return ext_UserInterfaceInputValueFQDN(U8G2_EXT::getU8g2(), extPad, title, pre, value, width, post);
 };
 
+uint8_t U8G2_EXT::UserInterfaceInputValueIP(KeyPad *extPad, const char *title, uint8_t value[4])
+{
+  return ext_UserInterfaceInputValueIP(U8G2_EXT::getU8g2(), extPad, title, value);
+};
+
 uint8_t U8G2_EXT::UserInterfaceInputValueBoolean(KeyPad *extPad, const char *title, boolean *value)
 {
   return ext_UserInterfaceInputValueBoolean(U8G2_EXT::getU8g2(), extPad, title, value);

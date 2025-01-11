@@ -328,36 +328,23 @@ void UI::menuWiFiStationEdit(const char *ssid, int index) {
   char titleIP[32];
 
   const char *selection_list =
-  "Name\n"
-  "SSID\n"
-  "Password\n"
-  "DHCP\n"
-  "IP1\n"
-  "IP2\n"
-  "IP3\n"
-  "IP4\n"
-  "Gateway IP1\n"
-  "Gateway IP2\n"
-  "Gateway IP3\n"
-  "Gateway IP4\n"
-  "Mask IP1\n"
-  "Mask IP2\n"
-  "Mask IP3\n"
-  "Mask IP4\n"
-  "Target IP1\n"
-  "Target IP2\n"
-  "Target IP3\n"
-  "Target IP4";
+  "Name\n"        // 1
+  "SSID\n"        // 2
+  "Password\n"    // 3
+  "DHCP\n"        // 4
+  "SHC IP\n"      // 5
+  "Gateway IP\n"  // 6
+  "Mask IP\n"     // 7
+  "Target IP\n"   // 8
+  "Reset";        // 9
 
   const char *selection_list_dhcp =
-  "Name\n"
-  "SSID\n"
-  "Password\n"
-  "DHCP\n"
-  "Target IP1\n"
-  "Target IP2\n"
-  "Target IP3\n"
-  "Target IP4";
+  "Name\n"         // 1
+  "SSID\n"         // 2
+  "Password\n"     // 3
+  "DHCP\n"         // 4
+  "Target IP\n"    // 5 + 3
+  "Reset";         // 6 + 3
 
   VF("MSG: Connect menu, editing WiFi station "); VL(index);
 
@@ -366,147 +353,74 @@ void UI::menuWiFiStationEdit(const char *ssid, int index) {
 
   int current_selection = 1;
   while (current_selection != 0) {
-
-    if (!wifiManager.sta->dhcpEnabled) {
-      current_selection = display->UserInterfaceSelectionList(&keyPad, title, current_selection, selection_list);
-      switch (current_selection) {
-        case 1:
-          display->UserInterfaceInputValueFQDN(&keyPad, "Host Name", "", wifiManager.sta->host, 16, "");
-        break;
-
-        case 2:
-          message.show("Current SSID:", wifiManager.sta->ssid, 3000);
-          ssidAccepted = false;
-          if (display->UserInterfaceInputValueBoolean(&keyPad, "Overwrite?", &ssidAccepted)) {
-            if (ssidAccepted) {
-              strcpy(wifiManager.sta->ssid, ssid);
-            }
-          }
-        break;
-
-        case 3:
-          display->UserInterfaceInputValuePassword(&keyPad, "Password", "", wifiManager.sta->pwd, ' ', '~', 16, "");
-        break;
-
-        case 4:
-          display->UserInterfaceInputValueBoolean(&keyPad, "Use DHCP?", &wifiManager.sta->dhcpEnabled);
-        break;
-
-        // Station IP
-        case 5:
-          sprintf(titleIP, "[?].%d.%d.%d", wifiManager.sta->ip[1], wifiManager.sta->ip[2], wifiManager.sta->ip[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->ip[0], 0, 255, 3, "]");
-        break;
-        case 6:
-          sprintf(titleIP, "%d.[?].%d.%d", wifiManager.sta->ip[0], wifiManager.sta->ip[2], wifiManager.sta->ip[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->ip[1], 0, 255, 3, "]");
-        break;
-        case 7:
-          sprintf(titleIP, "%d.%d.[?].%d", wifiManager.sta->ip[0], wifiManager.sta->ip[1], wifiManager.sta->ip[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->ip[2], 0, 255, 3, "]");
-        break;
-        case 8:
-          sprintf(titleIP, "%d.%d.%d.[?]", wifiManager.sta->ip[0], wifiManager.sta->ip[1], wifiManager.sta->ip[2]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->ip[3], 0, 255, 3, "]");
-        break;
-
-        // Gateway Mask IP
-        case 9:
-          sprintf(titleIP, "[?].%d.%d.%d", wifiManager.sta->gw[1], wifiManager.sta->gw[2], wifiManager.sta->gw[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->gw[0], 0, 255, 3, "]");
-        break;
-        case 10:
-          sprintf(titleIP, "%d.[?].%d.%d", wifiManager.sta->gw[0], wifiManager.sta->gw[2], wifiManager.sta->gw[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->gw[1], 0, 255, 3, "]");
-        break;
-        case 11:
-          sprintf(titleIP, "%d.%d.[?].%d", wifiManager.sta->gw[0], wifiManager.sta->gw[1], wifiManager.sta->gw[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->gw[2], 0, 255, 3, "]");
-        break;
-        case 12:
-          sprintf(titleIP, "%d.%d.%d.[?]", wifiManager.sta->gw[0], wifiManager.sta->gw[1], wifiManager.sta->gw[2]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->gw[3], 0, 255, 3, "]");
-        break;
-
-        // Subnet Mask IP
-        case 13:
-          sprintf(titleIP, "[?].%d.%d.%d", wifiManager.sta->sn[1], wifiManager.sta->sn[2], wifiManager.sta->sn[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->sn[0], 0, 255, 3, "]");
-        break;
-        case 14:
-          sprintf(titleIP, "%d.[?].%d.%d", wifiManager.sta->sn[0], wifiManager.sta->sn[2], wifiManager.sta->sn[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->sn[1], 0, 255, 3, "]");
-        break;
-        case 15:
-          sprintf(titleIP, "%d.%d.[?].%d", wifiManager.sta->sn[0], wifiManager.sta->sn[1], wifiManager.sta->sn[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->sn[2], 0, 255, 3, "]");
-        break;
-        case 16:
-          sprintf(titleIP, "%d.%d.%d.[?]", wifiManager.sta->sn[0], wifiManager.sta->sn[1], wifiManager.sta->sn[2]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->sn[3], 0, 255, 3, "]");
-        break;
-
-        // Target IP
-        case 17:
-          sprintf(titleIP, "[?].%d.%d.%d", wifiManager.sta->target[1], wifiManager.sta->target[2], wifiManager.sta->target[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[0], 0, 255, 3, "]");
-        break;
-        case 18:
-          sprintf(titleIP, "%d.[?].%d.%d", wifiManager.sta->target[0], wifiManager.sta->target[2], wifiManager.sta->target[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[1], 0, 255, 3, "]");
-        break;
-        case 19:
-          sprintf(titleIP, "%d.%d.[?].%d", wifiManager.sta->target[0], wifiManager.sta->target[1], wifiManager.sta->target[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[2], 0, 255, 3, "]");
-        break;
-        case 20:
-          sprintf(titleIP, "%d.%d.%d.[?]", wifiManager.sta->target[0], wifiManager.sta->target[1], wifiManager.sta->target[2]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[3], 0, 255, 3, "]");
-        break;
-      }
-    } else {
+    if (wifiManager.sta->dhcpEnabled) {
       current_selection = display->UserInterfaceSelectionList(&keyPad, title, current_selection, selection_list_dhcp);
-      switch (current_selection) {
-        case 1:
-          display->UserInterfaceInputValueFQDN(&keyPad, "Host Name", "", wifiManager.sta->host, 16, "");
-        break;
+      if (current_selection >= 5) current_selection += 3;
+    } else {
+      current_selection = display->UserInterfaceSelectionList(&keyPad, title, current_selection, selection_list);
+    }
 
-        case 2:
-          message.show("Current SSID:", wifiManager.sta->ssid, 3000);
-          ssidAccepted = false;
-          if (display->UserInterfaceInputValueBoolean(&keyPad, "Overwrite?", &ssidAccepted)) {
-            if (ssidAccepted) {
-              strcpy(wifiManager.sta->ssid, ssid);
-            }
+    switch (current_selection) {
+      case 1:
+        display->UserInterfaceInputValueFQDN(&keyPad, "Host Name", "", wifiManager.sta->host, 16, "");
+      break;
+
+      case 2:
+        message.show("Current SSID:", wifiManager.sta->ssid, 3000);
+        ssidAccepted = false;
+        if (display->UserInterfaceInputValueBoolean(&keyPad, "Overwrite?", &ssidAccepted)) {
+          if (ssidAccepted) {
+            strcpy(wifiManager.sta->ssid, ssid);
           }
-        break;
+        }
+      break;
 
-        case 3:
-          display->UserInterfaceInputValuePassword(&keyPad, "Password", "", wifiManager.sta->pwd, ' ', '~', 16, "");
-        break;
+      case 3:
+        display->UserInterfaceInputValuePassword(&keyPad, "Password", "", wifiManager.sta->pwd, ' ', '~', 16, "");
+      break;
 
-        case 4:
-          display->UserInterfaceInputValueBoolean(&keyPad, "Use DHCP?", &wifiManager.sta->dhcpEnabled);
-        break;
+      case 4:
+        display->UserInterfaceInputValueBoolean(&keyPad, "Use DHCP?", &wifiManager.sta->dhcpEnabled);
+      break;
 
-        // Target IP
-        case 5:
-          sprintf(titleIP, "[?].%d.%d.%d", wifiManager.sta->target[1], wifiManager.sta->target[2], wifiManager.sta->target[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[0], 0, 255, 3, "]");
-        break;
-        case 6:
-          sprintf(titleIP, "%d.[?].%d.%d", wifiManager.sta->target[0], wifiManager.sta->target[2], wifiManager.sta->target[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[1], 0, 255, 3, "]");
-        break;
-        case 7:
-          sprintf(titleIP, "%d.%d.[?].%d", wifiManager.sta->target[0], wifiManager.sta->target[1], wifiManager.sta->target[3]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[2], 0, 255, 3, "]");
-        break;
-        case 8:
-          sprintf(titleIP, "%d.%d.%d.[?]", wifiManager.sta->target[0], wifiManager.sta->target[1], wifiManager.sta->target[2]);
-          display->UserInterfaceInputValueInteger(&keyPad, titleIP, "[", &wifiManager.sta->target[3], 0, 255, 3, "]");
-        break;
-      }
+      // Station IP
+      case 5:
+        display->UserInterfaceInputValueIP(&keyPad, "SHC IP", wifiManager.sta->ip);
+      break;
+
+      // Gateway IP
+      case 6:
+        display->UserInterfaceInputValueIP(&keyPad, "Gateway IP", wifiManager.sta->gw);
+      break;
+
+      // Subnet Subnet IP
+      case 7:
+        display->UserInterfaceInputValueIP(&keyPad, "Subnet IP", wifiManager.sta->sn);
+      break;
+
+      // Target IP
+      case 8:
+        display->UserInterfaceInputValueIP(&keyPad, "Target IP", wifiManager.sta->target);
+      break;
+
+      // Reset all
+      case 9:
+        char title[32];
+        sprintf(title, L_PEC_CLEAR " Wifi Mem %d?", index);
+        bool reset = false;
+        if (display->UserInterfaceInputValueBoolean(&keyPad, L_PEC_CLEAR "?", &reset)) {
+          if (reset) {
+            strcpy(wifiManager.sta->host, "");
+            strcpy(wifiManager.sta->ssid, "");
+            strcpy(wifiManager.sta->pwd, "");
+            wifiManager.sta->dhcpEnabled = false;
+            ip4toip4(wifiManager.sta->gw, IPAddress(192,168,0,1));
+            ip4toip4(wifiManager.sta->ip, IPAddress(192,168,0,1));
+            ip4toip4(wifiManager.sta->sn, IPAddress(255,255,255,0));
+            ip4toip4(wifiManager.sta->target, IPAddress(192,168,0,1));
+          }
+        }
+      break;
     }
   }
 
@@ -546,7 +460,8 @@ void UI::menuBTStationEdit(const char *name, const char *address, int index) {
 
   const char *selection_list =
   "Name/MAC\n"
-  "PassKey";
+  "PassKey\n"
+  "Reset";
 
   VF("MSG: Connect menu, editing BT station "); VL(index);
 
@@ -557,6 +472,7 @@ void UI::menuBTStationEdit(const char *name, const char *address, int index) {
   while (current_selection != 0) {
     current_selection = display->UserInterfaceSelectionList(&keyPad, title, current_selection, selection_list);
     switch (current_selection) {
+      // Set the MAC and Host name
       case 1:
         message.show("Current Host:", bluetoothManager.sta->host, 3000);
         message.show("Current MAC:", bluetoothManager.sta->address, 3000);
@@ -568,9 +484,24 @@ void UI::menuBTStationEdit(const char *name, const char *address, int index) {
           }
         }
       break;
+
+      // PassKey aka Pin
       case 2:
         display->UserInterfaceInputValuePassword(&keyPad, "PassKey", "", bluetoothManager.sta->passkey, '0', '9', 4, "");
       break;
+
+      // Reset all
+      case 3:
+        bool reset = false;
+        char title[32];
+        sprintf(title, L_PEC_CLEAR " BT Mem %d?", index);
+        if (display->UserInterfaceInputValueBoolean(&keyPad, title, &reset)) {
+          if (reset) {
+            strcpy(bluetoothManager.sta->host, "");
+            strcpy(bluetoothManager.sta->address, "");
+            strcpy(bluetoothManager.sta->passkey, "");
+          }
+        }
     }
   }
 
