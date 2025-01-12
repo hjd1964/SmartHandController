@@ -120,6 +120,7 @@ void UI::poll() {
     if (!firstConnect) message.show(L_LOST_MSG, L_CONNECTION, 1000);
     connect();
     firstConnect = false;
+    reconnectionCount++;
   } else lastConnectedTime = millis();
 
   unsigned long time_now = millis();

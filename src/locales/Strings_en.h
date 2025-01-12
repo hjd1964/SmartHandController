@@ -188,7 +188,7 @@
 #define L_SET_BUZ "Buzzer"
 #define L_SET_MERIDIAN_FLIP "Meridian Flip"
 #define L_SET_CONFIG "Configuration"
-#define L_SET_VERSION "Firmware Ver"
+#define L_SET_VERSION "Firmware"
 #define L_SETTINGS "Settings"
 
 // date/time

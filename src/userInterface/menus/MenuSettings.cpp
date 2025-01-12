@@ -292,12 +292,16 @@ void UI::menuFirmware() {
 
   char temp1[32];
   char temp2[32];
-  if ( (message.show(onStepLx200.Get(":GVN#", temp1)))&&(message.show(onStepLx200.Get(":GVD#", temp2))) )
-  { for (char* p = temp1; (p = strchr(p, '#')); ++p) { *p = 0;} 
+  if ((message.show(onStepLx200.Get(":GVN#", temp1))) &&
+      (message.show(onStepLx200.Get(":GVD#", temp2)))) {
+    for (char* p = temp1; (p = strchr(p, '#')); ++p) { *p = 0;} 
     for (char* p = temp2; (p = strchr(p, '#')); ++p) { *p = 0;} 
     sprintf(out,"OnStep %s",temp1);
     message.show(out, temp2, 3000);
   }
+
+  sprintf(out, "%ld", reconnectionCount);
+  message.show("Reconnects", out, 3000);
 }
 
 void UI::menuFocuser(uint8_t foc) {

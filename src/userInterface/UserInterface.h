@@ -197,6 +197,7 @@ private:
   long angleDEC = 0;
 
   long serialBaud = 9600;
+  long reconnectionCount;
 };
 
 extern UI userInterface;

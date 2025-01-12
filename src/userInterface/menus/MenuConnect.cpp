@@ -33,6 +33,9 @@
     BTScanResults *btDeviceList = NULL;
     UNUSED(btDeviceList);
 
+    // reset the reconnection count
+    reconnectionCount = -1;
+
   rescan:
     // build the menu selections
     selectionCount = 0;
