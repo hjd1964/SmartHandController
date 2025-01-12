@@ -364,10 +364,11 @@ void UI::menuWiFiStationEdit(const char *ssid, int index) {
   while (current_selection != 0) {
     if (wifiManager.sta->dhcpEnabled) {
       current_selection = display->UserInterfaceSelectionList(&keyPad, title, current_selection, selection_list_dhcp);
-      if (current_selection >= 5) current_selection += 3;
     } else {
       current_selection = display->UserInterfaceSelectionList(&keyPad, title, current_selection, selection_list);
     }
+
+    if (wifiManager.sta->dhcpEnabled && current_selection >= 5) current_selection += 3;
 
     switch (current_selection) {
       case 1:
@@ -440,6 +441,9 @@ void UI::menuWiFiStationEdit(const char *ssid, int index) {
         }
       break;
     }
+
+    if (wifiManager.sta->dhcpEnabled && current_selection >= 8) current_selection -= 3;
+
   }
 
   // save any changes
