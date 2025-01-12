@@ -130,6 +130,10 @@
 
 // station 1
 
+#ifndef STA1_HOST_NAME
+#define STA1_HOST_NAME      STA_HOST_NAME
+#endif
+
 #ifndef STA1_SSID
 #define STA1_SSID                STA_SSID
 #endif
@@ -142,6 +146,10 @@
 #define STA1_DHCP_ENABLED        STA_DHCP
 #endif
 
+#ifndef STA1_TARGET_IP_ADDR 
+#define STA1_TARGET_IP_ADDR    STA_TARGET
+#endif
+
 #ifndef STA1_IP_ADDR
 #define STA1_IP_ADDR          STA_IP_ADDR
 #endif
@@ -152,14 +160,6 @@
 
 #ifndef STA1_SN_MASK
 #define STA1_SN_MASK          STA_SN_MASK
-#endif
-
-#ifndef STA1_HOST_NAME
-#define STA1_HOST_NAME      STA_HOST_NAME
-#endif
-
-#ifndef STA1_TARGET_IP_ADDR 
-#define STA1_TARGET_IP_ADDR    STA_TARGET
 #endif
 
 // station 2

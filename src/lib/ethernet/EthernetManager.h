@@ -78,22 +78,22 @@ class EthernetManager {
       STA_IP_ADDR, STA_GW_ADDR, STA_GW_ADDR, STA_SN_MASK,
       {
       #if EthernetStationCount > 0
-      {STA1_HOST_NAME, STA1_TARGET_IP_ADDR},
+        {STA1_HOST_NAME, STA1_TARGET_IP_ADDR},
       #endif
       #if EthernetStationCount > 1
-      {STA2_HOST_NAME, STA2_TARGET_IP_ADDR},
+        {STA2_HOST_NAME, STA2_TARGET_IP_ADDR},
       #endif
       #if EthernetStationCount > 2
-      {STA3_HOST_NAME, STA3_TARGET_IP_ADDR},
+        {STA3_HOST_NAME, STA3_TARGET_IP_ADDR},
       #endif
       #if EthernetStationCount > 3
-      {STA4_HOST_NAME, STA4_TARGET_IP_ADDR},
+        {STA4_HOST_NAME, STA4_TARGET_IP_ADDR},
       #endif
       #if EthernetStationCount > 4
-      {STA5_HOST_NAME, STA5_TARGET_IP_ADDR},
+        {STA5_HOST_NAME, STA5_TARGET_IP_ADDR},
       #endif
       #if EthernetStationCount > 5
-      {STA6_HOST_NAME, STA6_TARGET_IP_ADDR},
+        {STA6_HOST_NAME, STA6_TARGET_IP_ADDR},
       #endif
       }
     };
