@@ -121,7 +121,7 @@
             BTAdvertisedDevice *device = btDeviceList->getDevice(deviceNumber);
 
             if (strequ(HOST_NAME, device->getName().c_str())) {
-              VF("MSG: Skipping SHC BT Host "); VL(device->getName().c_str());
+              VF("MSG: Connect menu, skipping SHC BT Host "); VL(device->getName().c_str());
               continue;
             }
 
