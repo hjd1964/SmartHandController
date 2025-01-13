@@ -22,6 +22,7 @@
 #define onstep_logo_height 68
 
 enum OperatingMode {OM_SERIAL, OM_WIFI};
+enum DirectBoot {DB_NONE, DB_CONNECT_MENU, DB_SERIAL};
 
 enum OLED { OLED_SH1106, OLED_SH1106_4W_SW_SPI, OLED_SH1106_4W_HW_SPI, OLED_SSD1306, OLED_SSD1309, OLED_SSD1309_4W_SW_SPI, OLED_SSD1309_4W_HW_SPI };
 #define SH1106 OLED_SH1106
@@ -68,7 +69,7 @@ private:
   void menuMain();
   void menuFeatureKey();
   #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
-    bool menuWireless();
+    void menuWireless();
     void menuWiFiStationEditSelect(const char *ssid);
     void menuWiFiStationEdit(const char *ssid, int index);
     void menuBTStationEditSelect(const char *name, const char *address);
@@ -147,6 +148,7 @@ private:
     bool bluetoothStarted = false;
   #endif
   bool firstConnect = true;
+  DirectBoot directBootMode = DB_NONE;
   int skipConnectMenu = 1;
   int onStepContactTry;
   bool hasAuxFeatures = false;

@@ -56,6 +56,12 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
     if (!nv.isKeyValid(INIT_NV_KEY)) { DLF("ERR: NV, failed to read back key!"); } else { VLF("MSG: NV, reset complete"); }
   }
 
+  directBootMode = (DirectBoot)nv.readUI(NV_SERIAL_BOOT_FLAG_BASE);
+  if (directBootMode != DB_NONE) {
+    VF("MSG: UserInterface, direct boot flag set to "); VL((int)directBootMode);
+    nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_NONE);
+  }
+
   if (strlen(version) <= 19) strcpy(_version, version);
 
   status.lastState = 0;
@@ -105,8 +111,10 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   message.init(display);
 
   // display the splash screen
-  drawIntro();
-  delay(2000);
+  if (directBootMode == DB_NONE) {
+    drawIntro();
+    delay(2000);
+  }
 
   VF("MSG: UserInterface, start UI update task (rate 30ms priority 6)... ");
   if (tasks.add(30, 0, true, 6, updateWrapper, "UIupd")) { VLF("success"); } else { VLF("FAILED!"); }
@@ -732,22 +740,24 @@ initAgain:
       }
     #endif
     #if SERIAL_BT_MODE != OFF
-      if (onStep.connectionMode == CM_BLUETOOTH) { HAL_RESET(); }
+      if (onStep.connectionMode == CM_BLUETOOTH) {
+        nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_CONNECT_MENU);
+        tasks.yield(6000);
+        HAL_RESET();
+      }
     #endif
     #if SERIAL_ONSTEP != OFF
       if (onStep.connectionMode == CM_SERIAL) SERIAL_ONSTEP.end();
     #endif
   }
 
+  // show the connection menu
   #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
-    if (!skipConnectMenu) {
-      bool success;
-      do { success = menuWireless(); } while (!success);
-    }
-  #elif SERIAL_ONSTEP != OFF
-    onStep.connectionMode = CM_SERIAL;
+    if (directBootMode == DB_SERIAL) onStep.connectionMode = CM_SERIAL; else
+    if (!skipConnectMenu) menuWireless();
   #endif
 
+  // initialize connection
   #if SERIAL_IP_MODE != OFF
     if (onStep.connectionMode == CM_WIFI) { 
       if (!wifiManager.active) {
@@ -832,7 +842,9 @@ queryAgain:
     goto initAgain;
   }
 
-  VLF("MSG: Connect, found OnStep");
+  onStepLx200.Get(":GVN#", s);
+
+  VF("MSG: Connect, found OnStep "); VL(s);
 
   initGuideCommands();
 

@@ -2,6 +2,7 @@
 // MenuConnect, for UserInterface
 #include "../UserInterface.h"
 #include "../../lib/tasks/OnTask.h"
+#include "../../lib/nv/Nv.h"
 
 #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
 
@@ -17,7 +18,7 @@ typedef struct CrossIndex {
   int index;
 } CrossIndex;
 
-bool UI::menuWireless() {
+void UI::menuWireless() {
   char current_title[24];
   unsigned short userSelection;
   int selectionCount;
@@ -198,8 +199,10 @@ rescan:
   #if SERIAL_ONSTEP != OFF
     if (!showEditList && userSelection == 1) {
       onStep.connectionMode = CM_SERIAL;
-      VLF("Serial");
-      return true;
+      VLF("Serial setting boot flag (restarting...)");
+      nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_SERIAL);
+      tasks.yield(6000);
+      HAL_RESET();
     } else
   #endif
 
@@ -217,7 +220,7 @@ rescan:
       VF("WiFi station "); VL(crossIndex[userSelection].index);
       wifiManager.setStation(crossIndex[userSelection].index);
       onStep.connectionMode = CM_WIFI;
-      return true;
+      return;
     } else
   #endif
 
@@ -270,7 +273,7 @@ rescan:
                 VLF(" success");
                 message.show("BT " L_CONNECTION, L_SUCCESS, 1000);
                 onStep.connectionMode = CM_BLUETOOTH;
-                return true;
+                return;
               } else {
                 message.show("BT " L_CONNECTION, L_FAILED, 2000);
                 VLF(" failed!");
