@@ -755,6 +755,8 @@ initAgain:
   #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
     if (directBootMode == DB_SERIAL) onStep.connectionMode = CM_SERIAL; else
     if (!skipConnectMenu) menuWireless();
+  #elif SERIAL_ONSTEP != OFF
+    onStep.connectionMode = CM_SERIAL;
   #endif
 
   // initialize connection
