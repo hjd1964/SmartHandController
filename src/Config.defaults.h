@@ -29,8 +29,10 @@
 // src/lib/wifi/WifiManager.defaults.h
 #if SERIAL_RADIO == WIFI_STATION || SERIAL_RADIO == BOTH
 #define SERIAL_IP_MODE           STATION
+#ifndef WifiStationCount
 // Use all six stations
 #define WifiStationCount         6
+#endif
 #endif
 
 // set defaults just incase
