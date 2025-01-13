@@ -42,6 +42,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
     if (cmd[1] == 'G') {
       if (strchr("RDE", cmd[2])) { if (timeOutMs < 300) timeOutMs = 300; }
       if (cmd[2] == 'X' && cmd[3] == 'E' && cmd[4] == 'E') shortResponse = true;
+      if (cmd[2] == 'X' && cmd[3] == 'Y' && cmd[4] == '0') timeOutMs = 300;
     } else
     if (cmd[1] == 'M') {
       if (strchr("ewnsg", cmd[2])) noResponse = true;
