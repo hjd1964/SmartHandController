@@ -744,6 +744,8 @@ initAgain:
       bool success;
       do { success = menuWireless(); } while (!success);
     }
+  #elif SERIAL_ONSTEP != OFF
+    onStep.connectionMode = CM_SERIAL;
   #endif
 
   #if SERIAL_IP_MODE != OFF
