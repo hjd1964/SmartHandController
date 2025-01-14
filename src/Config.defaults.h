@@ -10,6 +10,7 @@
 // use the HAL specified default NV driver
 #ifndef NV_DRIVER
 #define NV_DRIVER                NV_DEFAULT
+#define NV_WAIT                  1500
 #endif
 
 // activate ST4 port serial interface

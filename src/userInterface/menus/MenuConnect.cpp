@@ -199,9 +199,10 @@ rescan:
   #if SERIAL_ONSTEP != OFF
     if (!showEditList && userSelection == 1) {
       onStep.connectionMode = CM_SERIAL;
-      VLF("Serial setting boot flag (restarting...)");
+      VLF("MSG: Connect menu, setting boot flag for Serial mode (restarting...)");
+      message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
       nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_SERIAL);
-      tasks.yield(6000);
+      tasks.yield(NV_WAIT + 500);
       HAL_RESET();
     } else
   #endif

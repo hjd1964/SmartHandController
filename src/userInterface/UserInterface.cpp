@@ -56,7 +56,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
     if (!nv.isKeyValid(INIT_NV_KEY)) { DLF("ERR: NV, failed to read back key!"); } else { VLF("MSG: NV, reset complete"); }
   }
 
-  directBootMode = (DirectBoot)nv.readUI(NV_SERIAL_BOOT_FLAG_BASE);
+  directBootMode = (DirectBoot)nv.readUC(NV_SERIAL_BOOT_FLAG_BASE);
   if (directBootMode != DB_NONE) {
     VF("MSG: UserInterface, direct boot flag set to "); VL((int)directBootMode);
     nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_NONE);
@@ -106,9 +106,9 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
   if (model == OLED_SSD1309_4W_HW_SPI) display = new U8G2_EXT_SSD1309_128X64_NONAME_F_4W_HW_SPI(U8G2_R0);
 
   display->begin();
-  display->setContrast(UI::Contrast[displaySettings.maxContrastSelection]);
   display->setFont(LF_STANDARD);
   message.init(display);
+  display->setContrast(UI::Contrast[displaySettings.maxContrastSelection]);
 
   // display the splash screen
   if (directBootMode == DB_NONE) {
@@ -741,8 +741,10 @@ initAgain:
     #endif
     #if SERIAL_BT_MODE != OFF
       if (onStep.connectionMode == CM_BLUETOOTH) {
+        VLF("MSG: Connect, setting boot flag for exiting BT mode (restarting...)");
         nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_CONNECT_MENU);
-        tasks.yield(6000);
+        message.show(L_SCANNING, L_PLEASE_WAIT "...", 10);
+        tasks.yield(NV_WAIT + 500);
         HAL_RESET();
       }
     #endif
