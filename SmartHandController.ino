@@ -48,8 +48,15 @@
 #endif
 
 const char Version[] = "Version " FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch;
-const int pin[7] = {B_PIN0, B_PIN1, B_PIN2, B_PIN3, B_PIN4, B_PIN5, B_PIN6};
-const int active[7] = {B_PIN0_ACTIVE_STATE, B_PIN1_ACTIVE_STATE, B_PIN2_ACTIVE_STATE, B_PIN3_ACTIVE_STATE, B_PIN4_ACTIVE_STATE, B_PIN5_ACTIVE_STATE, B_PIN6_ACTIVE_STATE};
+const KeyPad::Pin pins[7]= {
+  {B_PIN0, B_PIN0_ACTIVE_STATE, B_PIN0_INPUT_MODE},
+  {B_PIN1, B_PIN1_ACTIVE_STATE, B_PIN1_INPUT_MODE},
+  {B_PIN2, B_PIN2_ACTIVE_STATE, B_PIN2_INPUT_MODE},
+  {B_PIN3, B_PIN3_ACTIVE_STATE, B_PIN3_INPUT_MODE},
+  {B_PIN4, B_PIN4_ACTIVE_STATE, B_PIN4_INPUT_MODE},
+  {B_PIN5, B_PIN5_ACTIVE_STATE, B_PIN5_INPUT_MODE},
+  {B_PIN6, B_PIN6_ACTIVE_STATE, B_PIN6_INPUT_MODE},
+};
 
 void systemServices() {
   nv.poll(false);
@@ -88,7 +95,7 @@ void setup(void) {
   VF("MSG: Setup, starting system services task (rate 10ms priority 7)... ");
   if (tasks.add(10, 0, true, 5, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
-  userInterface.init(Version, pin, active, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<OLED>(DISPLAY_OLED));
+  userInterface.init(Version, pins, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<OLED>(DISPLAY_OLED));
 
   #if WEATHER != OFF
     // get any BME280 or BMP280 ready

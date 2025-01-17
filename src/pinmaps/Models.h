@@ -33,6 +33,28 @@
   #define B_PIN6_ACTIVE_STATE LOW
 #endif
 
+#ifndef B_PIN0_INPUT_MODE
+  #define B_PIN0_INPUT_MODE INPUT_PULLUP
+#endif
+#ifndef B_PIN1_INPUT_MODE
+  #define B_PIN1_INPUT_MODE INPUT_PULLUP
+#endif
+#ifndef B_PIN2_INPUT_MODE
+  #define B_PIN2_INPUT_MODE INPUT_PULLUP
+#endif
+#ifndef B_PIN3_INPUT_MODE
+  #define B_PIN3_INPUT_MODE INPUT_PULLUP
+#endif
+#ifndef B_PIN4_INPUT_MODE
+  #define B_PIN4_INPUT_MODE INPUT_PULLUP
+#endif
+#ifndef B_PIN5_INPUT_MODE
+  #define B_PIN5_INPUT_MODE INPUT_PULLUP
+#endif
+#ifndef B_PIN6_INPUT_MODE
+  #define B_PIN6_INPUT_MODE INPUT_PULLUP
+#endif
+
 // Default button debounce in milliseconds
 #ifndef BUTTON_DEBOUNCE_MS
   #define BUTTON_DEBOUNCE_MS 30

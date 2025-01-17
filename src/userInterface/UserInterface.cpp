@@ -19,7 +19,7 @@ void keyPadWrapper() { keyPad.poll(); }
   void auxST4Wrapper() { auxST4.poll(); }
 #endif
 
-void UI::init(const char version[], const int pin[7], const int active[7], const int SerialBaud, const OLED model) {
+void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialBaud, const OLED model) {
   serialBaud = SerialBaud;
 
   // get nv ready
@@ -73,7 +73,7 @@ void UI::init(const char version[], const int pin[7], const int active[7], const
     int thresholdNS = analogRead(B_PIN3);
     keyPad.init(pin, active, thresholdNS, thresholdEW);
   #else
-    keyPad.init(pin, active, 0, 0);
+    keyPad.init(pins, 0, 0);
   #endif
   VF("MSG: UserInterface, start KeyPad monitor task (rate 10ms priority 1)... ");
   if (tasks.add(10, 0, true, 1, keyPadWrapper, "Keypad")) { VLF("success"); } else { VLF("FAILED!"); }
