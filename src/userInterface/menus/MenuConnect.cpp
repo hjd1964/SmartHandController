@@ -198,6 +198,7 @@ rescan:
 
   #if SERIAL_ONSTEP != OFF
     if (!showEditList && userSelection == 1) {
+      VLF("Serial");
       onStep.connectionMode = CM_SERIAL;
       VLF("MSG: Connect menu, setting boot flag for Serial mode (restarting...)");
       message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
@@ -349,7 +350,7 @@ rescan:
     const char *selection_list =
     "Hostname\n"    // 1
     "SSID\n"        // 2
-    L_PASSWORD "\n"    // 3
+    L_PASSWORD "\n" // 3
     "DHCP\n"        // 4
     "SHC IP\n"      // 5
     "Gateway IP\n"  // 6
@@ -385,7 +386,7 @@ rescan:
           accept = false;
           if (display->UserInterfaceInputValueBoolean(&keyPad, "SSID as Hostname?", &accept)) {
             if (accept) sstrcpy(wifiManager.sta->host, ssid, 16);
-            display->UserInterfaceInputValueFQDN(&keyPad, "Hostname", "", wifiManager.sta->host, 16, "");
+            display->UserInterfaceInputValueFQDN(&keyPad, "Hostname", "", wifiManager.sta->host, 32, "");
           }
         break;
 
@@ -400,7 +401,7 @@ rescan:
         break;
 
         case 3:
-          display->UserInterfaceInputValuePassword(&keyPad, L_PASSWORD, "", wifiManager.sta->pwd, ' ', '~', 16, "");
+          display->UserInterfaceInputValuePassword(&keyPad, L_PASSWORD, "", wifiManager.sta->pwd, ' ', '~', 32, "");
         break;
 
         case 4:

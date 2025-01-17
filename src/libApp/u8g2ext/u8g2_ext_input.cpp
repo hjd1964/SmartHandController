@@ -56,11 +56,11 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
   uint8_t event;
 
   // transfer password to local variable and pad with spaces
-  if (width > 16) width = 16;
+  if (width > 32) width = 32;
   int visible_width = width;
   if (visible_width > visual_width_max) visible_width = visual_width_max;
-  char local_value[17];
-  strncpy(local_value, value, 16);
+  char local_value[33];
+  sstrcpy(local_value, value, 33);
   while (strlen(local_value) < width) { strcat(local_value, " "); }
 
   uint8_t selected_char = 0; // the character being edited
@@ -206,11 +206,11 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
   uint8_t event;
 
   // transfer password to local variable and pad with spaces
-  if (width > 16) width = 16;
+  if (width > 32) width = 32;
   int visible_width = width;
   if (visible_width > visual_width_max) visible_width = visual_width_max;
-  char local_value[17];
-  strncpy(local_value, value, 16);
+  char local_value[33];
+  sstrcpy(local_value, value, 33);
   while (strlen(local_value) < width) { strcat(local_value, " "); }
 
   for (int i = 0; i < strlen(local_value); i++) {
@@ -263,7 +263,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
     x -= pixel_width;
     x /= 2;
   }
-  
+
   // event loop
   for (;;) {
     u8g2_FirstPage(u8g2);
