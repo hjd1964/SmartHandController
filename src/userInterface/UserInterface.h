@@ -22,7 +22,11 @@
 #define onstep_logo_height 68
 
 enum OperatingMode {OM_SERIAL, OM_WIFI};
-enum DirectBoot {DB_NONE, DB_CONNECT_MENU, DB_SERIAL};
+enum ConnectSelection {
+  CS_NONE, CS_CONNECT_MENU, CS_SERIAL,
+  CS_WIFI_STA1, CS_WIFI_STA2, CS_WIFI_STA3, CS_WIFI_STA4, CS_WIFI_STA5, CS_WIFI_STA6, CS_WIFI_STA7, CS_WIFI_STA8, 
+  CS_BT_STA1, CS_BT_STA2, CS_BT_STA3, CS_BT_STA4, CS_BT_STA5, CS_BT_STA6, CS_BT_STA7, CS_BT_STA8
+};
 
 enum OLED { OLED_SH1106, OLED_SH1106_4W_SW_SPI, OLED_SH1106_4W_HW_SPI, OLED_SSD1306, OLED_SSD1309, OLED_SSD1309_4W_SW_SPI, OLED_SSD1309_4W_HW_SPI };
 #define SH1106 OLED_SH1106
@@ -148,9 +152,9 @@ private:
     bool bluetoothStarted = false;
   #endif
   bool firstConnect = true;
-  DirectBoot directBootMode = DB_NONE;
-  int skipConnectMenu = 1;
-  int onStepContactTry;
+  ConnectSelection connectionSelection = CS_NONE;
+  int skipConnectionSelection = 1;
+  int queryTry;
   bool hasAuxFeatures = false;
   bool sleepDisplay = false;
   bool lowContrast = false;

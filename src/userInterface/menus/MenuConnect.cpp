@@ -34,6 +34,7 @@ void UI::menuWireless() {
   #if SERIAL_BT_MODE != OFF
     BTScanResults *btDeviceList = NULL;
     UNUSED(btDeviceList);
+    SERIAL_BT.begin(SERIAL_BT_NAME, true);
   #endif
 
   // reset the reconnection count
@@ -85,7 +86,8 @@ rescan:
         for (int stationNumber = 1; stationNumber <= WifiStationCount; stationNumber++) {
           wifiManager.setStation(stationNumber);
           if (WiFi.SSID(ssidNumber).equals(wifiManager.sta->ssid)) {
-            VF("matched station "); VL(stationNumber);
+            if (!foundMatch) { VF("matched station(s) "); } else foundMatch = true;
+            V(stationNumber); V(" ");
             if (++selectionCount > crossIndexSize) break;
             if (strlen(wifiManager.sta->host) > 0)
               strncat(selectionList, wifiManager.sta->host, 14);
@@ -94,10 +96,10 @@ rescan:
             strcat(selectionList, " ip\n");
             crossIndex[selectionCount].code = CI_IP_STATION_INDEX;
             crossIndex[selectionCount].index = stationNumber;
-            foundMatch = true;
           }
         }
-        if (!foundMatch) { VLF("no match"); }
+        if (!foundMatch) { VF("no match"); }
+        VLF("");
       }
 
     }
@@ -199,12 +201,19 @@ rescan:
   #if SERIAL_ONSTEP != OFF
     if (!showEditList && userSelection == 1) {
       VLF("Serial");
-      onStep.connectionMode = CM_SERIAL;
-      VLF("MSG: Connect menu, setting boot flag for Serial mode (restarting...)");
-      message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
-      nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_SERIAL);
-      tasks.yield(NV_WAIT + 500);
-      HAL_RESET();
+
+      #if REBOOT_TO_SERIAL == ON
+        onStep.connectionMode = CM_SERIAL;
+        VLF("MSG: Connect menu, setting boot flag for Serial mode (restarting...)");
+        message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
+        nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_SERIAL);
+        tasks.yield(NV_WAIT + 500);
+        HAL_RESET();
+      #else
+        onStep.connectionMode = CM_SERIAL;
+        connectionSelection = CS_SERIAL;
+        return;
+      #endif
     } else
   #endif
 
@@ -220,9 +229,18 @@ rescan:
     } else
     if (crossIndex[userSelection].code == CI_IP_STATION_INDEX) {
       VF("WiFi station "); VL(crossIndex[userSelection].index);
-      wifiManager.setStation(crossIndex[userSelection].index);
-      onStep.connectionMode = CM_WIFI;
-      return;
+
+      #if REBOOT_TO_WIFI == ON
+        VF("MSG: Connect menu, setting boot flag for WiFi station "); V(crossIndex[userSelection].index); VLF(" (restarting...)");
+        message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
+        nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_WIFI_STA1 + (uint8_t)(crossIndex[userSelection].index - 1));
+        tasks.yield(NV_WAIT + 500);
+        HAL_RESET();
+      #else
+        onStep.connectionMode = CM_WIFI;
+        connectionSelection = (ConnectSelection)((uint8_t)CS_WIFI_STA1 + (uint8_t)(crossIndex[userSelection].index - 1));
+        return;
+      #endif
     } else
   #endif
 
@@ -251,37 +269,17 @@ rescan:
           BTAdvertisedDevice *device = btDeviceList->getDevice(deviceNumber);
 
           if (device->getAddress().toString().equals(bluetoothManager.sta->address)) {
-
-            VF("MSG: Connect menu, selected device ");
-            VF(device->getAddress().toString().c_str()); DF(" ");
-            VLF(device->getName().c_str());
-
-            int channel = 0;
-            BTAddress addr;
-            std::map<int, std::string> channels = SERIAL_BT.getChannels(device->getAddress());
-            if (channels.size() > 0) { addr = device->getAddress(); channel = channels.begin()->first; }
-
-            if (addr) {
-              VF("MSG: Connect menu, connecting to "); V(addr.toString().c_str());
-              VF(" on channel "); V(channel);
-
-              if (strlen(bluetoothManager.sta->passkey) > 0) {
-                VF(" using passkey "); V(bluetoothManager.sta->passkey);
-                SERIAL_BT.setPin(bluetoothManager.sta->passkey);
-              }
-
-              VF("...");
-              if (SERIAL_BT.connect(addr, channel, ESP_SPP_SEC_NONE, ESP_SPP_ROLE_SLAVE)) {
-                VLF(" success");
-                message.show("BT " L_CONNECTION, L_SUCCESS, 1000);
-                onStep.connectionMode = CM_BLUETOOTH;
-                return;
-              } else {
-                message.show("BT " L_CONNECTION, L_FAILED, 2000);
-                VLF(" failed!");
-                goto rescan;
-              }
-            }
+            #if REBOOT_TO_BLUETOOTH == ON
+              VF("MSG: Connect menu, setting boot flag for BT station "); V(crossIndex[userSelection].index); VLF(" (restarting...)");
+              message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
+              nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_BT_STA1 + (uint8_t)(crossIndex[userSelection].index - 1));
+              tasks.yield(NV_WAIT + 500);
+              HAL_RESET();
+            #else
+              onStep.connectionMode = CM_BLUETOOTH;
+              connectionSelection = (ConnectSelection)((uint8_t)CS_BT_STA1 + (uint8_t)(crossIndex[userSelection].index - 1));
+              return;
+            #endif
           }
         }
       }
@@ -405,25 +403,22 @@ rescan:
         break;
 
         case 4:
+          message.show(L_DHCP_LINE1, L_DHCP_LINE2, 3000);
           display->UserInterfaceInputValueBoolean(&keyPad, L_USE " DHCP?", &wifiManager.sta->dhcpEnabled);
         break;
 
-        // Station IP
         case 5:
           display->UserInterfaceInputValueIP(&keyPad, "SHC IP", wifiManager.sta->ip);
         break;
 
-        // Gateway IP
         case 6:
           display->UserInterfaceInputValueIP(&keyPad, "Gateway IP", wifiManager.sta->gw);
         break;
 
-        // Subnet Subnet IP
         case 7:
           display->UserInterfaceInputValueIP(&keyPad, "Subnet IP", wifiManager.sta->sn);
         break;
 
-        // Target IP
         case 8:
           display->UserInterfaceInputValueIP(&keyPad, "Target IP", wifiManager.sta->target);
         break;

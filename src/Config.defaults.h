@@ -36,7 +36,23 @@
 #endif
 #endif
 
-// set defaults just incase
+// some additional flexibility, just incase
+
+// note BT reboots to the connect menu regardless of the setting below
+// which revoots serial and wifi also
+#ifndef REBOOT_TO_CONNECT_MENU
+#define REBOOT_TO_CONNECT_MENU   OFF
+#endif
+#ifndef REBOOT_TO_SERIAL
+#define REBOOT_TO_SERIAL         OFF
+#endif
+#ifndef REBOOT_TO_WIFI
+#define REBOOT_TO_WIFI           OFF
+#endif
+#ifndef REBOOT_TO_BLUETOOTH
+#define REBOOT_TO_BLUETOOTH      OFF
+#endif
+
 #ifndef SERIAL_IP_MODE
 #define SERIAL_IP_MODE           OFF
 #endif
@@ -52,6 +68,7 @@
 #define STA_ENABLED              true
 #define STA_HOST_NAME            "OnStep"
 #define STA_SSID                 "OnStep"
+
 #ifndef MDNS_SERVER
 #define MDNS_SERVER              ON
 #endif
@@ -59,6 +76,25 @@
 #define MDNS_CLIENT              ON
 #endif
 
+#ifndef STA1_DHCP_ENABLED
+#define STA1_DHCP_ENABLED        true
+#endif
+#ifndef STA2_DHCP_ENABLED
+#define STA2_DHCP_ENABLED        true
+#endif
+#ifndef STA3_DHCP_ENABLED
+#define STA3_DHCP_ENABLED        true
+#endif
+#ifndef STA4_DHCP_ENABLED
+#define STA4_DHCP_ENABLED        true
+#endif
+#ifndef STA5_DHCP_ENABLED
+#define STA5_DHCP_ENABLED        true
+#endif
+#ifndef STA6_DHCP_ENABLED
+#define STA6_DHCP_ENABLED        true
+#endif
+#endif
 
 // enable and customize Bluetooth functionality
 // for other default BT settings see the file:
@@ -70,5 +106,4 @@
 
 #ifndef SERIAL_BT_MODE
 #define SERIAL_BT_MODE           OFF
-
 #endif

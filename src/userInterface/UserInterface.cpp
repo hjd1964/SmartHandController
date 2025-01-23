@@ -33,8 +33,7 @@ void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialB
     wifiManager.readSettings();
   #endif
   #if SERIAL_BT_MODE != OFF
-    SERIAL_BT.begin(SERIAL_BT_NAME, true);
-    bluetoothManager.init();
+  bluetoothManager.readSettings();
   #endif
 
   // confirm the data structure size
@@ -56,10 +55,10 @@ void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialB
     if (!nv.isKeyValid(INIT_NV_KEY)) { DLF("ERR: NV, failed to read back key!"); } else { VLF("MSG: NV, reset complete"); }
   }
 
-  directBootMode = (DirectBoot)nv.readUC(NV_SERIAL_BOOT_FLAG_BASE);
-  if (directBootMode != DB_NONE) {
-    VF("MSG: UserInterface, direct boot flag set to "); VL((int)directBootMode);
-    nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_NONE);
+  connectionSelection = (ConnectSelection)nv.readUC(NV_SERIAL_BOOT_FLAG_BASE);
+  if (connectionSelection != CS_NONE) {
+    VF("MSG: UserInterface, direct boot flag set to "); VL((int)connectionSelection);
+    nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_NONE);
   }
 
   if (strlen(version) <= 19) strcpy(_version, version);
@@ -111,7 +110,7 @@ void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialB
   display->setContrast(UI::Contrast[displaySettings.maxContrastSelection]);
 
   // display the splash screen
-  if (directBootMode == DB_NONE) {
+  if (connectionSelection == CS_NONE) {
     drawIntro();
     delay(2000);
   }
@@ -127,7 +126,6 @@ void UI::poll() {
   if (!status.connected && (long)(millis() - lastConnectedTime) > 2000) {
     if (!firstConnect) message.show(L_LOST_MSG, L_CONNECTION, 1000);
     connect();
-    firstConnect = false;
     reconnectionCount++;
   } else lastConnectedTime = millis();
 
@@ -728,90 +726,116 @@ bool UI::SelectStarAlign() {
 
 void UI::connect() {
 
-initAgain:
-  // count down reconnect attempts
-  if (--skipConnectMenu < 0) skipConnectMenu = 0;
+if (connectionSelection == CS_CONNECT_MENU) connectionSelection = CS_NONE;
+connectAgain:
 
-  if (!skipConnectMenu && !firstConnect) {
-    #if SERIAL_IP_MODE != OFF
-      if (onStep.connectionMode == CM_WIFI) {
-        SERIAL_IP.end();
-        wifiManager.disconnect();
-      }
-    #endif
-    #if SERIAL_BT_MODE != OFF
-      if (onStep.connectionMode == CM_BLUETOOTH) {
-        VLF("MSG: Connect, setting boot flag for exiting BT mode (restarting...)");
-        nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)DB_CONNECT_MENU);
+  // count down during reconnect attempts
+  if (--skipConnectionSelection < 0) skipConnectionSelection = 0;
+  if (!skipConnectionSelection) {
+
+    // shutdown any open connection
+    if (!firstConnect) {
+      #if SERIAL_ONSTEP != OFF
+        if (onStep.connectionMode == CM_SERIAL) SERIAL_ONSTEP.end();
+      #endif
+
+      #if SERIAL_IP_MODE != OFF
+        if (onStep.connectionMode == CM_WIFI) { SERIAL_IP.end(); wifiManager.disconnect(); }
+      #endif
+
+      if ((onStep.connectionMode == CM_BLUETOOTH) || REBOOT_TO_CONNECT_MENU == ON) {
+        VLF("MSG: Connect, setting boot flag for menu (restarting...)");
+        nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_CONNECT_MENU);
         message.show(L_SCANNING, L_PLEASE_WAIT "...", 10);
         tasks.yield(NV_WAIT + 500);
         HAL_RESET();
       }
+    }
+
+    #if SERIAL_ONSTEP != OFF && SERIAL_IP_MODE == OFF && SERIAL_BT_MODE == OFF
+      // flag serial only operation
+      connectionSelection = CS_SERIAL;
+    #else
+      // allow the user to make a selection
+      if (connectionSelection == CS_NONE) menuWireless();
     #endif
+
+    // start the connection
     #if SERIAL_ONSTEP != OFF
-      if (onStep.connectionMode == CM_SERIAL) SERIAL_ONSTEP.end();
+      if (connectionSelection == CS_SERIAL) {
+        onStep.connectionMode = CM_SERIAL;
+        connectionSelection = CS_NONE;
+
+        #if defined(SERIAL_ONSTEP_RX) && defined(SERIAL_ONSTEP_TX)
+          SERIAL_ONSTEP.begin(serialBaud, SERIAL_8N1, SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
+        #else
+          SERIAL_ONSTEP.begin(serialBaud);
+        #endif
+      }
     #endif
-  }
 
-  // show the connection menu
-  #if SERIAL_IP_MODE != OFF || SERIAL_BT_MODE != OFF
-    if (directBootMode == DB_SERIAL) onStep.connectionMode = CM_SERIAL; else
-    if (!skipConnectMenu) menuWireless();
-  #elif SERIAL_ONSTEP != OFF
-    onStep.connectionMode = CM_SERIAL;
-  #endif
+    #if SERIAL_IP_MODE != OFF
+      if (connectionSelection >= CS_WIFI_STA1 && connectionSelection <= CS_WIFI_STA6) {
+        wifiManager.setStation((connectionSelection - (int)CS_WIFI_STA1) + 1);
+        onStep.connectionMode = CM_WIFI;
+        connectionSelection = CS_NONE;
 
-  // initialize connection
-  #if SERIAL_IP_MODE != OFF
-    if (onStep.connectionMode == CM_WIFI) { 
-      if (!wifiManager.active) {
-        bool initSuccess = true;
-        if (firstConnect) {
+        if (!wifiManager.active) {
           VLF("MSG: Connect, WiFi starting");
-          message.show(L_WIFI_CONNECTION1, wifiManager.sta->ssid, 100);
-        } else {
-          VLF("MSG: Connect, WiFi restarting");
-          message.show(L_WIFI_CONNECTION2, wifiManager.sta->ssid, 100);
+          message.show(L_WIFI_CONNECTION, wifiManager.sta->ssid, 100);
+          delay(500);
+
+          wifiManager.staNameLookup = true;
+          if (!wifiManager.init()) {
+            VLF("MSG: Connect, WiFi start failed");
+            message.show(L_WIFI_CONNECTION, L_FAILED, 2000);
+            delay(5000);
+            goto connectAgain;
+          }
         }
-        delay(500);
 
-        wifiManager.staNameLookup = true;
-        if (!wifiManager.init()) initSuccess = false;
-
-        if (!initSuccess) {
-          VLF("MSG: Connect, WiFi failed");
-          message.show(L_WIFI_CONNECTION2, L_FAILED, 2000);
-          delay(5000);
-          goto initAgain;
+        message.show(L_CONNECTING, IPAddress(wifiManager.sta->target).toString().c_str(), 1000);
+        if (!SERIAL_IP.begin(serialBaud)) {
+          VLF("MSG: Connect, to target failed");
+          wifiManager.disconnect();
+          delay(2000);
+          message.show(L_CONNECTING, L_FAILED, 2000);
+          goto connectAgain;
         }
       }
+    #endif
 
-      message.show(L_CONNECTING, IPAddress(wifiManager.sta->target).toString().c_str(), 1000);
-      if (!SERIAL_IP.begin(serialBaud)) {
-        VLF("MSG: Connect, to target failed");
-        wifiManager.disconnect();
-        delay(2000);
-        message.show(L_CONNECTING, L_FAILED, 2000);
-        goto initAgain;
+    #if SERIAL_BT_MODE != OFF
+      if (connectionSelection >= CS_BT_STA1 && connectionSelection <= CS_BT_STA8) {
+        bluetoothManager.setStation((connectionSelection - (int)CS_BT_STA1) + 1);
+        onStep.connectionMode = CM_BLUETOOTH;
+        connectionSelection = CS_NONE;
+
+        if (!bluetoothManager.active) {
+          VLF("MSG: Connect, Bluetooth starting");
+          message.show(L_BT_CONNECTION, bluetoothManager.sta->address, 100);
+          delay(500);
+
+          SERIAL_BT.begin(SERIAL_BT_NAME, true);
+
+          if (!bluetoothManager.init()) {
+            VLF("MSG: Connect, Bluetooth start failed");
+            message.show(L_BT_CONNECTION, L_FAILED, 2000);
+            delay(5000);
+            goto connectAgain;
+          }
+        }
       }
-    }
-  #endif
-  #if SERIAL_ONSTEP != OFF
-    if (onStep.connectionMode == CM_SERIAL) {
-      #if defined(SERIAL_ONSTEP_RX) && defined(SERIAL_ONSTEP_TX)
-        SERIAL_ONSTEP.begin(serialBaud, SERIAL_8N1, SERIAL_ONSTEP_RX, SERIAL_ONSTEP_TX);
-      #else
-        SERIAL_ONSTEP.begin(serialBaud);
-      #endif
-    }
-  #endif
+    #endif
+
+    firstConnect = false;
+  }
 
   VLF("MSG: Connect, looking for OnStep...");
 
-  onStepContactTry = 0;
-
-queryAgain:
-  if (onStepContactTry % 1 == 0) message.show(L_LOOKING, "OnStep", 500); else message.show(L_LOOKING, "...", 500);
+  queryTry = 0;
+queryOnStep:
+  if (queryTry % 1 == 0) message.show(L_LOOKING, "OnStep", 500); else message.show(L_LOOKING, "...", 500);
 
   for (int i = 0; i < 3; i++) {
     delay(100);
@@ -829,7 +853,7 @@ queryAgain:
   char s[80] = "";
   CMD_RESULT r = onStepLx200.Get(":GVP#", s);
   if (r != CR_VALUE_GET || !strstr(s, "On-Step")) {
-    if (++onStepContactTry < 3) goto queryAgain;
+    if (++queryTry < 3) goto queryOnStep;
 
     #if SERIAL_IP_MODE != OFF
       if (onStep.connectionMode == CM_WIFI) {
@@ -843,7 +867,7 @@ queryAgain:
 
     delay(1000);
 
-    goto initAgain;
+    goto connectAgain;
   }
 
   onStepLx200.Get(":GVN#", s);
@@ -853,23 +877,23 @@ queryAgain:
   initGuideCommands();
 
   #if SERIAL_IP_MODE != OFF
-    if (onStep.connectionMode == CM_WIFI) skipConnectMenu = 3;
+    if (onStep.connectionMode == CM_WIFI) skipConnectionSelection = 3;
   #endif
   #if SERIAL_BT_MODE != OFF
-    if (onStep.connectionMode == CM_BLUETOOTH) skipConnectMenu = 2;
+    if (onStep.connectionMode == CM_BLUETOOTH) skipConnectionSelection = 2;
   #endif
   #if SERIAL_ONSTEP != OFF
-    if (onStep.connectionMode == CM_SERIAL) skipConnectMenu = 2;
+    if (onStep.connectionMode == CM_SERIAL) skipConnectionSelection = 2;
   #endif
 
-again2:
+  queryTry = 0;
+queryCoordinateSystem:
   delay(500);
 
   // OnStep coordinate mode for getting and setting RA/Dec
   // 0 = OBSERVED_PLACE (same as not supported)
   // 1 = TOPOCENTRIC (does refraction)
   // 2 = ASTROMETRIC_J2000 (does refraction and precession/nutation)
-  onStepContactTry = 0;
   if (onStepLx200.Get(":GXEE#", s) == CR_VALUE_GET && s[0] >= '0' && s[0] <= '3' && s[1] == 0) {
     if (s[0] == '0') {
       VLF("MSG: Connect, coords Observed Place");
@@ -887,7 +911,7 @@ again2:
       message.show(L_CONNECTION, L_OK "!", 500);
     }
   } else {
-    if (++onStepContactTry <= 3) goto again2;
+    if (++queryTry <= 3) goto queryCoordinateSystem;
     VLF("WRN: Connect, get coords failed");
     VLF("MSG: Connect, fallback Observed Place");
     telescopeCoordinates = OBSERVED_PLACE;

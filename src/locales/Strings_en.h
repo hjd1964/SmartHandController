@@ -40,6 +40,8 @@
 #define L_MEMORY "Memory"
 #define L_OVERWRITE "Overwrite"
 #define L_PASSWORD "Password"
+#define L_DHCP_LINE1 "DHCP disable can"
+#define L_DHCP_LINE2 "disrupt operation!"
 
 // common abbreviations
 #define L_TELESCOPE "Scope" // telescope
@@ -355,8 +357,8 @@
 // ------------------- SmartController.h -----------------------
 #define L_WIFI_SELECT "OnStep Connection:"
 #define L_WIFI_SELECT_EDIT "Edit Connection:"
-#define L_WIFI_CONNECTION1 "Starting WiFi:"
-#define L_WIFI_CONNECTION2 "Restart WiFi:"
+#define L_WIFI_CONNECTION "Starting WiFi:"
+#define L_BT_CONNECTION "Starting BT:"
 #define L_LOOKING "Looking for"
 #define L_WARNING "Warning"
 #define L_CONNECTION "Connection"
