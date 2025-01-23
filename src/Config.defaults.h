@@ -52,8 +52,13 @@
 #define STA_ENABLED              true
 #define STA_HOST_NAME            "OnStep"
 #define STA_SSID                 "OnStep"
+#ifndef MDNS_SERVER
 #define MDNS_SERVER              ON
 #endif
+#ifndef MDNS_CLIENT
+#define MDNS_CLIENT              ON
+#endif
+
 
 // enable and customize Bluetooth functionality
 // for other default BT settings see the file:
