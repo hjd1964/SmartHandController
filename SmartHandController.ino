@@ -30,7 +30,7 @@
 #define Product               "SHC"
 #define FirmwareVersionMajor  "4"
 #define FirmwareVersionMinor  "02"
-#define FirmwareVersionPatch  "q"
+#define FirmwareVersionPatch  "r"
 
 #include "src/Common.h"
 #include "src/Validate.h"
