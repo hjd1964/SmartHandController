@@ -11,24 +11,24 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
   // clear the queues and send the command
   #if SERIAL_IP_MODE != OFF
     if (connectionMode == CM_WIFI) {
-      SERIAL_IP.flush();
       SERIAL_IP.setTimeout(timeOutMs);
+      SERIAL_IP.flush();
       while (SERIAL_IP.available() > 0) SERIAL_IP.read();
       SERIAL_IP.print(cmd);
     }
   #endif
   #if SERIAL_BT_MODE != OFF
     if (connectionMode == CM_BLUETOOTH) {
-      SERIAL_BT.flush();
       SERIAL_BT.setTimeout(timeOutMs);
+      SERIAL_BT.flush();
       while (SERIAL_BT.available() > 0) SERIAL_BT.read();
       SERIAL_BT.print(cmd);
     }
   #endif
   #if SERIAL_ONSTEP != OFF
     if (connectionMode == CM_SERIAL) {
-      SERIAL_ONSTEP.flush();
       SERIAL_ONSTEP.setTimeout(timeOutMs);
+      SERIAL_ONSTEP.flush();
       while (SERIAL_ONSTEP.available() > 0) SERIAL_ONSTEP.read();
       SERIAL_ONSTEP.print(cmd);
     }
