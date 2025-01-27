@@ -39,7 +39,7 @@
 // some additional flexibility, just incase
 
 // note BT reboots to the connect menu regardless of the setting below
-// which revoots serial and wifi also
+// which reboots serial and wifi also
 #ifndef REBOOT_TO_CONNECT_MENU
 #define REBOOT_TO_CONNECT_MENU   OFF
 #endif
