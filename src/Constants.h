@@ -39,10 +39,10 @@
 #define WEATHER_LAST                6
 
 // NV -------------------------------------------------------------------------------------------------------------------
-#define INIT_NV_KEY                 159301359UL
+#define INIT_NV_KEY                 159301360UL
 
-#define NV_KEY                      0      // bytes:   4 , addr:   0..  3
-#define NV_DISPLAY_SETTINGS_BASE    4      // bytes:  24 , addr:   4.. 27
-#define NV_SERIAL_BOOT_FLAG_BASE   28      // bytes:   1 , addr:  28.. 28
-#define NV_BT_SETTINGS_BASE        29      // bytes: 149 , addr:  29..177 (BluetoothSettingsSize)
-#define NV_WIFI_SETTINGS_BASE     178      // bytes: 790 , addr: 178..968 (WifiSettingsSize)
+#define NV_KEY                      0      // bytes:   4 , addr:   0..   3
+#define NV_DISPLAY_SETTINGS_BASE    4      // bytes:  24 , addr:   4..  27
+#define NV_SERIAL_BOOT_FLAG_BASE   28      // bytes:   1 , addr:  28..  28
+#define NV_BT_SETTINGS_BASE        29      // bytes: 149 , addr:  29.. 177 (BluetoothSettingsSize)
+#define NV_WIFI_SETTINGS_BASE     178      // bytes: 988 , addr: 178..1165 (WifiSettingsSize)
