@@ -56,11 +56,11 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
   uint8_t event;
 
   // transfer password to local variable and pad with spaces
-  if (width > 32) width = 32;
+  if (width > 63) width = 63;
   int visible_width = width;
   if (visible_width > visual_width_max) visible_width = visual_width_max;
-  char local_value[33];
-  sstrcpy(local_value, value, 33);
+  char local_value[64];
+  sstrcpy(local_value, value, 64);
   while (strlen(local_value) < width) { strcat(local_value, " "); }
 
   uint8_t selected_char = 0; // the character being edited

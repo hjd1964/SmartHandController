@@ -383,7 +383,7 @@ rescan:
         case 1:
           accept = false;
           if (display->UserInterfaceInputValueBoolean(&keyPad, "SSID as Hostname?", &accept)) {
-            if (accept) sstrcpy(wifiManager.sta->host, ssid, 16);
+            if (accept) sstrcpy(wifiManager.sta->host, ssid, 32);
             display->UserInterfaceInputValueFQDN(&keyPad, "Hostname", "", wifiManager.sta->host, 32, "");
           }
         break;
@@ -393,13 +393,13 @@ rescan:
           accept = false;
           if (display->UserInterfaceInputValueBoolean(&keyPad, L_OVERWRITE "?", &accept)) {
             if (accept) {
-              strcpy(wifiManager.sta->ssid, ssid);
+              sstrcpy(wifiManager.sta->ssid, ssid, 33);
             }
           }
         break;
 
         case 3:
-          display->UserInterfaceInputValuePassword(&keyPad, L_PASSWORD, "", wifiManager.sta->pwd, ' ', '~', 32, "");
+          display->UserInterfaceInputValuePassword(&keyPad, L_PASSWORD, "", wifiManager.sta->pwd, ' ', '~', 63, "");
         break;
 
         case 4:
