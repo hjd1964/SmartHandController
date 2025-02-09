@@ -80,7 +80,7 @@ void UI::menuAlignment() {
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
       if (onStepLx200.Set(":hF#") == CR_VALUE_SET) message.show(L_ALGN_RESUME0, L_ALGN_RESUME1, -1);
     } else
-    if (starsForAlign>0) {
+    if (starsForAlign > 0) {
       // check if date/time is set, if not set it
       if (!status.hasDateTime()) { message.show(L_ALGN_RESUME2, L_ALGN_RESUME3, 2000); menuLocalDateTime(); }
 
