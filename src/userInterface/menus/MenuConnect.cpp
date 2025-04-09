@@ -86,7 +86,7 @@ rescan:
         for (int stationNumber = 1; stationNumber <= WifiStationCount; stationNumber++) {
           wifiManager.setStation(stationNumber);
           if (WiFi.SSID(ssidNumber).equals(wifiManager.sta->ssid)) {
-            if (!foundMatch) { VF("matched station(s) "); } else foundMatch = true;
+            if (!foundMatch) { VF("matched station(s) "); foundMatch = true; }
             V(stationNumber); V(" ");
             if (++selectionCount > crossIndexSize) break;
             if (strlen(wifiManager.sta->host) > 0)
