@@ -912,7 +912,7 @@ queryCoordinateSystem:
     }
   } else {
     if (++queryTry <= 3) goto queryCoordinateSystem;
-    VLF("WRN: Connect, get coords failed");
+    DLF("WRN: Connect, get coords failed");
     VLF("MSG: Connect, fallback Observed Place");
     telescopeCoordinates = OBSERVED_PLACE;
     message.show(L_CONNECTION, L_WARNING "!", 1000);
