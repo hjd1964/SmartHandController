@@ -76,20 +76,22 @@ void systemServices() {
 #endif
 
 void setup(void) {
-  
+
   // start debug serial port
   if (DEBUG == ON || DEBUG == VERBOSE) SERIAL_DEBUG.begin(SERIAL_DEBUG_BAUD);
   delay(2000);
 
   VF("MSG: Smart Hand Controller "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
   VF("MSG: MCU = "); VLF(MCU_STR);
-  
+
   HAL_INIT();
+  WIRE_INIT();
+
   if (!nv.init()) {
     DLF("WRN: Setup, NV (EEPROM/FRAM/Flash/etc.) device not found!");
     nv.initError = true;
   }
- 
+
   // System services
   // add task for system services, runs at 10ms intervals so commiting 1KB of NV takes about 10 seconds
   VF("MSG: Setup, starting system services task (rate 10ms priority 7)... ");

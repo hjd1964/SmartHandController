@@ -10,62 +10,27 @@
 #include "../HAL/HAL.h"
 #include "../locales/Locale.h"
 
-// Default pin state; true for active LOW, false if active HIGH
-#ifndef B_PIN0_ACTIVE_STATE
-  #define B_PIN0_ACTIVE_STATE LOW
-#endif
-#ifndef B_PIN1_ACTIVE_STATE
-  #define B_PIN1_ACTIVE_STATE LOW
-#endif
-#ifndef B_PIN2_ACTIVE_STATE
-  #define B_PIN2_ACTIVE_STATE LOW
-#endif
-#ifndef B_PIN3_ACTIVE_STATE
-  #define B_PIN3_ACTIVE_STATE LOW
-#endif
-#ifndef B_PIN4_ACTIVE_STATE
-  #define B_PIN4_ACTIVE_STATE LOW
-#endif
-#ifndef B_PIN5_ACTIVE_STATE
-  #define B_PIN5_ACTIVE_STATE LOW
-#endif
-#ifndef B_PIN6_ACTIVE_STATE
-  #define B_PIN6_ACTIVE_STATE LOW
-#endif
-
-#ifndef B_PIN0_INPUT_MODE
-  #define B_PIN0_INPUT_MODE INPUT_PULLUP
-#endif
-#ifndef B_PIN1_INPUT_MODE
-  #define B_PIN1_INPUT_MODE INPUT_PULLUP
-#endif
-#ifndef B_PIN2_INPUT_MODE
-  #define B_PIN2_INPUT_MODE INPUT_PULLUP
-#endif
-#ifndef B_PIN3_INPUT_MODE
-  #define B_PIN3_INPUT_MODE INPUT_PULLUP
-#endif
-#ifndef B_PIN4_INPUT_MODE
-  #define B_PIN4_INPUT_MODE INPUT_PULLUP
-#endif
-#ifndef B_PIN5_INPUT_MODE
-  #define B_PIN5_INPUT_MODE INPUT_PULLUP
-#endif
-#ifndef B_PIN6_INPUT_MODE
-  #define B_PIN6_INPUT_MODE INPUT_PULLUP
+#if defined(ESP32)
+  #define PINMAP_STR "ESP32"
+  #include "Pins.Esp32.h"
+#elif defined(ARDUINO_TEENSY32)
+  #define PINMAP_STR "TEENSY3.2"
+  #include "Pins.Teensy.h"
+#elif defined(ARDUINO_TEENSY35)
+  #define PINMAP_STR "TEENSY3.5"
+  #include "Pins.Teensy.h"
+#elif defined(ARDUINO_TEENSY36)
+  #define PINMAP_STR "TEENSY3.6"
+  #include "Pins.Teensy.h"
+#elif defined(ARDUINO_TEENSY40)
+  #define PINMAP_STR "TEENSY4.0"
+  #include "Pins.Teensy.h"
+#elif defined(ARDUINO_TEENSY41)
+  #define PINMAP_STR "TEENSY4.1"
+  #include "Pins.Teensy.h"
+#else
+  #error "Configuration (Arduino): select either a Teensy4.0 or ESP32 device"
 #endif
 
-// Default button debounce in milliseconds
-#ifndef BUTTON_DEBOUNCE_MS
-  #define BUTTON_DEBOUNCE_MS 30
-#endif
-
-// Default hysteresis for any joystick (in ADC counts) that may be present
-#ifndef KEYPAD_JOYSTICK_HYSTERESIS
-  #define KEYPAD_JOYSTICK_HYSTERESIS 200
-#endif
-
-#include "Pins.Esp32.h"
-#include "Pins.Esp8266.h"
-#include "Pins.M0.h"
-#include "Pins.Teensy.h"
+// all unassigned pins OFF
+#include "Pins.defaults.h"

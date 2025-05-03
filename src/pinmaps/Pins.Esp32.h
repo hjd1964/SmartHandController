@@ -1,10 +1,8 @@
 // -------------------------------------------------------------------------------------------------
-// Pin map for ESP32
+// pinmap for ESP32
 #pragma once
 
 #if defined(ESP32)
-  #define PINMAP_STR "ESP32"
-
   #if KEYPAD_JOYSTICK_ANALOG == JS1
     #ifndef B_PIN0
     #define B_PIN0             25  // Shift
@@ -66,17 +64,4 @@
   #define UTILITY_LIGHT_PIN    13  // GPIO13 used as PWM output to drive utility lamp LED
 
   #define DISPLAY_RESET_PIN    16  // GPIO16 used to reset some displays, i.e. the SSD1309
-
-  #ifndef DISPLAY_DC_PIN
-    #define DISPLAY_DC_PIN     -1  // SPI display data/clock pin
-  #endif
-  #ifndef DISPLAY_SS_PIN
-    #define DISPLAY_SS_PIN     -1  // SPI display slave select pin
-  #endif
-  #ifndef DISPLAY_MOSI_PIN
-    #define DISPLAY_MOSI_PIN   -1  // SPI display master out slave in pin (ignored for hardware SPI connections)
-  #endif
-  #ifndef DISPLAY_SCK_PIN
-    #define DISPLAY_SCK_PIN    -1  // SPI display clock pin for (ignored for hardware SPI connections)
-  #endif
 #endif
