@@ -121,6 +121,16 @@ void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialB
 
 void UI::poll() {
   // -----------------------------------------------------------------------------------------------------
+  // deep sleep
+  #ifdef DEEP_SLEEP_WAKEUP_PIN
+    if (keyPad.s->isDown() && keyPad.shift->isDown()) {
+      VLF("MSG: Entering deep sleep...");
+      message.show(L_POWERING, L_OFF "...", 1000);
+      esp_deep_sleep_enable_gpio_wakeup(BIT(DEEP_SLEEP_WAKEUP_PIN), ESP_GPIO_WAKEUP_GPIO_LOW);
+    }
+  #endif
+
+  // -----------------------------------------------------------------------------------------------------
   // connect/reconnect
   static unsigned long lastConnectedTime = 0;
   if (!status.connected && (long)(millis() - lastConnectedTime) > 2000) {

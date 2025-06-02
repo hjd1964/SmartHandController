@@ -42,6 +42,7 @@
 #define L_PASSWORD "Password"
 #define L_DHCP_LINE1 "DHCP disable can"
 #define L_DHCP_LINE2 "disrupt operation!"
+#define L_POWERING "Powering"
 
 // common abbreviations
 #define L_TELESCOPE "Scope" // telescope
