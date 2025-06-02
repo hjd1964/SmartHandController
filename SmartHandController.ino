@@ -92,6 +92,12 @@ void setup(void) {
     nv.initError = true;
   }
 
+  // If necessary, power up the display
+  #ifdef DISPLAY_POWER_PIN
+    pinMode(DISPLAY_POWER_PIN, OUTPUT);
+    digitalWrite(DISPLAY_POWER_PIN, HIGH);
+  #endif
+
   // System services
   // add task for system services, runs at 10ms intervals so commiting 1KB of NV takes about 10 seconds
   VF("MSG: Setup, starting system services task (rate 10ms priority 7)... ");
