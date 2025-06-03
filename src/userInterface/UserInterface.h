@@ -15,6 +15,7 @@
 #define ASTROMETRIC_J2000 3
 
 #define MY_BORDER_SIZE 1
+#define icon_narrow_width 8
 #define icon_width 16
 #define icon_height 16
 

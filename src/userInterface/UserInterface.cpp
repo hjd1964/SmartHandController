@@ -503,7 +503,19 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
       Status::ParkState curP = status.getParkState();
       Status::TrackState curT = status.getTrackingState();
       Status::TrackRate curTR = status.getTrackingRate();
-    
+
+      #ifdef BATTERY_VOLTAGE_PIN
+        static float batteryVoltage = 3.7F;
+        float v = analogReadMilliVolts(BATTERY_VOLTAGE_PIN)/1000.0F;
+        if (BATTERY_VOLTAGE_FORMULA(v) < 5.0F) batteryVoltage = (batteryVoltage*9.0F + BATTERY_VOLTAGE_FORMULA(v))/10.0F;
+
+        if (batteryVoltage < BATTERY_VOLTAGE_0) { display->drawXBMP(x - icon_narrow_width, 0, icon_narrow_width, icon_height, battery_0_percent_bits); x -= icon_narrow_width + 1; } else
+        if (batteryVoltage < BATTERY_VOLTAGE_25) { display->drawXBMP(x - icon_narrow_width, 0, icon_narrow_width, icon_height, battery_25_percent_bits); x -= icon_narrow_width + 1; } else
+        if (batteryVoltage < BATTERY_VOLTAGE_50) { display->drawXBMP(x - icon_narrow_width, 0, icon_narrow_width, icon_height, battery_50_percent_bits); x -= icon_narrow_width + 1; } else
+        if (batteryVoltage < BATTERY_VOLTAGE_75) { display->drawXBMP(x - icon_narrow_width, 0, icon_narrow_width, icon_height, battery_75_percent_bits); x -= icon_narrow_width + 1; } else
+        { display->drawXBMP(x - icon_narrow_width, 0, icon_narrow_width, icon_height, battery_100_percent_bits); x -= icon_narrow_width + 1; }
+      #endif
+
       if (curP == Status::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
       if (curP == Status::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
       if (status.atHome())             { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 

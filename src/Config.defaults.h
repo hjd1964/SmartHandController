@@ -107,3 +107,22 @@
 #ifndef SERIAL_BT_MODE
 #define SERIAL_BT_MODE           OFF
 #endif
+
+// for battery charge level indication
+#ifndef BATTERY_VOLTAGE_0
+#define BATTERY_VOLTAGE_0        2.8F
+#endif
+#ifndef BATTERY_VOLTAGE_25
+#define BATTERY_VOLTAGE_25       3.6F
+#endif
+#ifndef BATTERY_VOLTAGE_50
+#define BATTERY_VOLTAGE_50       3.7F
+#endif
+#ifndef BATTERY_VOLTAGE_75
+#define BATTERY_VOLTAGE_75       3.9F
+#endif
+
+// by default uses a 2:1 voltage divider so multiply by 2
+#ifndef BATTERY_VOLTAGE_FORMULA
+#define BATTERY_VOLTAGE_FORMULA(v) (v*2.0F)
+#endif
