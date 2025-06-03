@@ -8,7 +8,7 @@ class Status {
 public:
   enum Errors {
     ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC,
-    ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED, ERR_ALT_MAX, ERR_WEATHER_INIT, ERR_SITE_INIT
+    ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED, ERR_ALT_MAX, ERR_WEATHER_INIT, ERR_SITE_INIT, ERR_NV_INIT
   };
 
   enum AlignMode {ALIM_OFF, ALIM_ONE, ALIM_TWO, ALIM_THREE, ALIM_FOUR, ALIM_FIVE, ALIM_SIX, ALIM_SEVEN, ALIM_EIGHT, ALIM_NINE};
@@ -51,6 +51,7 @@ public:
   bool isPecWaiting();
   bool isGuiding();
   bool isMountGEM();
+  bool isMountFork();
   bool isMountAltAz();
   bool getT(double &T);
   bool getP(double &P);

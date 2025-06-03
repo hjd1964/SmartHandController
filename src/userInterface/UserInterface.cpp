@@ -541,8 +541,8 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
         if (curP == Status::PRK_FAILED) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parkingFailed_bits); x -= icon_width + 1; }
 
         Status::PierState CurP = status.getPierState();
-        if (CurP == Status::PIER_E) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, E_bits); x -= icon_width + 1; } else 
-        if (CurP == Status::PIER_W) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, W_bits); x -= icon_width + 1; }
+        if (CurP == Status::PIER_E) { display->drawXBMP(x - icon_narrow_width, 0, icon_narrow_width, icon_height, E_bits); x -= icon_narrow_width + 1; } else 
+        if (CurP == Status::PIER_W) { display->drawXBMP(x - icon_narrow_width, 0, icon_narrow_width, icon_height, W_bits); x -= icon_narrow_width + 1; }
 
         if (status.align != Status::ALI_OFF) {
           switch (status.aliMode) {
@@ -568,16 +568,37 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
 
       if (!status.isGuiding()) {
         switch (status.getError()) {
-          case Status::ERR_NONE: break;                                                                                                         // no error
-          case Status::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits);  x -= icon_width + 1; break; // motor fault
-          case Status::ERR_ALT_MIN:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits); x -= icon_width + 1; break; // above below horizon
-          case Status::ERR_LIMIT_SENSE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrLs_bits);  x -= icon_width + 1; break; // physical limit switch triggered
-          case Status::ERR_DEC:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits);  x -= icon_width + 1; break; // past the rarely used Dec limit
-          case Status::ERR_AZM:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAz_bits);  x -= icon_width + 1; break; // for AltAz mounts, past limit in Az
-          case Status::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits);  x -= icon_width + 1; break; // for Eq mounts, past limit in HA
-          case Status::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits);  x -= icon_width + 1; break; // for Eq mounts, past meridian limit
-          case Status::ERR_ALT_MAX:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits); x -= icon_width + 1; break; // above overhead
-          default:                      display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrOth_bits); x -= icon_width + 1; break; // other error
+          case Status::ERR_NONE: break;
+          case Status::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMot_bits);  x -= icon_width + 1; break;
+          case Status::ERR_ALT_MIN:
+            if (status.getOnStepVersion() < 1000)
+              display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAltLowHigh_bits);
+            else
+              display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAltLow_bits);
+            x -= icon_width + 1;
+          break;
+          case Status::ERR_LIMIT_SENSE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrLimitSW_bits);  x -= icon_width + 1; break;
+          case Status::ERR_DEC:
+            if (status.isMountFork())
+              display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDecFork_bits);
+            else
+              display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDecGEM_bits);
+            x -= icon_width + 1;
+          break;
+          case Status::ERR_AZM:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAzmDOB_bits);  x -= icon_width + 1; break;
+          case Status::ERR_UNDER_POLE:
+            if (status.isMountFork())
+              display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrRaFork_bits);
+            else
+              display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrRaGEM_bits);
+            x -= icon_width + 1;
+          break;
+          case Status::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMER_bits);  x -= icon_width + 1; break;
+          case Status::ERR_WEATHER_INIT:display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrWeather_bits);  x -= icon_width + 1; break;
+          case Status::ERR_SITE_INIT:   display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrSite_bits);  x -= icon_width + 1; break;
+          case Status::ERR_NV_INIT:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrNV_bits);  x -= icon_width + 1; break;
+          case Status::ERR_ALT_MAX:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAltHigh_bits); x -= icon_width + 1; break;
+          default:                      display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrOther_bits); x -= icon_width + 1; break;
         }
       }
     }

@@ -165,8 +165,13 @@ bool Status::isGuiding() {
 }
 
 bool Status::isMountGEM() {
-  if (strlen(TelStatus)<4) return false;
+  if (strlen(TelStatus) < 4) return false;
   return (TelStatus[3] & 0b00000001);
+}
+
+bool Status::isMountFork() {
+  if (strlen(TelStatus) < 4) return false;
+  return (TelStatus[3] & 0b00000010);
 }
 
 bool Status::isMountAltAz() {
