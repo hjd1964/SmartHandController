@@ -70,7 +70,7 @@ void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialB
     delay(100);
     int thresholdEW = analogRead(B_PIN1);
     int thresholdNS = analogRead(B_PIN3);
-    keyPad.init(pin, active, thresholdNS, thresholdEW);
+    keyPad.init(pins, thresholdNS, thresholdEW);
   #else
     keyPad.init(pins, 0, 0);
   #endif
