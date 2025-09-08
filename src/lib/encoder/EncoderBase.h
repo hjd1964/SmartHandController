@@ -3,11 +3,6 @@
 
 #include "../../Common.h"
 
-// allow up to 20 errors per minute
-#ifndef ENCODER_ERROR_COUNT_THRESHOLD
-  #define ENCODER_ERROR_COUNT_THRESHOLD 20
-#endif
-
 #ifndef AXIS1_ENCODER
   #define AXIS1_ENCODER OFF
 #endif
@@ -56,6 +51,11 @@
   #define HAS_BISS_C
 #endif
 
+// allow up to 20 errors per minute
+#ifndef ENCODER_ERROR_COUNT_THRESHOLD
+  #define ENCODER_ERROR_COUNT_THRESHOLD 20
+#endif
+
 // the time window within which encoder counts are converted to velocity
 // in 250ms units so a value of 4 (the defualt) is one second
 // too short a window and the velocity will be inaccurate
@@ -66,7 +66,7 @@
 #endif
 
 // OFF is disabled, ON disregards unexpected quadrature encoder signals, or 
-// a value > 0 (nanoseconds) disregards repeat signal events for that timer period  
+// a value > 0 (nanoseconds) disregards repeat signal events for that timer period
 #ifndef ENCODER_FILTER
   #define ENCODER_FILTER OFF
 #endif
