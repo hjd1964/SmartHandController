@@ -174,9 +174,10 @@
 #define L_MOUNT_LIMIT_MERIDIAN_EAST "Meridn Limit E"
 #define L_MOUNT_LIMIT_MERIDIAN_WEST "Meridn Limit W"
 #define L_MOUNT_PPS "Preferred Pier Side"
-#define L_PPS_BEST "Best"
 #define L_PPS_EAST "East"
 #define L_PPS_WEST "West"
+#define L_PPS_BEST "Best"
+#define L_PPS_AUTO "Auto"
 
 // -------------------- menu, settings ---------------------
 

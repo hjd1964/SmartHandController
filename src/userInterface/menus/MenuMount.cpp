@@ -109,7 +109,7 @@ void UI::menuHorizon() {
   char out[20];
   if (message.show(onStepLx200.Get(":Gh#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
-    if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_HORIZON, "", &angle, -10, 20, 2, 0, " degree")) {
+    if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_HORIZON, "", &angle, -90, 30, 2, 0, " " L_DEGREE)) {
       sprintf(out, ":Sh%+03d#", (int)angle);
       message.show(onStepLx200.Set(out), false);
     }
@@ -120,7 +120,7 @@ void UI::menuOverhead() {
   char out[20];
   if (message.show(onStepLx200.Get(":Go#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
-    if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_OVERHEAD, "", &angle, 60, 91, 2, 0, " " L_DEGREE)) {
+    if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_OVERHEAD, "", &angle, 60, 90, 2, 0, " " L_DEGREE)) {
       sprintf(out, ":So%02d#", (int)angle);
       message.show(onStepLx200.Set(out), false);
     }
@@ -159,15 +159,17 @@ void UI::menuPier() {
   char ppsState[20]=""; ok = onStepLx200.Get(":GX96#",ppsState) == CR_VALUE_GET;
   if (ok) {
     uint8_t choice = 1;
-    if (ppsState[0] == 'B') choice = 1; else
-    if (ppsState[0] == 'E') choice = 2; else
-    if (ppsState[0] == 'W') choice = 3;
+    if (ppsState[0] == 'E') choice = 1; else
+    if (ppsState[0] == 'W') choice = 2; else
+    if (ppsState[0] == 'B') choice = 3; else
+    if (ppsState[0] == 'A') choice = 4;
     
-    choice = display->UserInterfaceSelectionList(&keyPad, L_MOUNT_PPS, choice, L_PPS_BEST "\n" L_PPS_EAST "\n" L_PPS_WEST);
+    choice = display->UserInterfaceSelectionList(&keyPad, L_MOUNT_PPS, choice, L_PPS_EAST "\n" L_PPS_WEST "\n" L_PPS_BEST "\n" L_PPS_AUTO);
     if (choice) {
-      if (choice == 1) ok = message.show(onStepLx200.Set(":SX96,B#"), false); else
-      if (choice == 2) ok = message.show(onStepLx200.Set(":SX96,E#"), false); else
-      if (choice == 3) ok = message.show(onStepLx200.Set(":SX96,W#"), false);
+      if (choice == 1) ok = message.show(onStepLx200.Set(":SX96,E#"), false); else
+      if (choice == 2) ok = message.show(onStepLx200.Set(":SX96,W#"), false); else
+      if (choice == 3) ok = message.show(onStepLx200.Set(":SX96,B#"), false); else
+      if (choice == 4) ok = message.show(onStepLx200.Set(":SX96,A#"), false);
     }
   }
 }
