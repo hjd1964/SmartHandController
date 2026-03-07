@@ -58,10 +58,6 @@ const KeyPad::Pin pins[7]= {
   {B_PIN6, B_PIN6_ACTIVE_STATE, B_PIN6_INPUT_MODE},
 };
 
-void systemServices() {
-  nv.poll(false);
-}
-
 #if WEATHER != OFF
   void weatherServices() {
     static int i = 0;
@@ -87,21 +83,20 @@ void setup(void) {
   HAL_INIT();
   WIRE_INIT();
 
-  if (!nv.init()) {
+  // start the NV service task at priority level 5
+  if (!nv().init(5)) {
     DLF("WRN: Setup, NV (EEPROM/FRAM/Flash/etc.) device not found!");
-    nv.initError = true;
   }
+
+  #if defined(NV_WIPE) && NV_WIPE == ON
+    nv().wipe();
+  #endif
 
   // If necessary, power up the display
   #ifdef DISPLAY_POWER_PIN
     pinMode(DISPLAY_POWER_PIN, OUTPUT);
     digitalWrite(DISPLAY_POWER_PIN, HIGH);
   #endif
-
-  // System services
-  // add task for system services, runs at 10ms intervals so commiting 1KB of NV takes about 10 seconds
-  VF("MSG: Setup, starting system services task (rate 10ms priority 7)... ");
-  if (tasks.add(10, 0, true, 5, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!"); }
 
   userInterface.init(Version, pins, SERIAL_ONSTEP_BAUD_DEFAULT, static_cast<OLED>(DISPLAY_OLED));
 

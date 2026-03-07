@@ -138,7 +138,7 @@ void UI::menuContrast() {
   if (current_selection_L3 > 0) {
     displaySettings.maxContrastSelection = current_selection_L3 - 1;
     display->setContrast(UI::Contrast[displaySettings.maxContrastSelection]);
-    nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
+    nv().kv().put("DISPLAY_SETTINGS", displaySettings);
   }
 }
 
@@ -150,7 +150,7 @@ void UI::menuDimTimeout() {
   if (current_selection_L3 > 0) {
     displaySettings.dimTimeoutSelection = current_selection_L3 - 1;
     displaySettings.dimTimeout = displaySettings.dimTimeoutSelection * 30000;
-    nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
+    nv().kv().put("DISPLAY_SETTINGS", displaySettings);
   }
 }
 
@@ -162,7 +162,7 @@ void UI::menuBlankTimeout() {
   if (current_selection_L3 > 0) {
     displaySettings.blankTimeoutSelection = current_selection_L3 - 1;
     displaySettings.blankTimeout = displaySettings.blankTimeoutSelection * 60 * 1000;
-    nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
+    nv().kv().put("DISPLAY_SETTINGS", displaySettings);
   }
 }
 

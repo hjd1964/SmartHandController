@@ -30,9 +30,13 @@
 // src/lib/wifi/WifiManager.defaults.h
 #if SERIAL_RADIO == WIFI_STATION || SERIAL_RADIO == BOTH
 #define SERIAL_IP_MODE           STATION
+
+#ifndef NV_WIFI_SETTINGS
+#define NV_WIFI_SETTINGS                         // allow NV storage of WiFi settings
+#endif
+
 #ifndef WifiStationCount
-// Use all six stations
-#define WifiStationCount         6
+#define WifiStationCount         6               // use all six stations
 #endif
 #endif
 

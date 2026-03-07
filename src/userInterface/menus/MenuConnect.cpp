@@ -206,7 +206,7 @@ rescan:
         onStep.connectionMode = CM_SERIAL;
         VLF("MSG: Connect menu, setting boot flag for Serial mode (restarting...)");
         message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
-        nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_SERIAL);
+        nv().kv().put("SERIAL_BOOT_FLAG", (uint8_t)CS_SERIAL);
         tasks.yield(NV_WAIT + 500);
         HAL_RESET();
       #else
@@ -233,7 +233,9 @@ rescan:
       #if REBOOT_TO_WIFI == ON
         VF("MSG: Connect menu, setting boot flag for WiFi station "); V(crossIndex[userSelection].index); VLF(" (restarting...)");
         message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
-        nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_WIFI_STA1 + (uint8_t)(crossIndex[userSelection].index - 1));
+        int index = crossIndex[userSelection].index - 1;
+        if (index < 0 || index > 5) index = 0;
+        nv().kv().put("SERIAL_BOOT_FLAG", (uint8_t)(CS_WIFI_STA1 + index));
         tasks.yield(NV_WAIT + 500);
         HAL_RESET();
       #else
@@ -272,7 +274,9 @@ rescan:
             #if REBOOT_TO_BLUETOOTH == ON
               VF("MSG: Connect menu, setting boot flag for BT station "); V(crossIndex[userSelection].index); VLF(" (restarting...)");
               message.show(L_CONNECTING, L_PLEASE_WAIT "...", 10);
-              nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_BT_STA1 + (uint8_t)(crossIndex[userSelection].index - 1));
+              int index = crossIndex[userSelection].index - 1;
+              if (index < 0 || index > 5) index = 0;
+              nv().kv().put("SERIAL_BOOT_FLAG", (uint8_t)(CS_BT_STA1 + index));
               tasks.yield(NV_WAIT + 500);
               HAL_RESET();
             #else
@@ -435,7 +439,7 @@ rescan:
                 if (accept) {
                   strcpy(wifiManager.sta->host, "");
                   strcpy(wifiManager.sta->ssid, "");
-                  strcpy(wifiManager.sta->pwd, "");
+                  strcpy(wifiManager.staPwd->password, "");
                   wifiManager.sta->dhcpEnabled = false;
                   ip4toip4(wifiManager.sta->gw, IPAddress(192,168,0,1));
                   ip4toip4(wifiManager.sta->ip, IPAddress(192,168,0,1));

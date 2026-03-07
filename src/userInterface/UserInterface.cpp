@@ -22,43 +22,94 @@ void keyPadWrapper() { keyPad.poll(); }
 void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialBaud, const OLED model) {
   serialBaud = SerialBaud;
 
-  // get nv ready
-  if (!nv.isKeyValid(INIT_NV_KEY)) {
-    VF("MSG: NV, invalid key wipe "); V(nv.size); VLF(" bytes");
-    if (nv.verify()) { VLF("MSG: NV, ready for reset to defaults"); }
-  } else { VLF("MSG: NV, correct key found"); }
+  // --------------------------------------------------------------------------------------------------
+  // start the NV/EEPROM subsystem for settings storage
+  bool initErrorNv = false;
+  bool success = nv().init();
+  NvVolume &nvVolume = nv().volume();
+
+  if (success) {
+    success = (nvVolume.mount("SHC", NV_VOLUME_SIGNATURE) == NvVolume::Status::Ok);
+    VF("MSG: Nv, volume ");
+    if (success) { VLF("'SHC' mounted"); } else { VLF("invalid/unformatted"); }
+
+    if (!success) {
+
+      // automatic kv partition sizing
+      uint32_t vSize = nvVolume.byteCount() - 32;
+      uint32_t kvSize = vSize;
+      if (vSize > 1039) {
+
+        // start the volume format
+        success = nvVolume.formatBegin("SHC", NV_VOLUME_SIGNATURE) == NvVolume::Status::Ok;
+        if (success) { VF("MSG: Nv, volume 'SHC' format started ("); V(vSize); VLF(" bytes)"); }
+
+        // add the KV partition
+        success = success && nvVolume.formatAddPartition("KV", kvSize);
+        if (success) { VF("MSG: Nv, volume format added 'KV' partition ("); V(kvSize); VLF(" bytes)"); }
+
+        // finally commit the volume format
+        success = success && (nvVolume.formatCommit() == NvVolume::Status::Ok);
+        if (success) { VLF("MSG: Nv, volume format done"); }
+
+        // try to mount the volume again
+        success = success && (nvVolume.mount("SHC", NV_VOLUME_SIGNATURE) == NvVolume::Status::Ok);
+        if (success) { VLF("MSG: Nv, volume 'SHC' mounted"); } else { DLF("WRN: Nv, volume 'SWS' mount FAILED!"); }
+
+      } else {
+        DLF("WRN: Nv, volume compatible storage device NOT FOUND!");
+        success = false;
+      }
+    }
+
+    // Bind global KV instance to the KV partition index
+    success = success && (nv().kv().init(nvVolume, "KV") == KvPartition::Status::Ok);
+    if (success) { VLF("MSG: Nv, partition 'KV' mounted"); } else { DLF("WRN: Nv, partition 'KV' mount FAILED!"); }
+  } else {
+    DLF("WRN: Nv, backend init FAILED!");
+  }
+
+  if (!success) {
+    VLF("WRN: Nv, init FAILED!");
+    initErrorNv = true;
+  }
+
+  nv().kv().resetInitErrorFlag();
+  // --------------------------------------------------------------------------------------------------
 
   // get wireless ready
   #if SERIAL_IP_MODE != OFF
     wifiManager.readSettings();
   #endif
   #if SERIAL_BT_MODE != OFF
-  bluetoothManager.readSettings();
+    bluetoothManager.readSettings();
   #endif
 
-  // confirm the data structure size
-  if (DisplaySettingsSize < sizeof(DisplaySettings)) { nv.initError = true; DL("ERR: UserInterface::setup(); DisplaySettingsSize error NV subsystem writes disabled"); }
+  if (!nv().kv().getOrInit("DISPLAY_SETTINGS", displaySettings)) { DLF("WRN: init failed for DISPLAY_SETTINGS"); }
 
-  // write the default settings to NV
-  if (!nv.hasValidKey()) {
-    VLF("MSG: UserInterface, writing defaults to NV");
-    nv.writeBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
-  }
+  // --------------------------------------------------------------------------------------------------
+  // init is done let the user see what's in the KV
+  #if DEBUG != OFF
+    KvPartition::Stats stats;
+    if (success && nv().kv().stats(stats) == KvPartition::Status::Ok) {
+      VF("MSG: Nv, partition 'KV' data blocks used = ");
+      V(stats.dataBlocksTotal - stats.dataBlocksFree); VF(" (of "); V(stats.dataBlocksTotal); VF(")");
+      VF(" key slots used = ");
+      V(stats.slotsTotal - stats.slotsFree); VF(" (of "); V(stats.slotsTotal); VLF(")");
+    }
+  #endif
 
-  // read the settings
-  nv.readBytes(NV_DISPLAY_SETTINGS_BASE, &displaySettings, sizeof(DisplaySettings));
+  // and capture any errors
+  if (nv().kv().getInitErrorFlag()) initErrorNv = true;
+  UNUSED(initErrorNv);
+  // --------------------------------------------------------------------------------------------------
 
-  // init is done, write the NV key if necessary
-  if (!nv.hasValidKey()) {
-    nv.writeKey((uint32_t)INIT_NV_KEY);
-    nv.wait();
-    if (!nv.isKeyValid(INIT_NV_KEY)) { DLF("ERR: NV, failed to read back key!"); } else { VLF("MSG: NV, reset complete"); }
-  }
+  connectionSelection = CS_NONE;
+  if (!nv().kv().getOrInit("SERIAL_BOOT_FLAG", connectionSelection)) { DLF("WRN: init failed for SERIAL_BOOT_FLAG"); };
 
-  connectionSelection = (ConnectSelection)nv.readUC(NV_SERIAL_BOOT_FLAG_BASE);
   if (connectionSelection != CS_NONE) {
     VF("MSG: UserInterface, direct boot flag set to "); VL((int)connectionSelection);
-    nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_NONE);
+    nv().kv().put("SERIAL_BOOT_FLAG", (uint8_t)CS_NONE);
   }
 
   if (strlen(version) <= 19) strcpy(_version, version);
@@ -788,7 +839,7 @@ connectAgain:
 
       if ((onStep.connectionMode == CM_BLUETOOTH) || REBOOT_TO_CONNECT_MENU == ON) {
         VLF("MSG: Connect, setting boot flag for menu (restarting...)");
-        nv.write(NV_SERIAL_BOOT_FLAG_BASE, (uint8_t)CS_CONNECT_MENU);
+        nv().kv().put("SERIAL_BOOT_FLAG", (uint8_t)CS_CONNECT_MENU);
         message.show(L_SCANNING, L_PLEASE_WAIT "...", 10);
         tasks.yield(NV_WAIT + 500);
         HAL_RESET();
