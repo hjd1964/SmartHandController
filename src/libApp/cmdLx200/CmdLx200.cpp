@@ -86,7 +86,7 @@ CMD_RESULT CmdLx200::SetTime(long &value) {
   minute = value % 60;
   value /= 60;
   hour = value;
-  sprintf(out, ":SL%02d:%02d:%02d#", hour, minute, second);
+  snprintf(out, sizeof(out), ":SL%02d:%02d:%02d#", hour, minute, second);
 
   return Set(out);
 }
@@ -105,7 +105,7 @@ CMD_RESULT CmdLx200::GetSite(int& value) {
 CMD_RESULT CmdLx200::SetSite(int& value) {
   char out[80];
 
-  sprintf(out, ":W%d#", value);
+  snprintf(out, sizeof(out), ":W%d#", value);
 
   return Set(out);
 }
@@ -129,7 +129,7 @@ CMD_RESULT CmdLx200::SetTargetRa(int vr1, int vr2, int vr3) {
 
   int iter = 0;
   if (vr1 < 0 || vr1 > 24 || vr2 < 0 || vr2 > 59 || vr3 < 0 || vr3 > 59) return  CR_SET_VALUE_FAILED;
-  sprintf(cmd, ":Sr%02d:%02d:%02d#", vr1, vr2, vr3);
+  snprintf(cmd, sizeof(cmd), ":Sr%02d:%02d:%02d#", vr1, vr2, vr3);
   while (iter < 3) {
     if (Set(cmd) ==  CR_VALUE_SET) {
       if (Get(":Gr#", out) == CR_VALUE_GET) {
@@ -151,7 +151,7 @@ CMD_RESULT CmdLx200::SetTargetDec(char sign, int vd1, int vd2, int vd3) {
   int iter = 0;
 
   if ((sign != '-' && sign != '+') || vd1 < 0 || vd1 > 90 || vd2 < 0 || vd2 > 59 || vd3 < 0 || vd3 > 59) return  CR_SET_VALUE_FAILED;
-  sprintf(cmd, ":Sd%c%02d:%02d:%02d#", sign, vd1, vd2, vd3);
+  snprintf(cmd, sizeof(cmd), ":Sd%c%02d:%02d:%02d#", sign, vd1, vd2, vd3);
   while (iter < 3) {
     if (Set(cmd) ==  CR_VALUE_SET) {
       if (Get(":Gd#", out) == CR_VALUE_GET) {
@@ -265,7 +265,7 @@ CMD_RESULT CmdLx200::readBacklash(const uint8_t &axis, float &backlash) {
 CMD_RESULT CmdLx200::writeBacklash(const uint8_t &axis, const float &backlash) {
   char text[20];
 
-  sprintf(text, ":$BX%u#", (unsigned int)backlash);
+  snprintf(text, sizeof(text), ":$BX%u#", (unsigned int)backlash);
   text[3] = axis == 1 ? 'R' : 'D';
 
   return Set(text);
@@ -285,9 +285,9 @@ CMD_RESULT CmdLx200::readFocTCCoef(const uint8_t &foc, float &tccoef) {
 CMD_RESULT CmdLx200::writeFocTCCoef(const uint8_t &foc, const float &tccoef) {
   char cmd[20];
 
-  sprintf(cmd, ":FA%u#", foc);
+  snprintf(cmd, sizeof(cmd), ":FA%u#", foc);
   Set(cmd);
-  sprintf(cmd, ":FC%d#", (signed int)tccoef);
+  snprintf(cmd, sizeof(cmd), ":FC%d#", (signed int)tccoef);
 
   return Set(cmd);
 }
@@ -295,7 +295,7 @@ CMD_RESULT CmdLx200::writeFocTCCoef(const uint8_t &foc, const float &tccoef) {
 CMD_RESULT CmdLx200::readFocBacklash(const uint8_t &foc, float &backlash) {
   char cmd[20], out[80];
 
-  sprintf(cmd, ":FA%u#", foc);
+  snprintf(cmd, sizeof(cmd), ":FA%u#", foc);
   Set(cmd);
   CMD_RESULT ok = Get(":FB#", out);
   if (ok == CR_VALUE_GET) {
@@ -308,9 +308,9 @@ CMD_RESULT CmdLx200::readFocBacklash(const uint8_t &foc, float &backlash) {
 CMD_RESULT CmdLx200::writeFocBacklash(const uint8_t &foc, const float &backlash) {
   char cmd[20];
 
-  sprintf(cmd, ":FA%u#", foc);
+  snprintf(cmd, sizeof(cmd), ":FA%u#", foc);
   Set(cmd);
-  sprintf(cmd, ":FB%d#", (signed int)backlash);
+  snprintf(cmd, sizeof(cmd), ":FB%d#", (signed int)backlash);
 
   return Set(cmd);
 }
@@ -318,7 +318,7 @@ CMD_RESULT CmdLx200::writeFocBacklash(const uint8_t &foc, const float &backlash)
 CMD_RESULT CmdLx200::readFocTCDeadband(const uint8_t &foc, float &tcdeadband) {
   char cmd[20], out[80];
 
-  sprintf(cmd, ":FA%u#", foc);
+  snprintf(cmd, sizeof(cmd), ":FA%u#", foc);
   Set(cmd);
   CMD_RESULT ok = Get(":FD#", out);
   if (ok == CR_VALUE_GET) {
@@ -331,9 +331,9 @@ CMD_RESULT CmdLx200::readFocTCDeadband(const uint8_t &foc, float &tcdeadband) {
 CMD_RESULT CmdLx200::writeFocTCDeadband(const uint8_t &foc, const float &tcdeadband) {
   char cmd[20];
 
-  sprintf(cmd, ":FA%u#", foc);
+  snprintf(cmd, sizeof(cmd), ":FA%u#", foc);
   Set(cmd);
-  sprintf(cmd, ":FD%d#", (signed int)tcdeadband);
+  snprintf(cmd, sizeof(cmd), ":FD%d#", (signed int)tcdeadband);
 
   return Set(cmd);
 }

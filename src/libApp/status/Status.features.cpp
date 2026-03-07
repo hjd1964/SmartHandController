@@ -28,7 +28,7 @@ bool Status::featureScan() {
 
         char *purpose_str = NULL;
 
-        sprintf(cmd, ":GXY%d#", i + 1);
+        snprintf(cmd, sizeof(cmd), ":GXY%d#", i + 1);
         if ((onStepLx200.Get(cmd, out) != CR_VALUE_GET)) _featureValid = false;
         if (!_featureValid) { featureClearAll(); return false; }
 
@@ -69,7 +69,7 @@ bool Status::featureUpdate(int index) {
     char out[40], cmd[40];
 
     if (index == 0 || ((index == i + 1) && (feature[i].purpose == SWITCH || feature[i].purpose == ANALOG_OUTPUT || feature[i].purpose == DEW_HEATER || feature[i].purpose == INTERVALOMETER))) {
-      sprintf(cmd, ":GXX%d#", i + 1);
+      snprintf(cmd, sizeof(cmd), ":GXX%d#", i + 1);
       if ((onStepLx200.Get(cmd, out) != CR_VALUE_GET)) _featureValid = false;
       if (!_featureValid) {
         for (uint8_t j = 0; j < 8; j++) feature[j].purpose = 0;

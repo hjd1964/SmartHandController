@@ -60,7 +60,7 @@ uint8_t ext_UserInterfaceInputValuePassword(u8g2_t *u8g2, KeyPad* extPad, const 
   int visible_width = width;
   if (visible_width > visual_width_max) visible_width = visual_width_max;
   char local_value[64];
-  sstrcpy(local_value, value, 64);
+  sstrcpy(local_value, value);
   while (strlen(local_value) < width) { strcat(local_value, " "); }
 
   uint8_t selected_char = 0; // the character being edited
@@ -210,7 +210,7 @@ uint8_t ext_UserInterfaceInputValueFQDN(u8g2_t *u8g2, KeyPad* extPad, const char
   int visible_width = width;
   if (visible_width > visual_width_max) visible_width = visual_width_max;
   char local_value[33];
-  sstrcpy(local_value, value, 33);
+  sstrcpy(local_value, value);
   while (strlen(local_value) < width) { strcat(local_value, " "); }
 
   for (int i = 0; i < strlen(local_value); i++) {
@@ -400,10 +400,10 @@ uint8_t ext_UserInterfaceInputValueIP(u8g2_t *u8g2, KeyPad* extPad, const char *
 
       char local_value_string[24];
       switch (selected_digit) {
-        case 0: sprintf(local_value_string, "[%d].%d.%d.%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
-        case 1: sprintf(local_value_string, "%d.[%d].%d.%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
-        case 2: sprintf(local_value_string, "%d.%d.[%d].%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
-        case 3: sprintf(local_value_string, "%d.%d.%d.[%d]", local_value[0], local_value[1], local_value[2], local_value[3]); break;
+        case 0: snprintf(local_value_string, sizeof(local_value_string), "[%d].%d.%d.%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
+        case 1: snprintf(local_value_string, sizeof(local_value_string), "%d.[%d].%d.%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
+        case 2: snprintf(local_value_string, sizeof(local_value_string), "%d.%d.[%d].%d", local_value[0], local_value[1], local_value[2], local_value[3]); break;
+        case 3: snprintf(local_value_string, sizeof(local_value_string), "%d.%d.%d.[%d]", local_value[0], local_value[1], local_value[2], local_value[3]); break;
       }
 
       x = 0;

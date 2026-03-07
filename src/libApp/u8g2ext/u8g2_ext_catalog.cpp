@@ -81,7 +81,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     x = 0;
 
     // Prefix
-    sprintf(line,cat_mgr.catalogPrefix());
+    snprintf(line, sizeof(line), cat_mgr.catalogPrefix());
     if (strstr(line,"Star")) {
       // nothing
     } else
@@ -101,19 +101,19 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
 
     // Catalog number
     if (!strstr(line,"Star") && !cat_mgr.hasPrimaryIdInPrefix()) {
-      long p=cat_mgr.primaryId(); if (p>0) sprintf(line, "%ld", p); else sprintf(line,"?");
+      long p=cat_mgr.primaryId(); if (p>0) snprintf(line, sizeof(line), "%ld", p); else snprintf(line, sizeof(line), "?");
       x+=u8g2_DrawUTF8(u8g2, x, y, line);
     }
 
     // Star SubId
-    sprintf(line, "%s", cat_mgr.subIdStr());
+    snprintf(line, sizeof(line), "%s", cat_mgr.subIdStr());
     u8g2_SetFont(u8g2, LF_CATALOGS);
     x+=u8g2_DrawUTF8(u8g2, x, y, line);
     u8g2_SetFont(u8g2, myfont);
 
     // If anything is present on this line so far, add a space
     if (x!=0) {
-      sprintf(line, "%s", " ");
+      snprintf(line, sizeof(line), "%s", " ");
       x+=u8g2_DrawUTF8(u8g2, x, y, line);
     }
     
@@ -125,7 +125,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       u8g2_SetFont(u8g2, myfont);
     } else {
       if (p>24) {
-        sprintf(line,"%d",p-24);
+        snprintf(line, sizeof(line), "%d", p - 24);
         u8g2_SetFont(u8g2, LF_CATALOGS);
         x+=u8g2_DrawUTF8(u8g2, x, y, line);
         u8g2_SetFont(u8g2, myfont);
@@ -139,7 +139,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     float mf =cat_mgr.magnitude();
     float mf2=cat_mgr.magnitude2();
     if ((mf2>99) && (mf>99)) {
-      sprintf(line, "?.?");
+      snprintf(line, sizeof(line), "?.?");
     } else {
       if (mf2>99) {
         dtostrf(mf, 4, 1, line);
@@ -150,9 +150,9 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
           dtostrf(mf, 4, 1, mfs);
           dtostrf(mf2, 4, 1, mf2s);
           u8g2_SetFont(u8g2, LF_CATALOGS);
-          sprintf(line,"%s",mf2s);
+          snprintf(line, sizeof(line), "%s", mf2s);
           x=ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y+line_height, line);
-          sprintf(line,"%s",mfs);
+          snprintf(line, sizeof(line), "%s", mfs);
           ext_DrawFwNumeric(u8g2, dx-(ext_GetFwNumericWidth(u8g2, line)+x+4), y+line_height, line);
           u8g2_SetFont(u8g2, myfont);
         }
@@ -175,11 +175,11 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
         float f = cat_mgr.separation();
         if (f >= 0) dtostrf(f, 5, 1, seps); else strcpy(seps,"?.?");
 
-        sprintf(line, "Sep %s\"", seps);
+        snprintf(line, sizeof(line), "Sep %s\"", seps);
         x = u8g2_DrawUTF8(u8g2, 0, y, line);
 
         int p = cat_mgr.positionAngle();
-        if (p >= 0) sprintf(line, "%3d\xb0", p); else sprintf(line,"  ?\xb0");
+        if (p >= 0) snprintf(line, sizeof(line), "%3d\xb0", p); else snprintf(line, sizeof(line), "  ?\xb0");
         x = ext_DrawFwNumeric(u8g2, dx - ext_GetFwNumericWidth(u8g2, line), y, line);
         u8g2_DrawUTF8(u8g2, dx - (u8g2_GetUTF8Width(u8g2, "PA ") + x), y, "PA ");
       } else
@@ -188,10 +188,10 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
         char pers[16];
         float p=cat_mgr.period();
         // Period 0.00 to 9.99 days, period 10.0 to 3186.6 days, -1 = Unknown, -2 = Irregular
-        if (abs(p+1.0)<0.1)           { sprintf(line,L_CAT_PER_UNK); } else
-        if (abs(p+2.0)<0.1)           { sprintf(line,L_CAT_PER_IRR); } else
-        if ((p>=0.0)  && (p<   10.0)) { dtostrf(p, 7, 2, pers); sprintf(line,L_CAT_PER "%sd",pers); } else
-        if ((p>=10.0) && (p<=3186.6)) { dtostrf(p, 7, 1, pers); sprintf(line,L_CAT_PER "%sd",pers); } else sprintf(line,L_CAT_PER " ?");
+        if (abs(p+1.0)<0.1)           { snprintf(line, sizeof(line), L_CAT_PER_UNK); } else
+        if (abs(p+2.0)<0.1)           { snprintf(line, sizeof(line), L_CAT_PER_IRR); } else
+        if ((p>=0.0)  && (p<   10.0)) { dtostrf(p, 7, 2, pers); snprintf(line, sizeof(line), L_CAT_PER "%sd",pers); } else
+        if ((p>=10.0) && (p<=3186.6)) { dtostrf(p, 7, 1, pers); snprintf(line, sizeof(line), L_CAT_PER "%sd",pers); } else snprintf(line, sizeof(line), L_CAT_PER " ?");
         ext_DrawFwNumeric(u8g2, x, y, line);
       }
     }
@@ -204,20 +204,20 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     
     // Prefix and catalog number
     x = 0;
-    sprintf(line, "%s", cat_mgr.catalogPrefix());
+    snprintf(line, sizeof(line), "%s", cat_mgr.catalogPrefix());
     x += u8g2_DrawUTF8(u8g2, x, y, line);
-    if (!cat_mgr.hasPrimaryIdInPrefix()) sprintf(line, "%ld", cat_mgr.primaryId());
+    if (!cat_mgr.hasPrimaryIdInPrefix()) snprintf(line, sizeof(line), "%ld", cat_mgr.primaryId());
     x += u8g2_DrawUTF8(u8g2, x, y, line);
      
     // Object SubId
     u8g2_SetFont(u8g2, LF_CATALOGS);
-    sprintf(line, "%s", cat_mgr.subIdStr());
+    snprintf(line, sizeof(line), "%s", cat_mgr.subIdStr());
     x += u8g2_DrawUTF8(u8g2, x, y, line);
     u8g2_SetFont(u8g2, myfont);
 
     // Magnitude
     float mf=cat_mgr.magnitude();
-    if (mf>99) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
+    if (mf>99) snprintf(line, sizeof(line), "?.?"); else dtostrf(mf, 3, 1, line);
     step0 = u8g2_GetUTF8Width(u8g2, line);
     u8g2_DrawUTF8(u8g2, dx-step0, y, line);
 
@@ -230,7 +230,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectTypeStr());
   
       // Constellation Abberviation
-      sprintf(line, "%s", cat_mgr.constellationStr());
+      snprintf(line, sizeof(line), "%s", cat_mgr.constellationStr());
       step0 = u8g2_GetUTF8Width(u8g2, line);
       u8g2_DrawUTF8(u8g2, dx-step0, y, line);
   
@@ -247,16 +247,16 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     short vd1; uint8_t vd2, vd3;
 
     // RA
-    sprintf(epoch,"%04d",cat_mgr.epoch());
+    snprintf(epoch, sizeof(epoch), "%04d",cat_mgr.epoch());
     cat_mgr.raHMS(vr1,vr2,vr3);
-    sprintf(line," %02d:%02d:%02d",vr1,vr2,vr3);
+    snprintf(line, sizeof(line), " %02d:%02d:%02d", vr1, vr2, vr3);
     y += line_height;
     x = u8g2_DrawUTF8(u8g2, 0, y, L_RA); u8g2_SetFont(u8g2, LF_CATALOGS); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
     ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
 
     // Declination
     cat_mgr.decDMS(vd1,vd2, vd3);
-    sprintf(line,"%+02d\xb0%02d'%02d",vd1,vd2,vd3);
+    snprintf(line, sizeof(line), "%+02d\xb0%02d'%02d", vd1, vd2, vd3);
     y += line_height;
     x = u8g2_DrawUTF8(u8g2, 0, y, L_DE); u8g2_SetFont(u8g2, LF_CATALOGS); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
     ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
@@ -273,11 +273,11 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     if (firstPass) cat_mgr.altDMS(va1, va2, va3);
     vz2=vz2/6;
     va2=va2/6;
-    sprintf(line,"%3d.%d\xb0",vz1,vz2);
+    snprintf(line, sizeof(line),"%3d.%d\xb0", vz1, vz2);
     x=0; y += line_height;
     x += u8g2_DrawUTF8(u8g2, x, y, "Az")+2;
     x += (ext_DrawFwNumeric(u8g2, x, y, line));
-    sprintf(line,"%3d.%d\xb0",va1,va2);
+    snprintf(line, sizeof(line), "%3d.%d\xb0", va1, va2);
     x=dx-ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
     u8g2_DrawUTF8(u8g2, x-(u8g2_GetUTF8Width(u8g2, "Alt")+4), y, "Alt");
   }
