@@ -78,7 +78,7 @@ void UI::menuLocalDateTime() {
     uint8_t day = strtol(&out[3], &pEnd, 10);
     uint8_t year = strtol(&out[6], &pEnd, 10);
     if (display->UserInterfaceInputValueDate(&keyPad, L_SET_LOCAL_DATE, year, month, day)) {
-      sprintf(out, ":SC%02d/%02d/%02d#", month, day, year);
+      snprintf(out, sizeof(out), ":SC%02d/%02d/%02d#", month, day, year);
       message.show(onStepLx200.Set(out), false);
       // Time
       long value;
@@ -238,7 +238,7 @@ void UI::menuLatitude() {
       angle = angle / 60;
       minute = abs(angle) % 60;
       degree = abs(angle) / 60;
-      sprintf(out, ":St%c%02d*%02d#", angle < 0 ? '-' : '+', degree, minute);
+      snprintf(out, sizeof(out), ":St%c%02d*%02d#", angle < 0 ? '-' : '+', degree, minute);
       message.show(onStepLx200.Set(out),false);
     }
   }
@@ -257,7 +257,7 @@ void UI::menuLongitude() {
       angle = angle / 60;
       minute = abs(angle) % 60;
       degree = abs(angle) / 60;
-      sprintf(out, ":Sg%c%03d*%02d#", angle < 0 ? '-' : '+', degree, minute);
+      snprintf(out, sizeof(out), ":Sg%c%03d*%02d#", angle < 0 ? '-' : '+', degree, minute);
       message.show(onStepLx200.Set(out), false);
     }
   }
@@ -277,7 +277,7 @@ void UI::menuZone() {
       if (display->UserInterfaceInputValueBoolean(&keyPad, "UTC " L_OFFSET_ABV " - ?", &negative)) {
         hr = b;
         if (negative) hr = -hr;
-        sprintf(out, ":SG%+02d#", hr);
+        snprintf(out, sizeof(out), ":SG%+02d#", hr);
         message.show(onStepLx200.Set(out), false);
       }
     }
@@ -287,7 +287,7 @@ void UI::menuZone() {
 void UI::menuFirmware() {
   char out[64];
   
-  sprintf(out, "SHC %s", _version);
+  snprintf(out, sizeof(out), "SHC %s", _version);
   message.show(out, __DATE__, 3000);
 
   char temp1[32];
@@ -296,11 +296,11 @@ void UI::menuFirmware() {
       (message.show(onStepLx200.Get(":GVD#", temp2)))) {
     for (char* p = temp1; (p = strchr(p, '#')); ++p) { *p = 0;} 
     for (char* p = temp2; (p = strchr(p, '#')); ++p) { *p = 0;} 
-    sprintf(out,"OnStep %s",temp1);
+    snprintf(out, sizeof(out), "OnStep %s", temp1);
     message.show(out, temp2, 3000);
   }
 
-  sprintf(out, "%ld", reconnectionCount);
+  snprintf(out, sizeof(out), "%ld", reconnectionCount);
   message.show("Reconnects", out, 3000);
 }
 
@@ -310,19 +310,19 @@ void UI::menuFocuser(uint8_t foc) {
     const char *string_list_SiteL2 = L_FOC_RET_HOME "\n" L_FOC_AT_HOME "\n" L_FOC_BACKLASH "\n" L_FOC_TC "\n" L_FOC_TC_COEF "\n" L_FOC_TC_DEADBAND;
     
     char title[40];
-    if (status.getFocuserCount() > 1) sprintf(title, "%s %i", L_FOCUSER, foc); else sprintf(title, "%s", L_FOCUSER);
+    if (status.getFocuserCount() > 1) snprintf(title, sizeof(title), "%s %i", L_FOCUSER, foc); else snprintf(title, sizeof(title), "%s", L_FOCUSER);
     current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, title, current_selection_L2, string_list_SiteL2);
 
     bool isOk = false;
     char cmd[40];
     switch (current_selection_L2) {
       case 1:
-        sprintf(cmd, ":FA%u#:Fh#", foc);
+        snprintf(cmd, sizeof(cmd), ":FA%u#:Fh#", foc);
         message.show(onStepLx200.Set(cmd),false);
       break;
       case 2:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_FOC_AT_HALF, &isOk)) {
-          sprintf(cmd, ":FA%u#:FH#", foc);
+          snprintf(cmd, sizeof(cmd), ":FA%u#:FH#", foc);
           if (isOk) { message.show(onStepLx200.Set(cmd), false); }
         }
       break;
@@ -331,7 +331,7 @@ void UI::menuFocuser(uint8_t foc) {
       break;
       case 4:
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_FOC_TC, &isOk)) {
-          sprintf(cmd, ":FA%u#", foc);
+          snprintf(cmd, sizeof(cmd), ":FA%u#", foc);
           if (isOk) {
             if (message.show(onStepLx200.Set(cmd))) message.show(onStepLx200.Set(":Fc1#"), false);
           } else {
@@ -354,9 +354,9 @@ bool UI::menuSetFocBacklash(uint8_t &foc) {
   if (!message.show(onStepLx200.readFocBacklash(foc, backlash))) return false;
   char text[20];
   if (status.getFocuserCount() > 1)
-    sprintf(text, "Foc.%u " L_FOC_BACKLASH, foc);
+    snprintf(text, sizeof(text), "Foc.%u " L_FOC_BACKLASH, foc);
   else
-    sprintf(text, "Focuser " L_FOC_BACKLASH);
+    snprintf(text, sizeof(text), "Focuser " L_FOC_BACKLASH);
   if (display->UserInterfaceInputValueFloat(&keyPad, text, "", &backlash, 0, 999, 3, 0, " " L_FOC_BL_UNITS))
   {
     return message.show(onStepLx200.writeFocBacklash(foc, backlash), false);
@@ -369,9 +369,9 @@ bool UI::menuSetFocTCCoef(uint8_t &foc) {
   if (!message.show(onStepLx200.readFocTCCoef(foc, tccoef))) return false;
   char text[20];
   if (status.getFocuserCount() > 1)
-    sprintf(text, "Foc.%u " L_FOC_TC_COEF, foc);
+    snprintf(text, sizeof(text), "Foc.%u " L_FOC_TC_COEF, foc);
   else
-    sprintf(text, "Focuser " L_FOC_TC_COEF);
+    snprintf(text, sizeof(text), "Focuser " L_FOC_TC_COEF);
   if (display->UserInterfaceInputValueFloat(&keyPad, text, "", &tccoef, -999, 999, 4, 0, " " L_MICRON_PER_C)) {
     return message.show(onStepLx200.writeFocTCCoef(foc, tccoef), false);
   }
@@ -383,9 +383,9 @@ bool UI::menuSetFocTCDeadband(uint8_t &foc) {
   if (!message.show(onStepLx200.readFocTCDeadband(foc, deadband))) return false;
   char text[20];
   if (status.getFocuserCount() > 1)
-    sprintf(text, "Foc.%u " L_FOC_TC_DEADBAND, foc);
+    snprintf(text, sizeof(text), "Foc.%u " L_FOC_TC_DEADBAND, foc);
   else
-    sprintf(text, "Focuser " L_FOC_TC_DEADBAND);
+    snprintf(text, sizeof(text), "Focuser " L_FOC_TC_DEADBAND);
   if (display->UserInterfaceInputValueFloat(&keyPad, text, "", &deadband, 1, 999, 3, 0, " " L_FOC_TC_DB_UNITS)) {
     return message.show(onStepLx200.writeFocTCDeadband(foc, deadband), false);
   }
@@ -435,7 +435,7 @@ void UI::menuFeature(uint8_t feature) {
       const char *string_list_SiteL2 = L_AF_DEW_HEATER_ZERO "\n" L_AF_DEW_HEATER_SPAN;
       
       char title[40];
-      sprintf(title, "%s", status.featureName());
+      snprintf(title, sizeof(title), "%s", status.featureName());
       current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, title, current_selection_L2, string_list_SiteL2);
 
       char cmd[64];
@@ -448,7 +448,7 @@ void UI::menuFeature(uint8_t feature) {
           value = celsiusToNativeRelative(status.featureValue2());
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_ZERO, "", &value, celsiusToNativeRelative(low), celsiusToNativeRelative(high), 4, 1, " " TEMPERATURE_UNITS_ABV)) {
             sprintF(cmdParam, "%0.1f", nativeToCelsiusRelative(value));
-            sprintf(cmd, ":SXX%i,Z%s#", status.featureNumber(), cmdParam);
+            snprintf(cmd, sizeof(cmd), ":SXX%i,Z%s#", status.featureNumber(), cmdParam);
             message.show(onStepLx200.Set(cmd), false);
           }
         break;
@@ -456,7 +456,7 @@ void UI::menuFeature(uint8_t feature) {
           value = celsiusToNativeRelative(status.featureValue3());
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_DEW_HEATER_SPAN, "", &value, celsiusToNativeRelative(low), celsiusToNativeRelative(high), 4, 1, " " TEMPERATURE_UNITS_ABV)) {
             sprintF(cmdParam, "%0.1f", nativeToCelsiusRelative(value));
-            sprintf(cmd, ":SXX%i,S%s#", status.featureNumber(), cmdParam);
+            snprintf(cmd, sizeof(cmd), ":SXX%i,S%s#", status.featureNumber(), cmdParam);
             message.show(onStepLx200.Set(cmd), false);
           }
         break;
@@ -472,7 +472,7 @@ void UI::menuFeature(uint8_t feature) {
       const char *string_list_SiteL2 = L_AF_IV_COUNT "\n" L_AF_IV_DELAY "\n" L_AF_IV_EXPOS;
 
       char title[40];
-      sprintf(title, "%s", status.featureName());
+      snprintf(title, sizeof(title), "%s", status.featureName());
       current_selection_L2 = display->UserInterfaceSelectionList(&keyPad, title, current_selection_L2, string_list_SiteL2);
 
       char cmd[40];
@@ -481,21 +481,21 @@ void UI::menuFeature(uint8_t feature) {
         case 1:
           value = status.featureValue4();
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_COUNT, "", &value, 0, 255, 3, 0, "")) {
-            sprintf(cmd, ":SXX%i,C%i#", status.featureNumber(), (int)lround(value));
+            snprintf(cmd, sizeof(cmd), ":SXX%i,C%i#", status.featureNumber(), (int)lround(value));
             message.show(onStepLx200.Set(cmd), false);
           }
         break;
         case 2:
           value = status.featureValue3();
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_DELAY, "", &value, 0, 3600, 4, 0, " secs")) {
-            sprintf(cmd, ":SXX%i,D%i#", status.featureNumber(), (int)lround(value));
+            snprintf(cmd, sizeof(cmd), ":SXX%i,D%i#", status.featureNumber(), (int)lround(value));
             message.show(onStepLx200.Set(cmd), false);
           }
         break;
         case 3:
           value = status.featureValue2();
           if (display->UserInterfaceInputValueFloat(&keyPad, L_AF_IV_EXPOS, "", &value, 0, 3600, 4, 0, " secs")) {
-            sprintf(cmd, ":SXX%i,E%i#", status.featureNumber(), (int)lround(value));
+            snprintf(cmd, sizeof(cmd), ":SXX%i,E%i#", status.featureNumber(), (int)lround(value));
             message.show(onStepLx200.Set(cmd), false);
           }
         break;

@@ -78,7 +78,7 @@ MENU_RESULT UI::menuSyncGoto(bool sync) {
         if (display->UserInterfaceInputValueBoolean(&keyPad, L_SG_HOME1 "?", &GotoHome)) {
           if (GotoHome) {
             char cmd[5];
-            sprintf(cmd, ":hX#");
+            snprintf(cmd, sizeof(cmd), ":hX#");
             cmd[2] = sync ? 'F' : 'C';
             if (onStepLx200.Set(cmd) == CR_VALUE_SET) message.show(sync ? L_SG_HOME2 : L_SG_HOME3, " " L_SG_HOME4, -1);
             return MR_QUIT;

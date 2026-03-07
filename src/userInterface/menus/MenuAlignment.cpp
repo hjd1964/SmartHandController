@@ -39,12 +39,12 @@ void UI::menuAlignment() {
       strcpy(string_list_AlignmentL1, "");
       char s[20];
       for (int i = 1; i <= maxAlignStars; i++) {
-        sprintf(s, "%d-" L_ALGN_STAR_ALIGN "\n",i);
+        snprintf(s, sizeof(s), "%d-" L_ALGN_STAR_ALIGN "\n",i);
         strcat(string_list_AlignmentL1,s);
       }
       strcat(string_list_AlignmentL1, L_ALGN_SHOW_MODEL "\n" L_ALGN_CLEAR_MODEL "\n" L_ALGN_RESET_HOME);
       if (!status.isMountAltAz()) {
-        sprintf(s, "\nRefine PA");
+        snprintf(s, sizeof(s), "\nRefine PA");
         strcat(string_list_AlignmentL1, s);
       }
       current_selection_L1 = display->UserInterfaceSelectionList(&keyPad, L_ALIGNMENT, current_selection_L1, string_list_AlignmentL1);
@@ -85,7 +85,8 @@ void UI::menuAlignment() {
       if (!status.hasDateTime()) { message.show(L_ALGN_RESUME2, L_ALGN_RESUME3, 2000); menuLocalDateTime(); }
 
       // start the align
-      char s[20]; sprintf(s,":A%d#",starsForAlign);
+      char s[20];
+      snprintf(s, sizeof(s), ":A%d#",starsForAlign);
       if (onStepLx200.Set(s) == CR_VALUE_SET) status.aliMode = (Status::AlignMode)starsForAlign; else message.show(L_ALIGNMENT, L_FAILED "!", -1);
       if (onStepLx200.Set(":R7#") == CR_VALUE_SET) { message.show(L_ALGN_RESUME4, L_ALGN_RESUME5, 1000);  activeGuideRate=8; }
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu

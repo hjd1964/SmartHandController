@@ -196,11 +196,11 @@ const char* CatMgr::catalogPrefix() {
     const char *s1;
     long p=primaryId();
     if (p>=0) {
-      s1=getElementFromString(s,p);
+      s1=getElementFromString(s, p);
       if (strlen(s1)>0) return s1; else {
         s1=getElementFromString(s,0);
         static char s2[24];
-        sprintf(s2,"%s%ld",s1,p);
+        snprintf(s2, sizeof(s2), "%s%ld", s1, p);
         return s2;
       }
     } else return "?";
@@ -703,11 +703,11 @@ const char* CatMgr::bayerFlamStr() {
   static char bfStr[11] = "";
   int bfNum = bayerFlam();
   if ((bfNum >= 0) && (bfNum < 24)) {
-    sprintf(bfStr, "%d", bfNum);
+    snprintf(bfStr, sizeof(bfStr), "%d", bfNum);
     return bfStr;
   } else
   if (bfNum > 24) {
-    sprintf(bfStr, "%d", bfNum - 24);
+    snprintf(bfStr, sizeof(bfStr), "%d", bfNum - 24);
     return bfStr;
   } else
   return "";

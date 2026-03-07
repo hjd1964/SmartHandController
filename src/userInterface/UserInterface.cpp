@@ -319,9 +319,9 @@ void UI::poll() {
         float rpos = status.getRotatorPosition();
         if (!isnan(rpos)) {
           char temp[24];
-          if (rotState == RS_CCW_SLOW || rotState == RS_CCW_MID || rotState == RS_CCW_FAST) sprintf(temp, L_ROTATE " < %d°", (int)round(rpos)); else
-          if (rotState == RS_CW_SLOW || rotState == RS_CW_MID || rotState == RS_CW_FAST) sprintf(temp, L_ROTATE " > %d°", (int)round(rpos)); else
-          sprintf(temp, L_ROTATE "    %d°", (int)round(rpos));
+          if (rotState == RS_CCW_SLOW || rotState == RS_CCW_MID || rotState == RS_CCW_FAST) snprintf(temp, sizeof(temp), L_ROTATE " < %d°", (int)round(rpos)); else
+          if (rotState == RS_CW_SLOW || rotState == RS_CW_MID || rotState == RS_CW_FAST) snprintf(temp, sizeof(temp), L_ROTATE " > %d°", (int)round(rpos)); else
+          snprintf(temp, sizeof(temp), L_ROTATE "    %d°", (int)round(rpos));
           message.brief(temp);
         } else message.brief("?");
       }
@@ -350,9 +350,9 @@ void UI::poll() {
         float fpos = status.getFocuserPosition();
         if (!isnan(fpos)) {
           char temp[24];
-          if (focusState == FS_OUT_SLOW || focusState == FS_OUT_MID || focusState == FS_OUT_FAST) sprintf(temp, L_FOCUS " \\/ %dum", (int)round(fpos)); else
-          if (focusState == FS_IN_SLOW || focusState == FS_IN_MID || focusState == FS_IN_FAST) sprintf(temp, L_FOCUS " /\\ %dum", (int)round(fpos)); else
-          sprintf(temp, L_FOCUS "    %dum", (int)round(fpos));
+          if (focusState == FS_OUT_SLOW || focusState == FS_OUT_MID || focusState == FS_OUT_FAST) snprintf(temp, sizeof(temp), L_FOCUS " \\/ %dum", (int)round(fpos)); else
+          if (focusState == FS_IN_SLOW || focusState == FS_IN_MID || focusState == FS_IN_FAST) snprintf(temp, sizeof(temp), L_FOCUS " /\\ %dum", (int)round(fpos)); else
+          snprintf(temp, sizeof(temp), L_FOCUS "    %dum", (int)round(fpos));
           message.brief(temp);
         } else message.brief("?");
       }
@@ -369,14 +369,14 @@ void UI::poll() {
             // ANALOG_OUT but in units of 5%
             int v = lround(status.featureValue1()/12.75F) - 2;
             if (v < 0) v = 0;
-            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
+            snprintf(cmd, sizeof(cmd), ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
             onStepLx200.Set(cmd);
-            sprintf(line2, "%i%%", v*5);
+            snprintf(line2, sizeof(line2), "%i%%", v*5);
             message.show(status.featureName(), line2, 1000);
           } else {
-            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 0);
+            snprintf(cmd, sizeof(cmd), ":SXX%i,V%i#", featureKeyMode - 11, 0);
             onStepLx200.Set(cmd);
-            sprintf(line2, "%s", L_OFF);
+            snprintf(line2, sizeof(line2), "%s", L_OFF);
             message.show(status.featureName(), line2, 1000);
           }
         } else
@@ -385,14 +385,14 @@ void UI::poll() {
             status.featureUpdate(featureKeyMode - 11);
             int v = lround(status.featureValue1()/12.75F) + 2;
             if (v > 20) v = 20;
-            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
+            snprintf(cmd, sizeof(cmd), ":SXX%i,V%i#", featureKeyMode - 11, (int)lround(v*12.75F));
             onStepLx200.Set(cmd);
-            sprintf(line2, "%i%%", v*5);
+            snprintf(line2, sizeof(line2), "%i%%", v*5);
             message.show(status.featureName(), line2, 1000);
           } else {
-            sprintf(cmd, ":SXX%i,V%i#", featureKeyMode - 11, 1);
+            snprintf(cmd, sizeof(cmd), ":SXX%i,V%i#", featureKeyMode - 11, 1);
             onStepLx200.Set(cmd);
-            sprintf(line2, "%s",  L_ON);
+            snprintf(line2, sizeof(line2), "%s",  L_ON);
             message.show(status.featureName(), line2, 1000);
           }
         }
@@ -687,32 +687,32 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
 
         if (UNITS == IMPERIAL) {
         dtostrf((T*(9.0/5.0) + 32.0), 2, 0, temp);
-        sprintf(line, "T%s\xb0%s", temp, "F");
+        snprintf(line, sizeof(line), "T%s\xb0%s", temp, "F");
         display->DrawFwNumeric(0, y, line);
 
         dtostrf((P/33.864), 3, 1, temp); //drew
-        sprintf(line, "P%s\x22%s", temp, "Hg");
+        snprintf(line, sizeof(line), "P%s\x22%s", temp, "Hg");
         }
         else {
         dtostrf(T, 3, 1, temp);
-        sprintf(line, "T%s\xb0%s", temp, "C");
+        snprintf(line, sizeof(line), "T%s\xb0%s", temp, "C");
         display->DrawFwNumeric(0, y, line);
 
-        sprintf(line, "P%dmb",(int)round(P));          
+        snprintf(line, sizeof(line), "P%dmb",(int)round(P));          
         }
         display->DrawFwNumeric(dx - display->GetFwNumericWidth(line), y, line);
 
         y += line_height + 4;
-        sprintf(line, "H%d%%", (int)round(H));
+        snprintf(line, sizeof(line), "H%d%%", (int)round(H));
         display->DrawFwNumeric(0, y, line);
 
         if (UNITS == IMPERIAL) {
         dtostrf((DP*(9.0/5.0) + 32.0), 3, 1, temp);
-        sprintf(line, "DP%s\xb0%s", temp, "F");
+        snprintf(line, sizeof(line), "DP%s\xb0%s", temp, "F");
         }
         else {
         dtostrf(DP, 3, 1, temp);
-        sprintf(line, "DP%s\xb0%s", temp, "C"); 
+        snprintf(line, sizeof(line), "DP%s\xb0%s", temp, "C"); 
         }
         display->DrawFwNumeric(dx-display->GetFwNumericWidth(line), y, line);
       }      
@@ -725,8 +725,8 @@ void UI::updateMainDisplay(u8g2_uint_t page) {
       u8g2_uint_t y = 36;
 
       char txt[20];
-      if ((status.align - 1) % 3 == 1) sprintf(txt, L_SLEWING_TO_STAR " %u", (status.align - 1) / 3 + 1); else
-      if ((status.align - 1) % 3 == 2) sprintf(txt, L_RECENTER_STAR " %u", (status.align - 1) / 3 + 1);
+      if ((status.align - 1) % 3 == 1) snprintf(txt, sizeof(txt), L_SLEWING_TO_STAR " %u", (status.align - 1) / 3 + 1); else
+      if ((status.align - 1) % 3 == 2) snprintf(txt, sizeof(txt), L_RECENTER_STAR " %u", (status.align - 1) / 3 + 1);
       display->drawUTF8(0, y, txt);
 
       y += line_height + 4;

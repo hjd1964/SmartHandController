@@ -69,7 +69,7 @@ bool UI::menuSetBacklash(uint8_t &axis)
   float backlash;
   if (!message.show(onStepLx200.readBacklash(axis, backlash))) return false;
   char text[20];
-  sprintf(text, L_MOUNT_BL " Axis%u", axis);
+  snprintf(text, sizeof(text), L_MOUNT_BL " Axis%u", axis);
   if (display->UserInterfaceInputValueFloat(&keyPad, text, "", &backlash, 0, 3600, 4, 0, " " L_ARCSEC)) {
     return message.show(onStepLx200.writeBacklash(axis, backlash), false);
   }
@@ -110,7 +110,7 @@ void UI::menuHorizon() {
   if (message.show(onStepLx200.Get(":Gh#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
     if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_HORIZON, "", &angle, -90, 30, 2, 0, " " L_DEGREE)) {
-      sprintf(out, ":Sh%+03d#", (int)angle);
+      snprintf(out, sizeof(out), ":Sh%+03d#", (int)angle);
       message.show(onStepLx200.Set(out), false);
     }
   }
@@ -121,7 +121,7 @@ void UI::menuOverhead() {
   if (message.show(onStepLx200.Get(":Go#", out))) {
     float angle = (float)strtol(&out[0], NULL, 10);
     if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_OVERHEAD, "", &angle, 60, 90, 2, 0, " " L_DEGREE)) {
-      sprintf(out, ":So%02d#", (int)angle);
+      snprintf(out, sizeof(out), ":So%02d#", (int)angle);
       message.show(onStepLx200.Set(out), false);
     }
   }
@@ -134,7 +134,7 @@ void UI::menuMeridianE() {
     angle = round((angle * 15.0) / 60.0);
     if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_MERIDIAN_EAST, "", &angle, -180, 180, 3, 0, " " L_DEGREE)) {
       angle = round((angle * 60.0) / 15.0);
-      sprintf(out, ":SXE9,%+02d#", (int)angle);
+      snprintf(out, sizeof(out), ":SXE9,%+02d#", (int)angle);
       message.show(onStepLx200.Set(out), false);
     }
   }
@@ -147,7 +147,7 @@ void UI::menuMeridianW() {
     angle = round((angle * 15.0) / 60.0);
     if (display->UserInterfaceInputValueFloat(&keyPad, L_MOUNT_LIMIT_MERIDIAN_WEST, "", &angle, -180, 180, 3, 0, " " L_DEGREE)) {
       angle = round((angle * 60.0) / 15.0);
-      sprintf(out, ":SXEA,%+02d#", (int)angle);
+      snprintf(out, sizeof(out), ":SXEA,%+02d#", (int)angle);
       message.show(onStepLx200.Set(out), false);
     }
   }

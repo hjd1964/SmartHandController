@@ -102,30 +102,30 @@ bool Message::show(CMD_RESULT cmdResult, bool silentOk) {
   char text2[20] = "";
   int time = -1;
   if (cmdResult < CR_OK) {
-         if (cmdResult == CR_NOT_OK)                  { sprintf(text1, L_CMD_NOTOK_1); sprintf(text2, L_CMD_NOTOK_2);  }
-    else if (cmdResult == CR_SET_VALUE_FAILED)        { sprintf(text1, L_CMD_SETVF_1); sprintf(text2, L_CMD_SETVF_2);  }
-    else if (cmdResult == CR_GET_VALUE_FAILED)        { sprintf(text1, L_CMD_GETVF_1); sprintf(text2, L_CMD_GETVF_2);  }
-    else if (cmdResult == CR_SET_TARGET_FAILED)       { sprintf(text1, L_CMD_SETTG_1); sprintf(text2, L_CMD_SETTG_2);  }
-    else if (cmdResult == CR_NO_OBJECT_SELECTED)      { sprintf(text1, L_CMD_OBJSE_1); sprintf(text2, L_CMD_OBJSE_2);  }
-    else if (cmdResult == CR_GOTO_ERR_BELOW_HORIZON)  { sprintf(text1, L_CMD_TGHOR_1); sprintf(text2, L_CMD_TGHOR_2);  }
-    else if (cmdResult == CR_GOTO_ERR_ABOVE_OVERHEAD) { sprintf(text1, L_CMD_TGOVH_1); sprintf(text2, L_CMD_TGOVH_2);  }
-    else if (cmdResult == CR_GOTO_ERR_STANDBY)        { sprintf(text1, L_CMD_STNBF_1); sprintf(text2, L_CMD_STNBF_2);  }
-    else if (cmdResult == CR_GOTO_ERR_PARK)           { sprintf(text1, L_CMD_PARKF_1); sprintf(text2, L_CMD_PARKF_2);  }
-    else if (cmdResult == CR_GOTO_ERR_GOTO)           { sprintf(text1, L_CMD_GOGOF_1); sprintf(text2, L_CMD_GOGOF_2);  }
-    else if (cmdResult == CR_GOTO_ERR_OUTSIDE_LIMITS) { sprintf(text1, L_CMD_LIMTF_1); sprintf(text2, L_CMD_LIMTF_2);  }
-    else if (cmdResult == CR_GOTO_ERR_HARDWARE_FAULT) { sprintf(text1, L_CMD_HARDF_1); sprintf(text2, L_CMD_HARDF_2);  }
-    else if (cmdResult == CR_GOTO_ERR_IN_MOTION)      { sprintf(text1, L_CMD_GOMOF_1); sprintf(text2, L_CMD_GOMOF_2);  }
-    else if (cmdResult == CR_GOTO_ERR_UNSPECIFIED)    { sprintf(text1, L_CMD_UNSPF_1); sprintf(text2, L_CMD_UNSPF_2);  }
-    else                                              { sprintf(text1, L_CMD_ERROR);   sprintf(text2, "-1"); }
+         if (cmdResult == CR_NOT_OK)                  { snprintf(text1, sizeof(text1), L_CMD_NOTOK_1); snprintf(text2, sizeof(text2), L_CMD_NOTOK_2);  }
+    else if (cmdResult == CR_SET_VALUE_FAILED)        { snprintf(text1, sizeof(text1), L_CMD_SETVF_1); snprintf(text2, sizeof(text2), L_CMD_SETVF_2);  }
+    else if (cmdResult == CR_GET_VALUE_FAILED)        { snprintf(text1, sizeof(text1), L_CMD_GETVF_1); snprintf(text2, sizeof(text2), L_CMD_GETVF_2);  }
+    else if (cmdResult == CR_SET_TARGET_FAILED)       { snprintf(text1, sizeof(text1), L_CMD_SETTG_1); snprintf(text2, sizeof(text2), L_CMD_SETTG_2);  }
+    else if (cmdResult == CR_NO_OBJECT_SELECTED)      { snprintf(text1, sizeof(text1), L_CMD_OBJSE_1); snprintf(text2, sizeof(text2), L_CMD_OBJSE_2);  }
+    else if (cmdResult == CR_GOTO_ERR_BELOW_HORIZON)  { snprintf(text1, sizeof(text1), L_CMD_TGHOR_1); snprintf(text2, sizeof(text2), L_CMD_TGHOR_2);  }
+    else if (cmdResult == CR_GOTO_ERR_ABOVE_OVERHEAD) { snprintf(text1, sizeof(text1), L_CMD_TGOVH_1); snprintf(text2, sizeof(text2), L_CMD_TGOVH_2);  }
+    else if (cmdResult == CR_GOTO_ERR_STANDBY)        { snprintf(text1, sizeof(text1), L_CMD_STNBF_1); snprintf(text2, sizeof(text2), L_CMD_STNBF_2);  }
+    else if (cmdResult == CR_GOTO_ERR_PARK)           { snprintf(text1, sizeof(text1), L_CMD_PARKF_1); snprintf(text2, sizeof(text2), L_CMD_PARKF_2);  }
+    else if (cmdResult == CR_GOTO_ERR_GOTO)           { snprintf(text1, sizeof(text1), L_CMD_GOGOF_1); snprintf(text2, sizeof(text2), L_CMD_GOGOF_2);  }
+    else if (cmdResult == CR_GOTO_ERR_OUTSIDE_LIMITS) { snprintf(text1, sizeof(text1), L_CMD_LIMTF_1); snprintf(text2, sizeof(text2), L_CMD_LIMTF_2);  }
+    else if (cmdResult == CR_GOTO_ERR_HARDWARE_FAULT) { snprintf(text1, sizeof(text1), L_CMD_HARDF_1); snprintf(text2, sizeof(text2), L_CMD_HARDF_2);  }
+    else if (cmdResult == CR_GOTO_ERR_IN_MOTION)      { snprintf(text1, sizeof(text1), L_CMD_GOMOF_1); snprintf(text2, sizeof(text2), L_CMD_GOMOF_2);  }
+    else if (cmdResult == CR_GOTO_ERR_UNSPECIFIED)    { snprintf(text1, sizeof(text1), L_CMD_UNSPF_1); snprintf(text2, sizeof(text2), L_CMD_UNSPF_2);  }
+    else                                              { snprintf(text1, sizeof(text1), L_CMD_ERROR);   snprintf(text2, sizeof(text2), "-1"); }
     show(text1, text2, -1);
   } else
   if (!silentOk) {
     time = 1000;
-         if (cmdResult == CR_OK)            { sprintf(text1, L_CMD_ISAOK_1); sprintf(text2, L_CMD_ISAOK_2);  }
-    else if (cmdResult == CR_VALUE_SET)     { sprintf(text1, L_CMD_SETOK_1); sprintf(text2, L_CMD_SETOK_2);  }
-    else if (cmdResult == CR_VALUE_GET)     { sprintf(text1, L_CMD_GETOK_1); sprintf(text2, L_CMD_GETOK_2);  }
-    else if (cmdResult == CR_SYNCED)        { sprintf(text1, L_CMD_SNCOK_1); sprintf(text2, L_CMD_SNCOK_2);  }
-    else if (cmdResult == CR_GOTO_GOING_TO) { sprintf(text1, L_CMD_GOTOK_1); sprintf(text2, L_CMD_GOTOK_2);  }
+         if (cmdResult == CR_OK)            { snprintf(text1, sizeof(text1), L_CMD_ISAOK_1); snprintf(text2, sizeof(text2), L_CMD_ISAOK_2);  }
+    else if (cmdResult == CR_VALUE_SET)     { snprintf(text1, sizeof(text1), L_CMD_SETOK_1); snprintf(text2, sizeof(text2), L_CMD_SETOK_2);  }
+    else if (cmdResult == CR_VALUE_GET)     { snprintf(text1, sizeof(text1), L_CMD_GETOK_1); snprintf(text2, sizeof(text2), L_CMD_GETOK_2);  }
+    else if (cmdResult == CR_SYNCED)        { snprintf(text1, sizeof(text1), L_CMD_SNCOK_1); snprintf(text2, sizeof(text2), L_CMD_SNCOK_2);  }
+    else if (cmdResult == CR_GOTO_GOING_TO) { snprintf(text1, sizeof(text1), L_CMD_GOTOK_1); snprintf(text2, sizeof(text2), L_CMD_GOTOK_2);  }
     show(text1, text2, time);
   }
   return onStepLx200.isOk(cmdResult);

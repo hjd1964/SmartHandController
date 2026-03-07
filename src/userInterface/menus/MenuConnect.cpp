@@ -313,7 +313,7 @@ rescan:
 #if SERIAL_IP_MODE != OFF
   void UI::menuWiFiStationEditSelect(const char *ssid) {
     char title[32];
-    sprintf(title, "WiFi %s", ssid);
+    snprintf(title, sizeof(title), "WiFi %s", ssid);
 
     VLF("MSG: Connect menu, selection WiFi station");
 
@@ -328,7 +328,7 @@ rescan:
         char inUseIndication = ' ';
         if (strlen(wifiManager.sta->ssid) > 0) inUseIndication = '~';
         if (strequ(wifiManager.sta->ssid, ssid)) inUseIndication = '<';
-        sprintf(selection_item, L_MEMORY " %d%c", station, inUseIndication);
+        snprintf(selection_item, sizeof(selection_item), L_MEMORY " %d%c", station, inUseIndication);
         strcat(selection_list, selection_item);
         if (station < WifiStationCount) strcat(selection_list, "\n");
       }
@@ -366,7 +366,7 @@ rescan:
 
     VF("MSG: Connect menu, editing WiFi station "); VL(index);
 
-    sprintf(title, "WiFi " L_MEMORY " %d", index);
+    snprintf(title, sizeof(title), "WiFi " L_MEMORY " %d", index);
     wifiManager.setStation(index);
 
     int current_selection = 1;
@@ -383,7 +383,7 @@ rescan:
         case 1:
           accept = false;
           if (display->UserInterfaceInputValueBoolean(&keyPad, "SSID as Hostname?", &accept)) {
-            if (accept) sstrcpy(wifiManager.sta->host, ssid, 32);
+            if (accept) sstrcpy(wifiManager.sta->host, ssid);
             display->UserInterfaceInputValueFQDN(&keyPad, "Hostname", "", wifiManager.sta->host, 32, "");
           }
         break;
@@ -393,13 +393,13 @@ rescan:
           accept = false;
           if (display->UserInterfaceInputValueBoolean(&keyPad, L_OVERWRITE "?", &accept)) {
             if (accept) {
-              sstrcpy(wifiManager.sta->ssid, ssid, 33);
+              sstrcpy(wifiManager.sta->ssid, ssid);
             }
           }
         break;
 
         case 3:
-          display->UserInterfaceInputValuePassword(&keyPad, L_PASSWORD, "", wifiManager.sta->pwd, ' ', '~', 63, "");
+          display->UserInterfaceInputValuePassword(&keyPad, L_PASSWORD, "", wifiManager.staPwd->password, ' ', '~', 63, "");
         break;
 
         case 4:
@@ -426,7 +426,7 @@ rescan:
         // Reset all
         case 9:
           char title[32];
-          sprintf(title, L_CLEAR " " L_MEMORY " %d ?", index);
+          snprintf(title, sizeof(title), L_CLEAR " " L_MEMORY " %d ?", index);
           accept = false;
           if (display->UserInterfaceInputValueBoolean(&keyPad, title, &accept)) {
             if (accept) {
@@ -460,7 +460,7 @@ rescan:
 #if SERIAL_BT_MODE != OFF
   void UI::menuBTStationEditSelect(const char *name, const char *address) {
     char title[32];
-    sprintf(title, "BT %s", name);
+    snprintf(title, sizeof(title), "BT %s", name);
 
     VLF("MSG: Connect menu, selecting BT station");
 
@@ -475,7 +475,7 @@ rescan:
         char inUseIndication = ' ';
         if (strlen(bluetoothManager.sta->address) > 0) inUseIndication = '~';
         if (strequ(bluetoothManager.sta->address, address)) inUseIndication = '<';
-        sprintf(selection_item, L_MEMORY " %d%c", station, inUseIndication);
+        snprintf(selection_item, sizeof(selection_item), L_MEMORY " %d%c", station, inUseIndication);
         strcat(selection_list, selection_item);
         if (station < BluetoothStationCount) strcat(selection_list, "\n");
       }
@@ -499,7 +499,7 @@ rescan:
 
     VF("MSG: Connect menu, editing BT station "); VL(index);
 
-    sprintf(title, "BT " L_MEMORY " %d", index);
+    snprintf(title, sizeof(title), "BT " L_MEMORY " %d", index);
     bluetoothManager.setStation(index);
 
     int current_selection = 1;
@@ -527,7 +527,7 @@ rescan:
         // Reset all
         case 3:
           char title[32];
-          sprintf(title, L_CLEAR " " L_MEMORY " %d ?", index);
+          snprintf(title, sizeof(title), L_CLEAR " " L_MEMORY " %d ?", index);
           accept = false;
           if (display->UserInterfaceInputValueBoolean(&keyPad, title, &accept)) {
             if (accept) {
