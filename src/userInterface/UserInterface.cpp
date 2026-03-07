@@ -900,7 +900,7 @@ connectAgain:
     #endif
 
     #if SERIAL_BT_MODE != OFF
-      if (connectionSelection >= CS_BT_STA1 && connectionSelection <= CS_BT_STA8) {
+      if (connectionSelection >= CS_BT_STA1 && connectionSelection <= CS_BT_STA6) {
         bluetoothManager.setStation((connectionSelection - (int)CS_BT_STA1) + 1);
         onStep.connectionMode = CM_BLUETOOTH;
         connectionSelection = CS_NONE;
