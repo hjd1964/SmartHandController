@@ -176,8 +176,9 @@ void UI::poll() {
   #ifdef DEEP_SLEEP_WAKEUP_PIN
     if (keyPad.s->isDown() && keyPad.shift->isDown()) {
       VLF("MSG: Entering deep sleep...");
-      message.show(L_POWERING, L_OFF "...", 1000);
       esp_deep_sleep_enable_gpio_wakeup(BIT(DEEP_SLEEP_WAKEUP_PIN), ESP_GPIO_WAKEUP_GPIO_LOW);
+      message.show(L_POWERING, L_OFF "...", 1000);
+	  esp_deep_sleep_start();   
     }
   #endif
 
