@@ -43,6 +43,8 @@
 
 #include "src/userInterface/UserInterface.h"
 
+#include "src/plugins/Plugins.config.h"
+
 #if DEBUG == PROFILER
   extern void profiler();
 #endif
@@ -113,6 +115,33 @@ void setup(void) {
   #if DEBUG == PROFILER
     tasks.add(142, 0, true, 7, profiler, "Profilr");
   #endif
+  
+    // start any plugins
+#if PLUGIN1 != OFF
+  PLUGIN1.init();
+#endif
+#if PLUGIN2 != OFF
+  PLUGIN2.init();
+#endif
+#if PLUGIN3 != OFF
+  PLUGIN3.init();
+#endif
+#if PLUGIN4 != OFF
+  PLUGIN4.init();
+#endif
+#if PLUGIN5 != OFF
+  PLUGIN5.init();
+#endif
+#if PLUGIN6 != OFF
+  PLUGIN6.init();
+#endif
+#if PLUGIN7 != OFF
+  PLUGIN7.init();
+#endif
+#if PLUGIN8 != OFF
+  PLUGIN8.init();
+#endif
+
 
   VLF("MSG: Starting UI loop");
 }
