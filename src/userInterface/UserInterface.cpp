@@ -146,7 +146,6 @@ void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialB
   #endif
   
   //choose a 128x64 display supported by U8G2lib (if not listed below there are many many others in u8g2 library example Sketches)
-  delay(500);
   if (model == OLED_SH1106) display = new U8G2_EXT_SH1106_128X64_NONAME_1_HW_I2C(U8G2_R0); else
   if (model == OLED_SH1106_4W_SW_SPI) display = new U8G2_EXT_SH1106_128X64_NONAME_1_4W_SW_SPI(U8G2_R0); else
   if (model == OLED_SH1106_4W_HW_SPI) display = new U8G2_EXT_SH1106_128X64_NONAME_1_4W_HW_SPI(U8G2_R0);
