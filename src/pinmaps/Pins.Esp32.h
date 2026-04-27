@@ -66,6 +66,18 @@
   #endif
 
   #ifndef DISPLAY_RESET_PIN
-    #define DISPLAY_RESET_PIN    16  // GPIO16 used to reset some displays, i.e. the SSD1309
+    #define DISPLAY_RESET_PIN  16  // GPIO16 used to reset some displays, i.e. the SSD1309
+  #endif
+  #ifndef DISPLAY_DC_PIN
+    #define DISPLAY_DC_PIN     15  // SPI display data/clock pin
+  #endif
+  #ifndef DISPLAY_SS_PIN
+    #define DISPLAY_SS_PIN      4  // SPI display slave select pin
+  #endif
+  #ifndef DISPLAY_MOSI_PIN
+    #define DISPLAY_MOSI_PIN   21  // SPI display master out slave in pin (ignored for hardware SPI connections)
+  #endif
+  #ifndef DISPLAY_SCK_PIN
+    #define DISPLAY_SCK_PIN    22  // SPI display clock pin for (ignored for hardware SPI connections)
   #endif
 #endif
