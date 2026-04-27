@@ -76,8 +76,10 @@ const KeyPad::Pin pins[7]= {
 void setup(void) {
 
   // start debug serial port
-  if (DEBUG == ON || DEBUG == VERBOSE) SERIAL_DEBUG.begin(SERIAL_DEBUG_BAUD);
-  delay(2000);
+  if (DEBUG == ON || DEBUG == VERBOSE) {
+    SERIAL_DEBUG.begin(SERIAL_DEBUG_BAUD);
+    delay(2000);
+  }
 
   VF("MSG: Smart Hand Controller "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
   VF("MSG: MCU = "); VLF(MCU_STR);
