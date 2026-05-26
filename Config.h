@@ -14,7 +14,7 @@
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
-#define DISPLAY_LANGUAGE             L_en //   L_en, English. Specify language with two letter country code, if supported.    Adjust
+#define DISPLAY_LANGUAGE             L_en //   L_en, English. Or L_us, L_ro.                                                  Adjust
 #define DISPLAY_OLED               SH1106 // SH1106, OLED 1.3" I2C display commonly used. SSD1306 is a 0.96" OLED display.    Infreq
                                           //         The SSD1309 is often used on 1.54" or 2.3" I2C displays.
 

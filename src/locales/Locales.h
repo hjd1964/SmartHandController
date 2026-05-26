@@ -11,3 +11,4 @@
 #define L_us 4
 #define L_es 5
 #define L_fr 6
+#define L_ro 7 // Romanian
