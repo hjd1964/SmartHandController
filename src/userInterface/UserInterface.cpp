@@ -3,6 +3,7 @@
 
 #include "UserInterface.h"
 
+#include "../lib/analog/Analog.h"
 #include "../lib/tasks/OnTask.h"
 #include "../lib/nv/Nv.h"
 
@@ -116,11 +117,12 @@ void UI::init(const char version[], const KeyPad::Pin pins[7], const int SerialB
 
   status.lastState = 0;
   #if KEYPAD_JOYSTICK_ANALOG == JS1
+    analog.begin();
     pinMode(B_PIN1, INPUT_PULLUP);
     pinMode(B_PIN3, INPUT_PULLUP);
     delay(100);
-    int thresholdEW = analogRead(B_PIN1);
-    int thresholdNS = analogRead(B_PIN3);
+    int thresholdEW = analog.read10(B_PIN1);
+    int thresholdNS = analog.read10(B_PIN3);
     keyPad.init(pins, thresholdNS, thresholdEW);
   #else
     keyPad.init(pins, 0, 0);
