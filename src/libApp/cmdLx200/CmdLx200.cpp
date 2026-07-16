@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------------
 // OnStep command processing
 
-#include <Ephemeris.h> // https://github.com/MarScaper/ephemeris
+#include <Ephemeris.h> // https://github.com/hjd1964/ephemeris
 
 #include "CmdLx200.h"
 
