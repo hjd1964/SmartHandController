@@ -58,7 +58,7 @@
 #endif
 
 #if KEYPAD_JOYSTICK_HYSTERESIS < 0 || KEYPAD_JOYSTICK_HYSTERESIS > 1023
-  #warning "Configuration (Config.h): Setting KEYPAD_JOYSTICK_HYSTERESIS unknown, use a value 0 to 1023 (default analog read range)"
+  #warning "Configuration (Config.h): Setting KEYPAD_JOYSTICK_HYSTERESIS unknown, use a value 0 to 1023 (10 bit analog button range)"
 #endif
 
 #if ST4_AUX_INTERFACE != OFF && ST4_AUX_INTERFACE != ON
